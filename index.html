@@ -235,8 +235,8 @@ function drawTg(){$('tg').innerHTML=TG.map(([k,l])=>`<button class="sw" data-k="
 $('admB').onclick=()=>{drawTg();$('adm').classList.remove('hide')};$('admX').onclick=()=>$('adm').classList.add('hide');
 $('miB').onclick=async()=>{const L=$('mi').value.split(/\r?\n/).filter(x=>x.trim());if(L.length<2)return alert('Header + data paste karein.');
   const sp=l=>l.includes('\t')?l.split('\t'):l.split(',');const h=sp(L[0]).map(x=>N(x).replace(/\s+/g,''));
-  const map={region:'region',state:'state',division:'division',district:'district',coursetype:'courseType',coursename:'courseName',shobaname:'shobaName',shobajatcourses:'shobaName',muallimzimmedari:'muallimZimmedari'};
-  const rows=L.slice(1).map(l=>{const c=sp(l),o={};h.forEach((x,i)=>{if(map[x])o[map[x]]=(c[i]||'').trim()});return o});
+  const key=x=>x.includes('shoba')?'shobaName':x.includes('muallim')?'muallimZimmedari':/course.*type/.test(x)?'courseType':/course.*name/.test(x)?'courseName':['region','state','division','district'].includes(x)?x:null;
+  const rows=L.slice(1).map(l=>{const c=sp(l),o={};h.forEach((x,i)=>{const k=key(x);if(k)o[k]=(c[i]||'').trim()});return o});
   try{await setDoc(doc(db,'config','master'),{rows});S.m=rows;alert(rows.length+' rows import ho gayi.')}catch(e){alert('Error: '+e.message+' (1MB limit)')}};
 $('nuB').onclick=async()=>{const id=$('nuId').value.trim(),pw=$('nuPw').value.trim();if(!id||!pw)return alert('ID aur Password dein.');
   await setDoc(doc(db,'users',N(id)),{login:id,password:pw,status:$('nuSt').value,level:$('nuLv').value.trim()});alert('User saved.')};
