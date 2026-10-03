@@ -11,7 +11,7 @@
 .panel{background:#fff;border:1px solid var(--l);border-radius:10px;padding:18px;margin-bottom:16px}
 header{background:linear-gradient(135deg,var(--n9),var(--n8));color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .wrap{max-width:1200px;margin:0 auto;padding:18px 12px 50px}
-label{display:block;font-size:12px;font-weight:600;color:#4A5568;margin:8px 0 3px;text-align:left}
+label{display:flex;align-items:flex-end;min-height:28px;font-size:12px;font-weight:600;color:#4A5568;margin:6px 0 3px;text-align:left}
 input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--n7);border-radius:7px;background:var(--bg);font:inherit}
 input:disabled,select:disabled{background:#e2e8f0;opacity:.7}
 button{border:0;border-radius:7px;padding:8px 14px;font:600 13px inherit;background:var(--n7);color:#fff;cursor:pointer}
@@ -19,7 +19,8 @@ button.o{background:#fff;color:var(--n7);border:1px solid var(--n7)}button.d{bac
 .tabs{display:flex;gap:8px;margin-bottom:14px}.tabs button{background:#fff;color:#4A5568;border:1px solid var(--l);border-radius:99px}
 .tabs button.on{background:var(--n7);color:#fff}
 h3{background:var(--n7);color:#fff;padding:7px 11px;border-radius:6px;font-size:14px;margin:18px 0 6px}
-.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:0 10px}
+.g{display:grid;grid-template-columns:repeat(var(--c,4),1fr);gap:2px 12px}@media(max-width:700px){.g{grid-template-columns:repeat(2,1fr)!important}.g>[style*=span]{grid-column:span 2!important}}
+.stat small{display:block;color:var(--n7);font-weight:600}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:12px 0}
 .stat{background:#fff;border-left:5px solid var(--n7);border-radius:8px;padding:10px 12px}.stat b{font-size:22px;display:block}
 .sc{overflow:auto;max-height:60vh;border:1px solid var(--l);border-radius:8px}
@@ -68,9 +69,14 @@ td{padding:6px 8px;border-bottom:1px solid var(--l);white-space:nowrap}tr:nth-ch
     </section>
 
     <section id="p2" class="hide">
+     <div id="cap">
       <div class="panel"><b>Filters</b><div class="g" id="fl"></div>
-        <div class="row" style="margin-top:8px"><button class="o" id="fr">Reset</button><button class="o" id="csv">Export CSV</button></div></div>
-      <div class="stats" id="st"></div>
+        <div class="row" style="margin-top:8px"><button class="o" id="fr">Reset</button><button class="o" id="csv">Export CSV</button><button class="o" id="img">Export Dashboard Image</button></div></div>
+      <div class="stats" id="st"></div><div class="stats" id="ft"></div>
+      <div class="panel"><b>Courses ki Output Report Summary</b><div class="stats" id="ex"></div></div>
+      <div class="panel"><b>Pending &amp; Complete Status (Region, State, Division, District)</b><div class="stats" id="cv"></div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px"><div class="panel"><canvas id="c1"></canvas></div><div class="panel"><canvas id="c2"></canvas></div></div>
+     </div>
       <div class="sc"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>
     </section>
   </div>
@@ -84,13 +90,15 @@ td{padding:6px 8px;border-bottom:1px solid var(--l);white-space:nowrap}tr:nth-ch
     <p style="font-size:12px;margin:4px 0">Google Sheet ke "Data" tab se copy-paste karein (header row ke saath): region, state, division, district, courseType, courseName, shobaName, muallimZimmedari</p>
     <textarea id="mi" rows="5"></textarea><button id="miB" style="margin-top:6px">Import Master</button>
     <h3>User add / update</h3>
-    <div class="g"><div><label>User ID (jaise "Delhi Region")</label><input id="nuId"></div><div><label>Password</label><input id="nuPw"></div>
+    <div class="g" style="--c:2"><div><label>User ID (jaise "Delhi Region")</label><input id="nuId"></div><div><label>Password</label><input id="nuPw"></div>
     <div><label>Status</label><select id="nuSt"><option>active</option><option>inactive</option></select></div>
     <div><label>Level (region/state/division, optional)</label><input id="nuLv"></div></div>
     <button id="nuB" style="margin-top:8px">Save User</button>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getFirestore,doc,getDoc,setDoc,addDoc,deleteDoc,collection,getDocs} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -109,7 +117,8 @@ const INP=[['startDate','Course Start Date','date'],['endDate','Course End Date'
 ['shuraka','Shuraka','number'],['qafila3','3 Din Qafila','number'],['shuraka2','Shuraka (3 Din)','number'],['qafila12','12 Din Qafila','number'],['shuraka3','Shuraka (12 Din)','number'],['mah12','12 Mah Qafila','number'],
 ['nekTaqseem','Nek Amal Taqseem','number'],['nekWasool','Nek Amal Wasool','number'],['azkar','Namaz ke Azkar','number'],['jamiatul','Jamiatul Madina','number'],['imamat','Imamat Course','number'],['madrasa','Madrasatul Madina','number'],
 ['zimmedari','Tanzeemi Zimmedari','text'],['aamdan','Aamdan','number'],['kharch','Kharch','number']];
-const COLS=[['ts','Timestamp'],...LOC.map(k=>[k,k[0].toUpperCase()+k.slice(1)]),['courseType','Course Type'],['courseName','Course Name'],['remark','Remark'],...INP.map(x=>[x[0],x[1]]),['shobaName','Shobajat Courses'],['muallimZimmedari','Muallim Zimmedari']];
+const MON=['January','February','March','April','May','June','July','August','September','October','November','December'],charts={};
+const COLS=[['year','Year'],['month','Month'],['ts','Timestamp'],...LOC.map(k=>[k,k[0].toUpperCase()+k.slice(1)]),['courseType','Course Type'],['courseName','Course Name'],['remark','Remark'],...INP.map(x=>[x[0],x[1]]),['shobaName','Shobajat Courses'],['muallimZimmedari','Muallim Zimmedari']];
 const S={u:null,m:[],set:{...DEF},rows:[],edit:null,scoped:[]};
 
 function remarkOf(ct,cn,sh){ct=N(ct);cn=N(cn);const n=parseInt(sh,10);
@@ -141,10 +150,15 @@ function wireChain(pre){LOC.forEach((k,i)=>{$(pre+k).onchange=()=>{LOC.slice(i+1
 
 function buildForm(){
   const locH=(p)=>LOC.map(k=>`<div><label>${k.toUpperCase()}</label><select id="${p}${k}"></select></div>`).join('');
-  $('formBox').innerHTML='<h3>Location</h3><div class="g">'+locH('')+'</div><h3>Course Selection</h3><div class="g">'+
-   SEL.map(([i,l])=>`<div><label>${l}</label><select id="${i}"></select></div>`).join('')+
-   `<div><label>Remark (Auto)</label><input id="remark" readonly></div></div><h3>Details</h3><div class="g">`+
-   INP.map(([i,l,t])=>`<div><label>${l}</label><input id="${i}" type="${t}"${t==='number'?' min="0"':''}></div>`).join('')+'</div>';
+  const SL=Object.fromEntries(SEL),IM=Object.fromEntries(INP.map(x=>[x[0],x.slice(1)]));
+  const fld=i=>{if(LOC.includes(i)||SL[i]||i==='year'||i==='month')return`<div><label>${SL[i]||i[0].toUpperCase()+i.slice(1)}</label><select id="${i}"></select></div>`;
+    if(i==='remark')return'<div><label>Remark (Auto)</label><input id="remark" readonly></div>';
+    const[l,t]=IM[i];return`<div${i==='courseKaAddress'?' style="grid-column:span 2"':''}><label>${l}</label><input id="${i}" type="${t}"${t==='number'?' min="0"':''}></div>`};
+  const GR=[['Location',4,LOC],['Course Selection',5,['courseType','courseName','shobaName','muallimZimmedari','remark']],
+    ['Execution Details',4,['year','month','startDate','endDate','muallimName','courseKaAddress','shuraka']],
+    ['Qafila Details',3,['qafila3','shuraka2','qafila12','shuraka3','mah12','azkar']],
+    ['Nek Amal &amp; Other Details',4,['nekTaqseem','nekWasool','jamiatul','imamat','madrasa','zimmedari','aamdan','kharch']]];
+  $('formBox').innerHTML=GR.map(([t,n,ks])=>`<h3>${t}</h3><div class="g" style="--c:${n}">${ks.map(fld).join('')}</div>`).join('');
   $('lkSel').innerHTML=locH('l_');
   wireChain('');wireChain('l_');
   $('courseType').onchange=()=>{typeChange();updRemark()};
@@ -160,6 +174,7 @@ function initForm(){
   S.scoped=mine();chain('');chain('l_');
   const ct=uniq(S.m,'courseType');if(!ct.includes(NOC))ct.push(NOC);
   fill($('courseType'),ct);fill($('shobaName'),uniq(S.m,'shobaName'));fill($('muallimZimmedari'),uniq(S.m,'muallimZimmedari'));fill($('courseName'),[]);
+  const dt=new Date(),Y=dt.getFullYear();fill($('year'),[Y-2,Y-1,Y,Y+1].map(String),String(Y));fill($('month'),MON,MON[dt.getMonth()]);
   $('fload').textContent=(!S.scoped.length&&!isAdm())?'Is location ka data nahi mila.':'';
 }
 
@@ -167,9 +182,9 @@ function resetForm(){S.edit=null;$('edb').classList.add('hide');$('sv').textCont
   $('formBox').querySelectorAll('input').forEach(i=>i.value='');initForm()}
 
 $('sv').onclick=async()=>{
-  const d={};[...LOC,...SEL.map(x=>x[0]),...INP.map(x=>x[0])].forEach(i=>d[i]=$(i).value.trim());
+  const d={};[...LOC,'year','month',...SEL.map(x=>x[0]),...INP.map(x=>x[0])].forEach(i=>d[i]=$(i).value.trim());
   const nc=d.courseType===NOC;
-  const req=nc?[...LOC,'courseType','courseName']:[...LOC,...SEL.map(x=>x[0]),...INP.map(x=>x[0])];
+  const req=nc?[...LOC,'year','month','courseType','courseName']:[...LOC,'year','month',...SEL.map(x=>x[0]),...INP.map(x=>x[0])];
   const miss=req.find(k=>!d[k]);if(miss)return alert('Sabhi fields bharna zaroori hai: '+miss);
   if(S.u.level==='quick'&&S.set.FormAccessQuickEntry==='OFF')return alert('Quick Entry Form abhi band hai.');
   if(!isAdm()){const bad=LOC.find(k=>S.u[k]&&N(d[k])!==N(S.u[k]));if(bad)return alert('Aap sirf apne '+bad+' ka data save kar sakte hain.')}
@@ -183,12 +198,12 @@ $('sv').onclick=async()=>{
 $('canB').onclick=resetForm;
 
 // ---------- Dashboard ----------
-const FLT=[['region','fRegion'],['state','fState'],['division','fDivision'],['district','fDistrict'],['courseType','fType'],['remark','fRemark']];
+const FLT=[['region','fRegion'],['state','fState'],['division','fDivision'],['district','fDistrict'],['courseType','fType'],['courseName','fName'],['shobaName','fShoba'],['muallimZimmedari','fMuallim'],['remark','fRemark'],['year','fYear'],['month','fMonth']];
 async function loadRows(){
   $('tb').innerHTML='<tr><td>Loading...</td></tr>';
   const snap=await getDocs(collection(db,'responses'));
   S.rows=snap.docs.map(d=>({id:d.id,...d.data()})).filter(r=>LOC.every(k=>!S.u[k]||N(r[k])===N(S.u[k]))).sort((a,b)=>(b.ts||'').localeCompare(a.ts||''));
-  $('fl').innerHTML=FLT.map(([k,i])=>`<div><label>${k}</label><select id="${i}"></select></div>`).join('');
+  $('fl').innerHTML=FLT.map(([k,i])=>`<div><label style="text-transform:capitalize">${k.replace(/([A-Z])/g,' $1')}</label><select id="${i}"></select></div>`).join('');
   FLT.forEach(([k,i])=>$(i).onchange=renderDash);renderDash()}
 const fmt=t=>{const d=new Date(t);return isNaN(d)?t:d.toLocaleString('en-IN')};
 const curRows=()=>S.rows.filter(r=>FLT.every(([k,i])=>!$(i).value||r[k]===$(i).value));
@@ -197,14 +212,29 @@ function renderDash(){
   FLT.forEach(([k,i])=>{const s=$(i),c=s.value;fill(s,[...new Set(S.rows.map(r=>r[k]).filter(Boolean))].sort(),c);s.options[0].text='All'});
   const rows=curRows(),cr=rows.filter(r=>r.remark==='Course'),sh=r=>(r.remark==='Course'||r.remark==='Course Shumar Nahi kiya gaya')?(+r.shuraka||0):0;
   const ft=cr.filter(r=>N(r.courseType).includes('full'));
-  $('st').innerHTML=[['Total Courses',cr.length],['Total Shuraka',rows.reduce((a,r)=>a+sh(r),0)],['Full Time',ft.length],['Part Time',cr.length-ft.length],
-    ['Nek Amal Wasool',rows.reduce((a,r)=>a+(+r.nekWasool||0),0)],['Aamdan',rows.reduce((a,r)=>a+(+r.aamdan||0),0)],['Kharch',rows.reduce((a,r)=>a+(+r.kharch||0),0)]]
-    .map(([l,v])=>`<div class="stat"><b>${v}</b>${l}</div>`).join('');
+  const sS=a=>a.reduce((x,r)=>x+sh(r),0),box=(l,v,s)=>`<div class="stat"><b>${v}</b>${l}${s!=null?`<small>Shuraka: ${s}</small>`:''}</div>`;
+  const isF=r=>N(r.courseType).includes('full'),fa=rows.filter(isF),pa=rows.filter(r=>!isF(r));
+  const shb=cr.filter(r=>r.shobaName&&!/madani course/i.test(r.shobaName)),pm=cr.filter(r=>!isF(r)&&N(r.courseName).includes('muallim'));
+  $('st').innerHTML=box('Total Courses',cr.length)+box('Total Shuraka',sS(rows))+box('Full Time',ft.length,sS(fa))+box('Part Time',cr.length-ft.length,sS(pa))+box('Shobajat',shb.length,sS(shb))+box('PT Muallim',pm.length,sS(pm));
+  const FT=['63 Day Madani Course','12 Deeni Kaam Course','Islahe Amal Course','7 Day Faizane Namaz Course','Muallim Madani Course','1 Mah Madani Course (For Student)'],z=s=>N(s).replace(/[^a-z0-9]/g,'');
+  $('ft').innerHTML=FT.map(n=>{const a=ft.filter(r=>z(r.courseName)===z(n));return box(n,a.length,sS(a))}).join('');
+  const EX=[['3 Din Qafila','qafila3'],['Shuraka (3 Din)','shuraka2'],['12 Din Qafila','qafila12'],['Shuraka (12 Din)','shuraka3'],['Nek Amal Taqseem','nekTaqseem'],['Nek Amal Wasool','nekWasool'],['Namaz ke Azkar','azkar'],['12 Mah Qafila','mah12'],['Jamiatul Madina','jamiatul'],['Imamat Course','imamat'],['Madrasatul Madina','madrasa'],['Tanzeemi Zimmedari','zimmedari']];
+  $('ex').innerHTML=EX.map(([l,k])=>box(l,rows.reduce((a,r)=>a+(k==='zimmedari'?(r[k]?(isNaN(+r[k])?1:+r[k]):0):(+r[k]||0)),0))).join('');
+  const P=(o,ks)=>ks.map(k=>N(o[k])).join('|'),sel=Object.fromEntries(LOC.map(k=>[k,$('f'+k[0].toUpperCase()+k.slice(1)).value])),
+    stx=S.scoped.filter(r=>LOC.every(k=>!sel[k]||r[k]===sel[k])),done=new Set(rows.map(r=>P(r,LOC)));
+  $('cv').innerHTML=LOC.map((n,i)=>{const ks=LOC.slice(0,i+1),mp={};stx.forEach(r=>{const p=P(r,ks);(mp[p]=mp[p]||{l:r[ks[i]],d:[]}).d.push(P(r,LOC))});
+    const A=Object.values(mp),cp=A.filter(x=>x.d.every(d=>done.has(d))),pd=A.filter(x=>!cp.includes(x)),
+    li=(a,t,c)=>a.length?`<details><summary style="color:${c};font-weight:700;cursor:pointer">${t}: ${a.length}</summary><div style="max-height:130px;overflow:auto;font-size:12px">${a.map(x=>esc(x.l)).sort().join('<br>')}</div></details>`:'';
+    return`<div class="stat"><b>${cp.length}/${A.length}</b>${n[0].toUpperCase()+n.slice(1)}${li(pd,'Pending','var(--r)')}${li(cp,'Complete','var(--ok)')}</div>`}).join('');
+  const lv=levelOf(S.u),[a1,a2]=lv==='division'?['district','courseName']:lv==='state'?['division','district']:lv==='region'?['state','division']:['region','state'];
+  [['c1',a1],['c2',a2]].forEach(([id,k])=>{const L=[...new Set(rows.map(r=>r[k]||'Unknown'))],g=l=>rows.filter(r=>(r[k]||'Unknown')===l);charts[id]&&charts[id].destroy();
+    charts[id]=new Chart($(id),{type:'bar',data:{labels:L,datasets:[{label:'Courses',backgroundColor:'#2C5282',data:L.map(l=>g(l).filter(r=>r.remark==='Course').length)},{label:'Shuraka',backgroundColor:'#F6AD55',data:L.map(l=>sS(g(l)))}]},options:{plugins:{title:{display:true,text:k+'-wise Data'}},scales:{y:{beginAtZero:true}}}})});
   const m=canMod();
   $('th').innerHTML='<tr>'+COLS.map(c=>`<th>${c[1]}</th>`).join('')+'<th>Action</th></tr>';
   $('tb').innerHTML=rows.map(r=>'<tr>'+COLS.map(([k])=>`<td>${esc(k==='ts'?fmt(r.ts):r[k])}</td>`).join('')+
     `<td>${m?`<button class="w" onclick="editR('${r.id}')">Edit</button> <button class="d" onclick="delR('${r.id}')">Rem</button>`:'-'}</td></tr>`).join('')||'<tr><td>Koi data nahi.</td></tr>'}
 $('fr').onclick=()=>{FLT.forEach(([k,i])=>$(i).value='');renderDash()};
+$('img').onclick=()=>html2canvas($('cap'),{scale:2,backgroundColor:'#F0F4F8'}).then(c=>{const a=document.createElement('a');a.href=c.toDataURL();a.download='Dashboard_'+Date.now()+'.png';a.click()});
 $('csv').onclick=()=>{const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
   const t=[COLS.map(c=>q(c[1])).join(',')].concat(curRows().map(r=>COLS.map(([k])=>q(k==='ts'?fmt(r.ts):r[k])).join(','))).join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'text/csv'}));a.download='Report_Data_'+Date.now()+'.csv';a.click()};
@@ -215,7 +245,7 @@ window.editR=id=>{const r=S.rows.find(x=>x.id===id);if(!r)return;tab(1);S.edit=i
   $('edb').classList.remove('hide');$('sv').textContent='Update Data';
   LOC.forEach(k=>{$(k).value=r[k]||'';chain('')});
   $('courseType').value=r.courseType;typeChange();$('courseName').value=r.courseName;
-  [...SEL.slice(2),...INP].forEach(x=>{if(!$(x[0]).disabled)$(x[0]).value=r[x[0]]||''});updRemark()};
+  [...SEL.slice(2),...INP].forEach(x=>{if(!$(x[0]).disabled)$(x[0]).value=r[x[0]]||''});$('year').value=r.year||'';$('month').value=r.month||'';updRemark()};
 
 // ---------- Quick links ----------
 const enc=o=>btoa(encodeURIComponent(JSON.stringify(o))),dec=s=>JSON.parse(decodeURIComponent(atob(s)));
