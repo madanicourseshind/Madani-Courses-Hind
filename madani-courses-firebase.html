@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="hi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shoba Madani Courses Report Form</title>
+<style>
+:root{--n9:#0B192C;--n8:#1A365D;--n7:#2C5282;--bg:#E6F0FA;--g:#DD6B20;--l:#E2E8F0;--r:#E53E3E;--ok:#38A169}
+*{box-sizing:border-box}body{margin:0;background:#F0F4F8;font:14px system-ui,Segoe UI,sans-serif;color:#1A202C}
+.hide{display:none!important}
+#login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--n9),var(--n8));padding:16px}
+.card{background:#fff;border-radius:14px;padding:28px;width:100%;max-width:370px;text-align:center}
+.panel{background:#fff;border:1px solid var(--l);border-radius:10px;padding:18px;margin-bottom:16px}
+header{background:linear-gradient(135deg,var(--n9),var(--n8));color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.wrap{max-width:1200px;margin:0 auto;padding:18px 12px 50px}
+label{display:block;font-size:12px;font-weight:600;color:#4A5568;margin:8px 0 3px;text-align:left}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--n7);border-radius:7px;background:var(--bg);font:inherit}
+input:disabled,select:disabled{background:#e2e8f0;opacity:.7}
+button{border:0;border-radius:7px;padding:8px 14px;font:600 13px inherit;background:var(--n7);color:#fff;cursor:pointer}
+button.o{background:#fff;color:var(--n7);border:1px solid var(--n7)}button.d{background:var(--r)}button.w{background:var(--g)}
+.tabs{display:flex;gap:8px;margin-bottom:14px}.tabs button{background:#fff;color:#4A5568;border:1px solid var(--l);border-radius:99px}
+.tabs button.on{background:var(--n7);color:#fff}
+h3{background:var(--n7);color:#fff;padding:7px 11px;border-radius:6px;font-size:14px;margin:18px 0 6px}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:0 10px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:12px 0}
+.stat{background:#fff;border-left:5px solid var(--n7);border-radius:8px;padding:10px 12px}.stat b{font-size:22px;display:block}
+.sc{overflow:auto;max-height:60vh;border:1px solid var(--l);border-radius:8px}
+table{border-collapse:collapse;width:100%}th{background:var(--n9);color:#fff;padding:8px;white-space:nowrap;position:sticky;top:0;text-align:left}
+td{padding:6px 8px;border-bottom:1px solid var(--l);white-space:nowrap}tr:nth-child(even) td{background:#F8FAFC}
+.err{color:var(--r);font-weight:600;margin:8px 0}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sw{display:flex;justify-content:space-between;width:100%;background:#fff;color:#1A202C;border:1px solid var(--l);margin:4px 0}
+.on-b{color:var(--ok)}.off-b{color:var(--r)}
+#edb{background:#F6AD55;padding:8px 12px;border-radius:7px;margin-bottom:10px;font-weight:700}
+</style></head>
+<body>
+
+<div id="login"><div class="card">
+  <h2 style="margin:0 0 4px;color:var(--n9)">Shoba Madani Courses</h2>
+  <p style="color:#4A5568;margin:0 0 14px">Report Form &amp; Dashboard</p>
+  <div id="lmsg" class="err hide"></div>
+  <div id="lform">
+    <label>User ID</label><input id="uid" autocomplete="username">
+    <label>Password</label><input id="pw" type="password" autocomplete="current-password">
+    <div id="lerr" class="err hide"></div>
+    <button id="lb" style="width:100%;margin-top:12px">Login</button>
+  </div>
+</div></div>
+
+<div id="appS" class="hide">
+  <header>
+    <b>Shoba Madani Courses</b>
+    <div class="row"><span id="ulab"></span>
+      <button class="o hide" id="admB" style="background:#E2E8F0;color:var(--n9)">⚙ Admin</button>
+      <button id="rfB" class="o" style="color:#fff;border-color:#fff;background:transparent">↻ Refresh</button>
+      <button class="d" id="outB">Logout</button></div>
+  </header>
+  <div class="wrap">
+    <div id="qeb" class="panel hide" style="background:#C6F6D5"></div>
+    <div class="tabs"><button class="on" id="t1">Courses Report Form</button><button id="t2">Data Dashboard</button></div>
+
+    <section id="p1">
+      <div id="edb" class="hide">✏️ Edit Mode — purani entry modify ho rahi hai. <button class="o" id="canB">Cancel</button></div>
+      <div class="panel"><div id="fload" style="color:var(--n7);font-weight:600">Loading...</div>
+        <div id="formBox"></div>
+        <button id="sv" style="width:100%;margin-top:14px;padding:12px">Save Data</button></div>
+      <div class="panel hide" id="lkP"><b>Quick Entry Link banayein</b>
+        <div class="g" id="lkSel"></div>
+        <div class="row" style="margin-top:10px"><button id="lkG">Generate / Show Link</button><button class="d hide" id="lkD">Disable Link</button></div>
+        <div class="row hide" id="lkR" style="margin-top:8px"><input id="lkU" readonly style="flex:1"><button id="lkC">Copy</button></div></div>
+    </section>
+
+    <section id="p2" class="hide">
+      <div class="panel"><b>Filters</b><div class="g" id="fl"></div>
+        <div class="row" style="margin-top:8px"><button class="o" id="fr">Reset</button><button class="o" id="csv">Export CSV</button></div></div>
+      <div class="stats" id="st"></div>
+      <div class="sc"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>
+    </section>
+  </div>
+</div>
+
+<div id="adm" class="hide" style="position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;padding:12px;z-index:9">
+  <div class="card" style="max-width:520px;max-height:90vh;overflow:auto;text-align:left">
+    <div class="row" style="justify-content:space-between"><b>⚙ Admin Control</b><button class="o" id="admX">Close</button></div>
+    <div id="tg"></div>
+    <h3>Master Data Import (Region/State/Division/District/Course data)</h3>
+    <p style="font-size:12px;margin:4px 0">Google Sheet ke "Data" tab se copy-paste karein (header row ke saath): region, state, division, district, courseType, courseName, shobaName, muallimZimmedari</p>
+    <textarea id="mi" rows="5"></textarea><button id="miB" style="margin-top:6px">Import Master</button>
+    <h3>User add / update</h3>
+    <div class="g"><div><label>User ID (jaise "Delhi Region")</label><input id="nuId"></div><div><label>Password</label><input id="nuPw"></div>
+    <div><label>Status</label><select id="nuSt"><option>active</option><option>inactive</option></select></div>
+    <div><label>Level (region/state/division, optional)</label><input id="nuLv"></div></div>
+    <button id="nuB" style="margin-top:8px">Save User</button>
+  </div>
+</div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getFirestore,doc,getDoc,setDoc,addDoc,deleteDoc,collection,getDocs} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const db=getFirestore(initializeApp({
+  apiKey:"AIzaSyCrNMZN32I9zpp62oaZg8ZoJgXbheQ1Mms",authDomain:"madani-courses-hind.firebaseapp.com",
+  projectId:"madani-courses-hind",storageBucket:"madani-courses-hind.firebasestorage.app",
+  messagingSenderId:"169371284614",appId:"1:169371284614:web:3ea03647ab97546d11cd07"}));
+
+const $=i=>document.getElementById(i),N=v=>(v||'').toString().trim().toLowerCase();
+const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const NOC='Is District Me Koi Course Nahi Hua',LOC=['region','state','division','district'];
+const DEF={FormAccessRegion:'ON',FormAccessState:'ON',FormAccessDivision:'ON',FormAccessQuickEntry:'ON',RegionLinkAccess:'OFF',StateLinkAccess:'OFF',EditRemoveRegion:'OFF',EditRemoveState:'OFF'};
+const SEL=[['courseType','Course Type'],['courseName','Course Name'],['shobaName','Shobajat Courses'],['muallimZimmedari','Muallim Zimmedari']];
+const INP=[['startDate','Course Start Date','date'],['endDate','Course End Date','date'],['muallimName','Muallim Naam','text'],['courseKaAddress','Course ka Address','text'],
+['shuraka','Shuraka','number'],['qafila3','3 Din Qafila','number'],['shuraka2','Shuraka (3 Din)','number'],['qafila12','12 Din Qafila','number'],['shuraka3','Shuraka (12 Din)','number'],['mah12','12 Mah Qafila','number'],
+['nekTaqseem','Nek Amal Taqseem','number'],['nekWasool','Nek Amal Wasool','number'],['azkar','Namaz ke Azkar','number'],['jamiatul','Jamiatul Madina','number'],['imamat','Imamat Course','number'],['madrasa','Madrasatul Madina','number'],
+['zimmedari','Tanzeemi Zimmedari','text'],['aamdan','Aamdan','number'],['kharch','Kharch','number']];
+const COLS=[['ts','Timestamp'],...LOC.map(k=>[k,k[0].toUpperCase()+k.slice(1)]),['courseType','Course Type'],['courseName','Course Name'],['remark','Remark'],...INP.map(x=>[x[0],x[1]]),['shobaName','Shobajat Courses'],['muallimZimmedari','Muallim Zimmedari']];
+const S={u:null,m:[],set:{...DEF},rows:[],edit:null,scoped:[]};
+
+function remarkOf(ct,cn,sh){ct=N(ct);cn=N(cn);const n=parseInt(sh,10);
+  if(ct===N(NOC))return'No Course';const ft=ct.includes('full');
+  if(ft&&cn.includes('7 day')&&cn.includes('faizan')&&cn.includes('namaz')){if(n===0)return'Qafila';if(n>=1&&n<=11)return'Course Cancle/ Qafila Hua';if(n>=12&&n<=14)return'Course Shumar Nahi kiya gaya';return'Course'}
+  if(ft&&cn.includes('63 day')&&cn.includes('madani')){if(n===0)return'63 Din Course Mukhtaflif Report';return'Course'}
+  return'Course'}
+
+async function loadBase(){
+  const m=await getDoc(doc(db,'config','master'));S.m=m.exists()?(m.data().rows||[]):[];
+  const s=await getDoc(doc(db,'config','settings'));S.set={...DEF,...(s.exists()?s.data():{})}}
+
+function scopeOf(id,hint){
+  const f=N(id).replace(/\s+/g,' ');if(f==='admin')return{admin:1,region:'',state:'',division:''};
+  let lv=N(hint),n=f;const m=f.match(/^(.*?)\s+(region|state|division)$/);if(m){n=m[1];lv=lv||m[2]}
+  const order=[lv,'region','state','division'].filter((x,i,a)=>x&&a.indexOf(x)===i);
+  for(const c of[n,f])for(const l of order){const r=S.m.find(x=>N(x[l])===c);
+    if(r)return{region:r.region,state:l==='region'?'':r.state,division:l==='division'?r.division:''}}
+  return{region:'',state:'',division:''}}
+const isAdm=()=>!!S.u?.admin;
+const levelOf=u=>u.division?'division':u.state?'state':u.region?'region':'none';
+const mine=()=>S.m.filter(r=>LOC.every(k=>!S.u[k]||N(r[k])===N(S.u[k])));
+
+function fill(s,vals,keep){s.innerHTML='<option value="">Select</option>'+vals.map(v=>`<option>${esc(v)}</option>`).join('');if(keep&&vals.includes(keep))s.value=keep}
+const uniq=(rows,k,f={})=>[...new Set(rows.filter(r=>r[k]&&Object.keys(f).every(p=>!f[p]||r[p]===f[p])).map(r=>r[k]))];
+function chain(pre){const pf={};LOC.forEach(k=>{const s=$(pre+k),vals=uniq(S.scoped,k,pf);fill(s,vals,s.value);
+  const sv=S.u[k];if(sv&&vals.includes(sv)){s.value=sv;s.disabled=true}else s.disabled=false;pf[k]=s.value})}
+function wireChain(pre){LOC.forEach((k,i)=>{$(pre+k).onchange=()=>{LOC.slice(i+1).forEach(x=>$(pre+x).value='');chain(pre)}})}
+
+function buildForm(){
+  const locH=(p)=>LOC.map(k=>`<div><label>${k.toUpperCase()}</label><select id="${p}${k}"></select></div>`).join('');
+  $('formBox').innerHTML='<h3>Location</h3><div class="g">'+locH('')+'</div><h3>Course Selection</h3><div class="g">'+
+   SEL.map(([i,l])=>`<div><label>${l}</label><select id="${i}"></select></div>`).join('')+
+   `<div><label>Remark (Auto)</label><input id="remark" readonly></div></div><h3>Details</h3><div class="g">`+
+   INP.map(([i,l,t])=>`<div><label>${l}</label><input id="${i}" type="${t}"${t==='number'?' min="0"':''}></div>`).join('')+'</div>';
+  $('lkSel').innerHTML=locH('l_');
+  wireChain('');wireChain('l_');
+  $('courseType').onchange=()=>{typeChange();updRemark()};
+  $('courseName').onchange=updRemark;$('shuraka').oninput=updRemark;
+}
+function typeChange(){const t=$('courseType').value,nc=t===NOC;
+  if(nc)fill($('courseName'),['None'],'None');else fill($('courseName'),uniq(S.m,'courseName',{courseType:t}));
+  $('courseName').value=nc?'None':'';
+  INP.forEach(([i])=>{$(i).disabled=nc;if(nc)$(i).value=''});['shobaName','muallimZimmedari'].forEach(i=>{$(i).disabled=nc;if(nc)$(i).value=''})}
+const updRemark=()=>$('remark').value=remarkOf($('courseType').value,$('courseName').value,$('shuraka').value);
+
+function initForm(){
+  S.scoped=mine();chain('');chain('l_');
+  const ct=uniq(S.m,'courseType');if(!ct.includes(NOC))ct.push(NOC);
+  fill($('courseType'),ct);fill($('shobaName'),uniq(S.m,'shobaName'));fill($('muallimZimmedari'),uniq(S.m,'muallimZimmedari'));fill($('courseName'),[]);
+  $('fload').textContent=(!S.scoped.length&&!isAdm())?'Is location ka data nahi mila.':'';
+}
+
+function resetForm(){S.edit=null;$('edb').classList.add('hide');$('sv').textContent='Save Data';
+  $('formBox').querySelectorAll('input').forEach(i=>i.value='');initForm()}
+
+$('sv').onclick=async()=>{
+  const d={};[...LOC,...SEL.map(x=>x[0]),...INP.map(x=>x[0])].forEach(i=>d[i]=$(i).value.trim());
+  const nc=d.courseType===NOC;
+  const req=nc?[...LOC,'courseType','courseName']:[...LOC,...SEL.map(x=>x[0]),...INP.map(x=>x[0])];
+  const miss=req.find(k=>!d[k]);if(miss)return alert('Sabhi fields bharna zaroori hai: '+miss);
+  if(S.u.level==='quick'&&S.set.FormAccessQuickEntry==='OFF')return alert('Quick Entry Form abhi band hai.');
+  if(!isAdm()){const bad=LOC.find(k=>S.u[k]&&N(d[k])!==N(S.u[k]));if(bad)return alert('Aap sirf apne '+bad+' ka data save kar sakte hain.')}
+  d.remark=remarkOf(d.courseType,d.courseName,d.shuraka);
+  $('sv').disabled=true;
+  try{
+    if(S.edit){const old=S.rows.find(r=>r.id===S.edit);d.ts=old?old.ts:new Date().toISOString();await setDoc(doc(db,'responses',S.edit),d);alert('Data update ho gaya!')}
+    else{d.ts=new Date().toISOString();await addDoc(collection(db,'responses'),d);alert('Form submitted successfully')}
+    resetForm()}catch(e){alert('Error: '+e.message)}
+  $('sv').disabled=false};
+$('canB').onclick=resetForm;
+
+// ---------- Dashboard ----------
+const FLT=[['region','fRegion'],['state','fState'],['division','fDivision'],['district','fDistrict'],['courseType','fType'],['remark','fRemark']];
+async function loadRows(){
+  $('tb').innerHTML='<tr><td>Loading...</td></tr>';
+  const snap=await getDocs(collection(db,'responses'));
+  S.rows=snap.docs.map(d=>({id:d.id,...d.data()})).filter(r=>LOC.every(k=>!S.u[k]||N(r[k])===N(S.u[k]))).sort((a,b)=>(b.ts||'').localeCompare(a.ts||''));
+  $('fl').innerHTML=FLT.map(([k,i])=>`<div><label>${k}</label><select id="${i}"></select></div>`).join('');
+  FLT.forEach(([k,i])=>$(i).onchange=renderDash);renderDash()}
+const fmt=t=>{const d=new Date(t);return isNaN(d)?t:d.toLocaleString('en-IN')};
+const curRows=()=>S.rows.filter(r=>FLT.every(([k,i])=>!$(i).value||r[k]===$(i).value));
+function canMod(){if(isAdm())return true;const l=levelOf(S.u);return(l==='region'&&S.set.EditRemoveRegion==='ON')||(l==='state'&&S.set.EditRemoveState==='ON')}
+function renderDash(){
+  FLT.forEach(([k,i])=>{const s=$(i),c=s.value;fill(s,[...new Set(S.rows.map(r=>r[k]).filter(Boolean))].sort(),c);s.options[0].text='All'});
+  const rows=curRows(),cr=rows.filter(r=>r.remark==='Course'),sh=r=>(r.remark==='Course'||r.remark==='Course Shumar Nahi kiya gaya')?(+r.shuraka||0):0;
+  const ft=cr.filter(r=>N(r.courseType).includes('full'));
+  $('st').innerHTML=[['Total Courses',cr.length],['Total Shuraka',rows.reduce((a,r)=>a+sh(r),0)],['Full Time',ft.length],['Part Time',cr.length-ft.length],
+    ['Nek Amal Wasool',rows.reduce((a,r)=>a+(+r.nekWasool||0),0)],['Aamdan',rows.reduce((a,r)=>a+(+r.aamdan||0),0)],['Kharch',rows.reduce((a,r)=>a+(+r.kharch||0),0)]]
+    .map(([l,v])=>`<div class="stat"><b>${v}</b>${l}</div>`).join('');
+  const m=canMod();
+  $('th').innerHTML='<tr>'+COLS.map(c=>`<th>${c[1]}</th>`).join('')+'<th>Action</th></tr>';
+  $('tb').innerHTML=rows.map(r=>'<tr>'+COLS.map(([k])=>`<td>${esc(k==='ts'?fmt(r.ts):r[k])}</td>`).join('')+
+    `<td>${m?`<button class="w" onclick="editR('${r.id}')">Edit</button> <button class="d" onclick="delR('${r.id}')">Rem</button>`:'-'}</td></tr>`).join('')||'<tr><td>Koi data nahi.</td></tr>'}
+$('fr').onclick=()=>{FLT.forEach(([k,i])=>$(i).value='');renderDash()};
+$('csv').onclick=()=>{const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const t=[COLS.map(c=>q(c[1])).join(',')].concat(curRows().map(r=>COLS.map(([k])=>q(k==='ts'?fmt(r.ts):r[k])).join(','))).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'text/csv'}));a.download='Report_Data_'+Date.now()+'.csv';a.click()};
+window.delR=async id=>{if(!canMod()||!confirm('Is entry ko delete karein?'))return;
+  const r=S.rows.find(x=>x.id===id);if(!isAdm()&&LOC.some(k=>S.u[k]&&N(r[k])!==N(S.u[k])))return alert('Allowed nahi.');
+  await deleteDoc(doc(db,'responses',id));loadRows()};
+window.editR=id=>{const r=S.rows.find(x=>x.id===id);if(!r)return;tab(1);S.edit=id;
+  $('edb').classList.remove('hide');$('sv').textContent='Update Data';
+  LOC.forEach(k=>{$(k).value=r[k]||'';chain('')});
+  $('courseType').value=r.courseType;typeChange();$('courseName').value=r.courseName;
+  [...SEL.slice(2),...INP].forEach(x=>{if(!$(x[0]).disabled)$(x[0]).value=r[x[0]]||''});updRemark()};
+
+// ---------- Quick links ----------
+const enc=o=>btoa(encodeURIComponent(JSON.stringify(o))),dec=s=>JSON.parse(decodeURIComponent(atob(s)));
+const lid=loc=>loc.replace(/[\/+=]/g,'_');
+const lkLoc=()=>{const o={};LOC.forEach(k=>o[k]=$('l_'+k).value);return enc(o)};
+$('lkG').onclick=async()=>{const loc=lkLoc(),ref=doc(db,'links',lid(loc));let s=await getDoc(ref);let sig;
+  if(s.exists())sig=s.data().sig;else{sig=crypto.randomUUID();await setDoc(ref,{loc,sig})}
+  $('lkU').value=location.origin+location.pathname+'?loc='+encodeURIComponent(loc)+'&sig='+sig;$('lkR').classList.remove('hide')};
+$('lkD').onclick=async()=>{if(!confirm('Link hamesha ke liye disable karein?'))return;await deleteDoc(doc(db,'links',lid(lkLoc())));$('lkR').classList.add('hide');alert('Link disable ho gayi.')};
+$('lkC').onclick=()=>{$('lkU').select();document.execCommand('copy');alert('Copied!')};
+
+// ---------- Admin ----------
+const TG=[['FormAccessRegion','Region Form Access'],['FormAccessState','State Form Access'],['FormAccessDivision','Division Form Access'],['FormAccessQuickEntry','Quick Entry Form Access'],
+['EditRemoveRegion','Region Edit/Remove'],['EditRemoveState','State Edit/Remove'],['RegionLinkAccess','Region Quick Link'],['StateLinkAccess','State Quick Link']];
+function drawTg(){$('tg').innerHTML=TG.map(([k,l])=>`<button class="sw" data-k="${k}"><span>${l}</span><b class="${S.set[k]==='ON'?'on-b':'off-b'}">${S.set[k]}</b></button>`).join('');
+  $('tg').querySelectorAll('button').forEach(b=>b.onclick=async()=>{const k=b.dataset.k,v=S.set[k]==='ON'?'OFF':'ON';await setDoc(doc(db,'config','settings'),{[k]:v},{merge:true});S.set[k]=v;drawTg()})}
+$('admB').onclick=()=>{drawTg();$('adm').classList.remove('hide')};$('admX').onclick=()=>$('adm').classList.add('hide');
+$('miB').onclick=async()=>{const L=$('mi').value.split(/\r?\n/).filter(x=>x.trim());if(L.length<2)return alert('Header + data paste karein.');
+  const sp=l=>l.includes('\t')?l.split('\t'):l.split(',');const h=sp(L[0]).map(x=>N(x).replace(/\s+/g,''));
+  const map={region:'region',state:'state',division:'division',district:'district',coursetype:'courseType',coursename:'courseName',shobaname:'shobaName',shobajatcourses:'shobaName',muallimzimmedari:'muallimZimmedari'};
+  const rows=L.slice(1).map(l=>{const c=sp(l),o={};h.forEach((x,i)=>{if(map[x])o[map[x]]=(c[i]||'').trim()});return o});
+  try{await setDoc(doc(db,'config','master'),{rows});S.m=rows;alert(rows.length+' rows import ho gayi.')}catch(e){alert('Error: '+e.message+' (1MB limit)')}};
+$('nuB').onclick=async()=>{const id=$('nuId').value.trim(),pw=$('nuPw').value.trim();if(!id||!pw)return alert('ID aur Password dein.');
+  await setDoc(doc(db,'users',N(id)),{login:id,password:pw,status:$('nuSt').value,level:$('nuLv').value.trim()});alert('User saved.')};
+
+// ---------- Auth / boot ----------
+function tab(n){$('p1').classList.toggle('hide',n!==1);$('p2').classList.toggle('hide',n!==2);$('t1').classList.toggle('on',n===1);$('t2').classList.toggle('on',n===2);if(n===2)loadRows()}
+$('t1').onclick=()=>tab(1);$('t2').onclick=()=>tab(2);
+function enter(){$('login').classList.add('hide');$('appS').classList.remove('hide');buildForm();initForm();
+  const l=levelOf(S.u),a=isAdm();$('admB').classList.toggle('hide',!a);$('lkD').classList.toggle('hide',!a);
+  $('lkP').classList.toggle('hide',!(a||(l==='state'&&S.set.StateLinkAccess==='ON')||(l==='region'&&S.set.RegionLinkAccess==='ON')))}
+$('lb').onclick=async()=>{const id=$('uid').value.trim(),pw=$('pw').value.trim(),e=$('lerr');e.classList.add('hide');
+  if(!id||!pw){e.textContent='Dono fields bharein.';return e.classList.remove('hide')}
+  $('lb').disabled=true;
+  try{await loadBase();const s=await getDoc(doc(db,'users',N(id)));const d=s.exists()?s.data():null;
+    if(!d||String(d.password).trim()!==pw)throw Error('Galat User ID ya Password.');
+    if(N(d.status)==='inactive')throw Error('Ye account inactive hai.');
+    const sc=scopeOf(id,d.level),lv=levelOf(sc);
+    if(!sc.admin){const k={region:'FormAccessRegion',state:'FormAccessState',division:'FormAccessDivision'}[lv];if(k&&S.set[k]==='OFF')throw Error(lv+' users ke liye Form abhi band hai.')}
+    S.u={id,...sc,district:'',level:lv};$('ulab').textContent=id;enter()}
+  catch(x){e.textContent=x.message;e.classList.remove('hide')}
+  $('lb').disabled=false};
+$('outB').onclick=()=>location.href=location.pathname;
+$('rfB').onclick=async()=>{await loadBase();initForm();if(!$('p2').classList.contains('hide'))loadRows()};
+
+(async()=>{const p=new URLSearchParams(location.search);if(!p.get('loc'))return;
+  $('lform').classList.add('hide');const m=$('lmsg');m.classList.remove('hide');
+  try{await loadBase();if(S.set.FormAccessQuickEntry==='OFF')throw Error('Quick Entry Form abhi Admin dwara band hai.');
+    const loc=p.get('loc'),s=await getDoc(doc(db,'links',lid(loc)));
+    if(!s.exists()||s.data().sig!==p.get('sig'))throw Error('Link invalid ya disable hai.');
+    const o=dec(loc);S.u={id:'Quick Entry Link',admin:0,level:'quick',...o};
+    $('ulab').textContent='Quick Entry Mode';$('outB').classList.add('hide');enter();
+    $('qeb').classList.remove('hide');$('qeb').textContent='Pre-filled: '+LOC.map(k=>o[k]).filter(Boolean).join(' → ');$('lkP').classList.add('hide')}
+  catch(e){m.textContent=e.message}})();
+</script>
+</body></html>
