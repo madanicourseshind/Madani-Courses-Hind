@@ -10,7 +10,7 @@
 .card{background:#fff;border-radius:14px;padding:28px;width:100%;max-width:370px;text-align:center}
 .panel{background:#fff;border:1px solid var(--l);border-radius:10px;padding:18px;margin-bottom:16px}
 header{background:linear-gradient(135deg,var(--n9),var(--n8));color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
-.wrap{max-width:1000px;margin:0 auto;padding:18px 12px 50px}
+.wrap{max-width:1200px;margin:0 auto;padding:18px 12px 50px}
 label{display:block;font-size:12px;font-weight:600;color:#4A5568;margin:8px 0 3px;text-align:left}
 input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--n7);border-radius:7px;background:var(--bg);font:inherit}
 button{border:0;border-radius:7px;padding:8px 14px;font:600 13px inherit;background:var(--n7);color:#fff;cursor:pointer}
@@ -26,7 +26,7 @@ td{padding:6px 8px;border-bottom:1px solid var(--l)}tr:nth-child(even) td{backgr
 .sw{display:flex;justify-content:space-between;width:100%;background:#fff;color:#1A202C;border:1px solid var(--l);margin:4px 0;padding:10px 14px}
 .on-b{color:var(--ok)}.off-b{color:var(--r)}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:12px 0}
-.stat{background:#fff;border:1px solid var(--l);border-left:5px solid var(--n7);border-radius:8px;padding:10px 12px}.stat b{font-size:22px;display:block}
+.stat{background:#fff;border:1px solid var(--l);border-left:5px solid var(--n7);border-radius:8px;padding:10px 12px}.stat b{font-size:22px;display:block}.stat small{display:block;color:var(--n7);font-weight:600}
 </style></head>
 <body>
 
@@ -41,13 +41,21 @@ td{padding:6px 8px;border-bottom:1px solid var(--l)}tr:nth-child(even) td{backgr
       <div class="row"><input id="yf" type="number" placeholder="From (jaise 2024)" style="width:170px"><input id="yt" type="number" placeholder="To (jaise 2030)" style="width:170px"><button id="yb">Save Years</button></div>
     </div>
 
-    <div class="panel hide" id="a_dash">
-      <h3>Courses Monthly Dashboard</h3>
-      <div class="row"><select id="dY" style="width:auto"></select><select id="dM" style="width:auto"></select><select id="dR" style="width:auto"></select>
-        <button class="o" id="dX">Excel</button><button id="dRf">↻ Refresh</button></div>
-      <div class="stats" id="dS"></div>
-      <div style="max-width:100%"><canvas id="dC" height="110"></canvas></div>
-      <h3 style="margin-top:14px">Month-wise Summary</h3><div class="sc"><table id="dT"></table></div>
+    <div class="hide" id="a_dash">
+     <div id="cap">
+      <div class="panel"><b>Filters</b><div class="g" id="fl" style="--c:4"></div>
+        <div class="row" style="margin-top:8px"><button class="o" id="fr">Reset</button><button class="o" id="csv">Export CSV</button><button class="o" id="img">Export Dashboard Image</button><button class="o" id="dpdf">Export Dashboard PDF</button></div></div>
+      <div class="stats" id="st"></div><div class="stats" id="ft"></div>
+      <div class="panel"><b>Courses ki Output Report Summary</b><div class="stats" id="ex"></div></div>
+      <div class="panel"><b>Pending &amp; Complete Status (Region, State, Division, District)</b><div class="stats" id="cv"></div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px"><div class="panel"><canvas id="c1"></canvas></div><div class="panel"><canvas id="c2"></canvas></div></div>
+     </div>
+      <div class="panel"><div class="row" style="justify-content:space-between"><h2 style="margin:0">Data Dashboard</h2><button id="rd">↻ Refresh Data</button></div>
+      <div class="row" style="margin:10px 0">Show <select id="ps" style="width:auto"><option>10</option><option>25</option><option selected>50</option><option>100</option></select> entries
+        <button class="o" id="xl">Excel</button><button class="o" id="pf">PDF</button><button class="o" id="it">Image Table</button>
+        <span class="row" style="margin-left:auto">Search <input id="sq" style="width:180px"></span></div>
+      <div class="sc"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>
+      <div class="row" style="justify-content:space-between;margin-top:8px"><span id="inf"></span><span class="row"><button class="o" id="pv">Previous</button><b id="pn"></b><button class="o" id="nx">Next</button></span></div></div>
     </div>
 
     <div class="panel hide" id="a_opt"></div>
@@ -73,6 +81,9 @@ td{padding:6px 8px;border-bottom:1px solid var(--l)}tr:nth-child(even) td{backgr
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getFirestore,doc,getDoc,setDoc,deleteDoc,collection,getDocs} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -87,7 +98,7 @@ const DEF={FormAccessRegion:'ON',FormAccessState:'ON',FormAccessDivision:'ON',Fo
 const TG=[['FormAccessRegion','Region Level Form Access'],['FormAccessState','State Level Form Access'],['FormAccessDivision','Division Level Form Access'],['FormAccessQuickEntry','Quick Entry Form Access'],
 ['EditRemoveRegion','Region Users Edit/Remove'],['EditRemoveState','State Users Edit/Remove'],['RegionLinkAccess','Region Quick Link Access'],['StateLinkAccess','State Quick Link Access'],
 ['RegionDistrictAccess','Region Link: District Field'],['StateDistrictAccess','State Link: District Field']];
-const AT=[['a_set','Settings'],['a_dash','Dashboard'],['a_opt','Dropdown Options'],['a_imp','Master Import'],['a_usr','Users']];
+const AT=[['a_set','Settings'],['a_dash','Monthly Report Form Dashboard'],['a_opt','Dropdown Options'],['a_imp','Master Import'],['a_usr','Users']];
 const OPT=[['courseType','Course Type'],['courseName','Course Name (Type ke saath)'],['shobaName','Shobajat Courses'],['muallimZimmedari','Muallim Zimmedari'],['loc','Locations (Region → District)']];
 const S={m:[],set:{...DEF},us:{},oi:[]};let ot='courseType';
 const uniq=(rows,k)=>[...new Set(rows.map(r=>r[k]).filter(Boolean))];
@@ -104,7 +115,7 @@ $('out').onclick=()=>{sessionStorage.removeItem('adm');location.href='index.html
 
 function start(){$('tabs').innerHTML=AT.map(([k,l])=>`<button data-t="${k}">${l}</button>`).join('');
   $('tabs').onclick=e=>e.target.dataset.t&&tab(e.target.dataset.t);$('yf').value=S.set.YearFrom||'';$('yt').value=S.set.YearTo||'';drawTg();tab('a_set')}
-function tab(id){AT.forEach(([k])=>$(k).classList.toggle('hide',k!==id));$('tabs').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t===id));if(id==='a_opt')drawOpt();if(id==='a_dash')drawDash();if(id==='a_usr')drawUsers()}
+function tab(id){AT.forEach(([k])=>$(k).classList.toggle('hide',k!==id));$('tabs').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t===id));if(id==='a_opt')drawOpt();if(id==='a_dash'){S.scoped=S.m;loadRows()}if(id==='a_usr')drawUsers()}
 
 // ---- Settings ----
 function drawTg(){$('tg').innerHTML=TG.map(([k,l])=>`<button class="sw" data-k="${k}"><span>${l}</span><b class="${S.set[k]==='ON'?'on-b':'off-b'}">${S.set[k]}</b></button>`).join('');
@@ -144,24 +155,79 @@ window.usrDel=async id=>{if(id==='admin')return alert('admin user delete nahi ho
 $('nuB').onclick=async()=>{const id=$('nuId').value.trim(),pw=$('nuPw').value.trim();if(!id||!pw)return alert('ID aur Password dein.');
   await setDoc(doc(db,'users',N(id)),{login:id,password:pw,status:$('nuSt').value,level:$('nuLv').value.trim()});alert('User saved.');drawUsers()};
 
-// ---- Monthly dashboard ----
-const MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
-let DR=[],DT=[],dch;
-async function drawDash(){const s=await getDocs(collection(db,'responses'));
-  DR=s.docs.map(d=>{const r=d.data(),t=new Date(r.ts);return{...r,year:r.year||(isNaN(t)?'':String(t.getFullYear())),month:r.month||(isNaN(t)?'':MON[t.getMonth()])}});
-  const f=(id,k,l)=>{const c=$(id).value;$(id).innerHTML=`<option value="">All ${l}</option>`+[...new Set(DR.map(r=>r[k]).filter(Boolean))].sort().map(v=>`<option>${esc(v)}</option>`).join('');$(id).value=c};
-  f('dY','year','Years');f('dM','month','Months');f('dR','region','Regions');renderDash()}
+// ---- Monthly Report Form Dashboard (full) ----
+const SEL=[['courseType','Course Type'],['courseName','Course Name'],['shobaName','Shobajat Courses'],['muallimZimmedari','Muallim Zimmedari']];
+const INP=[['startDate','Course Start Date','date'],['endDate','Course End Date','date'],['muallimName','Muallim Naam','text'],['courseKaAddress','Course ka Address','text'],
+['shuraka','Shuraka','number'],['qafila3','3 Din Qafila','number'],['shuraka2','Shuraka (3 Din)','number'],['qafila12','12 Din Qafila','number'],['shuraka3','Shuraka (12 Din)','number'],['mah12','12 Mah Qafila','number'],
+['nekTaqseem','Nek Amal Taqseem','number'],['nekWasool','Nek Amal Wasool','number'],['azkar','Namaz ke Azkar','number'],['jamiatul','Jamiatul Madina','number'],['imamat','Imamat Course','number'],['madrasa','Madrasatul Madina','number'],
+['zimmedari','Tanzeemi Zimmedari','text'],['aamdan','Aamdan','number'],['kharch','Kharch','number']];
+const MON=['January','February','March','April','May','June','July','August','September','October','November','December'],charts={};
+const COLS=[['ts','Timestamp'],['year','Year'],['month','Month'],...LOC.map(k=>[k,k[0].toUpperCase()+k.slice(1)]),['courseType','Course Type'],['courseName','Course Name'],['remark','Remark'],...INP.map(x=>[x[0],x[1]]),['shobaName','Shobajat Courses'],['muallimZimmedari','Muallim Zimmedari']];
+const levelOf=u=>u.division?'division':u.state?'state':u.region?'region':'none',isAdm=()=>true;
+function fill(s,vals,keep){s.innerHTML='<option value="">Select</option>'+vals.map(v=>`<option>${esc(v)}</option>`).join('');if(keep&&vals.includes(keep))s.value=keep}
+S.u={admin:1,region:'',state:'',division:'',district:''};
+// ---------- Dashboard ----------
+const FLT=[['region','fRegion'],['state','fState'],['division','fDivision'],['district','fDistrict'],['courseType','fType'],['courseName','fName'],['shobaName','fShoba'],['muallimZimmedari','fMuallim'],['remark','fRemark'],['year','fYear'],['month','fMonth']];
+async function loadRows(){
+  $('tb').innerHTML='<tr><td>Loading...</td></tr>';
+  const snap=await getDocs(collection(db,'responses'));
+  S.rows=snap.docs.map(d=>({id:d.id,...d.data()})).filter(r=>LOC.every(k=>!S.u[k]||N(r[k])===N(S.u[k]))).sort((a,b)=>(b.ts||'').localeCompare(a.ts||''));
+  $('fl').innerHTML=FLT.map(([k,i])=>`<div><label style="text-transform:capitalize">${k.replace(/([A-Z])/g,' $1')}</label><select id="${i}"></select></div>`).join('');
+  FLT.forEach(([k,i])=>$(i).onchange=renderDash);renderDash()}
+const fmt=t=>{const d=new Date(t);return isNaN(d)?t:d.toLocaleString('en-IN')};
+const curRows=()=>S.rows.filter(r=>FLT.every(([k,i])=>!$(i).value||r[k]===$(i).value));
+function canMod(){if(isAdm())return true;const l=levelOf(S.u);return(l==='region'&&S.set.EditRemoveRegion==='ON')||(l==='state'&&S.set.EditRemoveState==='ON')}
 function renderDash(){
-  const rows=DR.filter(r=>[['dY','year'],['dM','month'],['dR','region']].every(([i,k])=>!$(i).value||r[k]===$(i).value));
-  const full=r=>N(r.courseType).includes('full'),sh=r=>(r.remark==='Course'||r.remark==='Course Shumar Nahi kiya gaya')?(+r.shuraka||0):0,sum=a=>a.reduce((x,r)=>x+sh(r),0),cr=rows.filter(r=>r.remark==='Course');
-  $('dS').innerHTML=[['Total Courses',cr.length],['Total Shuraka',sum(rows)],['Full Time',cr.filter(full).length],['Part Time',cr.filter(r=>!full(r)).length],['Total Entries',rows.length]].map(([l,v])=>`<div class="stat"><b>${v}</b>${l}</div>`).join('');
-  const g={};rows.forEach(r=>{const k=(r.year||'-')+'|'+String(MON.indexOf(r.month)+1).padStart(2,'0')+'|'+(r.month||'-');(g[k]=g[k]||[]).push(r)});
-  DT=Object.keys(g).sort().map(k=>{const a=g[k],c=a.filter(r=>r.remark==='Course'),p=k.split('|');return[p[0],p[2],c.length,sum(a),c.filter(full).length,c.filter(r=>!full(r)).length,a.length]});
-  $('dT').innerHTML='<tr>'+['Year','Month','Courses','Shuraka','Full Time','Part Time','Entries'].map(h=>`<th>${h}</th>`).join('')+'</tr>'+(DT.map(r=>'<tr>'+r.map(x=>`<td>${esc(x)}</td>`).join('')+'</tr>').join('')||'<tr><td colspan="7">Koi data nahi.</td></tr>');
-  dch&&dch.destroy();dch=new Chart($('dC'),{type:'bar',data:{labels:DT.map(r=>r[1]+' '+r[0]),datasets:[{label:'Courses',backgroundColor:'#2C5282',data:DT.map(r=>r[2])},{label:'Shuraka',backgroundColor:'#F6AD55',data:DT.map(r=>r[3])}]},options:{scales:{y:{beginAtZero:true}}}})}
-['dY','dM','dR'].forEach(i=>$(i).onchange=renderDash);$('dRf').onclick=drawDash;
-$('dX').onclick=()=>{const h=['Year','Month','Courses','Shuraka','Full Time','Part Time','Entries'],t='<html><meta charset="utf-8"><table border="1"><tr>'+h.map(x=>`<th>${x}</th>`).join('')+'</tr>'+DT.map(r=>'<tr>'+r.map(x=>`<td>${esc(x)}</td>`).join('')+'</tr>').join('')+'</table></html>';
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'application/vnd.ms-excel'}));a.download='Monthly_Summary_'+Date.now()+'.xls';a.click()};
+  FLT.forEach(([k,i])=>{const s=$(i),c=s.value;fill(s,[...new Set(S.rows.map(r=>r[k]).filter(Boolean))].sort(),c);s.options[0].text='All'});
+  const rows=curRows(),cr=rows.filter(r=>r.remark==='Course'),sh=r=>(r.remark==='Course'||r.remark==='Course Shumar Nahi kiya gaya')?(+r.shuraka||0):0;
+  const ft=cr.filter(r=>N(r.courseType).includes('full'));
+  const sS=a=>a.reduce((x,r)=>x+sh(r),0),box=(l,v,s)=>`<div class="stat"><b>${v}</b>${l}${s!=null?`<small>Shuraka: ${s}</small>`:''}</div>`;
+  const isF=r=>N(r.courseType).includes('full'),fa=rows.filter(isF),pa=rows.filter(r=>!isF(r));
+  const shb=cr.filter(r=>r.shobaName&&!/madani course/i.test(r.shobaName)),pm=cr.filter(r=>!isF(r)&&N(r.courseName).includes('muallim'));
+  $('st').innerHTML=box('Total Courses',cr.length)+box('Total Shuraka',sS(rows))+box('Full Time',ft.length,sS(fa))+box('Part Time',cr.length-ft.length,sS(pa))+box('Shobajat',shb.length,sS(shb))+box('PT Muallim',pm.length,sS(pm));
+  const FT=['63 Day Madani Course','12 Deeni Kaam Course','Islahe Amal Course','7 Day Faizane Namaz Course','Muallim Madani Course','1 Mah Madani Course (For Student)'],z=s=>N(s).replace(/[^a-z0-9]/g,'');
+  $('ft').innerHTML=FT.map(n=>{const a=ft.filter(r=>z(r.courseName)===z(n));return box(n,a.length,sS(a))}).join('');
+  const EX=[['3 Din Qafila','qafila3'],['Shuraka (3 Din)','shuraka2'],['12 Din Qafila','qafila12'],['Shuraka (12 Din)','shuraka3'],['Nek Amal Taqseem','nekTaqseem'],['Nek Amal Wasool','nekWasool'],['Namaz ke Azkar','azkar'],['12 Mah Qafila','mah12'],['Jamiatul Madina','jamiatul'],['Imamat Course','imamat'],['Madrasatul Madina','madrasa'],['Tanzeemi Zimmedari','zimmedari']];
+  $('ex').innerHTML=EX.map(([l,k])=>box(l,rows.reduce((a,r)=>a+(k==='zimmedari'?(r[k]?(isNaN(+r[k])?1:+r[k]):0):(+r[k]||0)),0))).join('');
+  const P=(o,ks)=>ks.map(k=>N(o[k])).join('|'),sel=Object.fromEntries(LOC.map(k=>[k,$('f'+k[0].toUpperCase()+k.slice(1)).value])),
+    stx=S.scoped.filter(r=>LOC.every(k=>!sel[k]||r[k]===sel[k])),done=new Set(rows.map(r=>P(r,LOC)));
+  $('cv').innerHTML=LOC.map((n,i)=>{const ks=LOC.slice(0,i+1),mp={};stx.forEach(r=>{const p=P(r,ks);(mp[p]=mp[p]||{l:r[ks[i]],f:ks.map(k=>r[k]).join(' → '),d:[]}).d.push(P(r,LOC))});
+    const A=Object.values(mp),cp=A.filter(x=>x.d.every(d=>done.has(d))),pd=A.filter(x=>!cp.includes(x)),
+    li=(a,t,c)=>{(S.cvx=S.cvx||{})[n+'_'+t]=a.map(x=>x.f).sort();return a.length?`<details><summary style="color:${c};font-weight:700;cursor:pointer">${t}: ${a.length}</summary><div class="row" style="margin:4px 0"><button class="o" style="padding:2px 8px" onclick="expL('${n}_${t}','p')">PDF</button><button class="o" style="padding:2px 8px" onclick="expL('${n}_${t}','x')">Excel</button></div><div style="max-height:130px;overflow:auto;font-size:12px">${a.map(x=>esc(x.l)).sort().join('<br>')}</div></details>`:''};
+    return`<div class="stat"><b>${cp.length}/${A.length}</b>${n[0].toUpperCase()+n.slice(1)}${li(pd,'Pending','var(--r)')}${li(cp,'Complete','var(--ok)')}</div>`}).join('');
+  const lv=levelOf(S.u),[a1,a2]=lv==='division'?['district','courseName']:lv==='state'?['division','district']:lv==='region'?['state','division']:['region','state'];
+  [['c1',a1],['c2',a2]].forEach(([id,k])=>{const L=[...new Set(rows.map(r=>r[k]||'Unknown'))],g=l=>rows.filter(r=>(r[k]||'Unknown')===l);charts[id]&&charts[id].destroy();
+    charts[id]=new Chart($(id),{type:'bar',data:{labels:L,datasets:[{label:'Courses',backgroundColor:'#2C5282',data:L.map(l=>g(l).filter(r=>r.remark==='Course').length)},{label:'Shuraka',backgroundColor:'#F6AD55',data:L.map(l=>sS(g(l)))}]},options:{plugins:{title:{display:true,text:k+'-wise Data'}},scales:{y:{beginAtZero:true}}}})});
+  const m=canMod();
+  $('th').innerHTML='<tr>'+COLS.map(c=>`<th>${c[1]}</th>`).join('')+'<th>Action</th></tr>';
+  S.tr=rows;S.pg=1;drawTable()}
+function drawTable(){const m=canMod(),q=N($('sq').value),ps=+$('ps').value,all=S.tr.filter(r=>!q||COLS.some(([k])=>N(k==='ts'?fmt(r.ts):r[k]).includes(q))),
+  pages=Math.max(1,Math.ceil(all.length/ps));S.pg=Math.min(S.pg,pages);const a=(S.pg-1)*ps,v=all.slice(a,a+ps);S.vis=all;
+  $('tb').innerHTML=v.map(r=>'<tr>'+COLS.map(([k])=>`<td>${esc(k==='ts'?fmt(r.ts):r[k])}</td>`).join('')+
+    `<td>${m?`<button class="d" onclick="delR('${r.id}')">Rem</button>`:'-'}</td></tr>`).join('')||'<tr><td>Koi data nahi.</td></tr>';
+  $('inf').textContent=`Showing ${all.length?a+1:0} to ${a+v.length} of ${all.length} entries`+(all.length<S.tr.length?` (filtered from ${S.tr.length} total entries)`:'');$('pn').textContent=S.pg+' / '+pages}
+$('fr').onclick=()=>{FLT.forEach(([k,i])=>$(i).value='');renderDash()};
+$('img').onclick=()=>html2canvas($('cap'),{scale:2,backgroundColor:'#F0F4F8'}).then(c=>{const a=document.createElement('a');a.href=c.toDataURL();a.download='Dashboard_'+Date.now()+'.png';a.click()});
+const hd=COLS.map(c=>c[1]),tv=()=>(S.vis||[]).map(r=>COLS.map(([k])=>k==='ts'?fmt(r.ts):(r[k]??''))),
+  dl=(b,n)=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click()},
+  tbl=(h,rs,st='')=>`<table border="1" style="border-collapse:collapse${st}"><tr>${h.map(x=>`<th style="background:#0B192C;color:#fff;padding:4px">${esc(x)}</th>`).join('')}</tr>${rs.map(r=>'<tr>'+r.map(x=>`<td style="padding:4px">${esc(x)}</td>`).join('')+'</tr>').join('')}</table>`,
+  xls=(h,rs,n)=>dl(new Blob(['\ufeff<html><meta charset="utf-8">'+tbl(h,rs)+'</html>'],{type:'application/vnd.ms-excel'}),n+'.xls'),
+  pdf=(h,rs,n,t,land)=>{const d=new window.jspdf.jsPDF(land?'l':'p','mm',land?'a3':'a4');d.text(t,10,10);d.autoTable({head:[h],body:rs,startY:15,styles:{fontSize:land?6:9},headStyles:{fillColor:[11,25,44]}});d.save(n+'.pdf')};
+$('xl').onclick=()=>xls(hd,tv(),'Report_Data_'+Date.now());
+$('pf').onclick=()=>pdf(hd,tv(),'Report_Data_'+Date.now(),'Shoba Madani Courses - Report Data',1);
+$('it').onclick=()=>{let rs=tv();if(!rs.length)return alert('Data nahi hai.');if(rs.length>300){if(!confirm('Sirf 300 rows image me aayengi. Aage badhein?'))return;rs=rs.slice(0,300)}
+  const w=document.createElement('div');w.style.cssText='position:fixed;left:-99999px;top:0;background:#fff;padding:14px;font:11px Arial';w.innerHTML='<h3>Shoba Madani Courses - Report Data</h3>'+tbl(hd,rs,';white-space:nowrap');document.body.appendChild(w);
+  html2canvas(w,{scale:2}).then(c=>{const a=document.createElement('a');a.href=c.toDataURL();a.download='Report_Data_'+Date.now()+'.png';a.click();w.remove()})};
+$('dpdf').onclick=()=>html2canvas($('cap'),{scale:2,backgroundColor:'#F0F4F8'}).then(c=>{const h=c.height*210/c.width,d=new window.jspdf.jsPDF({unit:'mm',format:[210,h+20]});d.text('Shoba Madani Courses - Dashboard Report',10,10);d.addImage(c.toDataURL('image/png'),'PNG',0,15,210,h);d.save('Dashboard_'+Date.now()+'.pdf')});
+window.expL=(k,t)=>{const a=S.cvx[k],[n,s]=k.split('_'),h=[n[0].toUpperCase()+n.slice(1)+' '+s+' List'],rs=a.map(x=>[x]);t==='p'?pdf(h,rs,k,h[0]):xls(h,rs,k)};
+$('ps').onchange=$('sq').oninput=()=>{S.pg=1;drawTable()};$('pv').onclick=()=>{if(S.pg>1){S.pg--;drawTable()}};$('nx').onclick=()=>{S.pg++;drawTable()};$('rd').onclick=loadRows;
+$('csv').onclick=()=>{const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const t=[COLS.map(c=>q(c[1])).join(',')].concat(curRows().map(r=>COLS.map(([k])=>q(k==='ts'?fmt(r.ts):r[k])).join(','))).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'text/csv'}));a.download='Report_Data_'+Date.now()+'.csv';a.click()};
+window.delR=async id=>{if(!canMod()||!confirm('Is entry ko delete karein?'))return;
+  const r=S.rows.find(x=>x.id===id);if(!isAdm()&&LOC.some(k=>S.u[k]&&N(r[k])!==N(S.u[k])))return alert('Allowed nahi.');
+  await deleteDoc(doc(db,'responses',id));loadRows()};
+
 
 // ---- Users import ----
 $('uiB').onclick=async()=>{const L=$('ui').value.split(/\r?\n/).filter(x=>x.trim());if(!L.length)return alert('Users paste karein.');
