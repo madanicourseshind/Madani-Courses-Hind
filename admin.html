@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="hi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Panel - Shoba Madani Courses</title>
+<style>
+:root{--n9:#0B192C;--n8:#1A365D;--n7:#2C5282;--bg:#E6F0FA;--g:#DD6B20;--l:#E2E8F0;--r:#E53E3E;--ok:#38A169}
+*{box-sizing:border-box}body{margin:0;background:#F0F4F8;font:14px system-ui,Segoe UI,sans-serif;color:#1A202C}
+.hide{display:none!important}
+#login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--n9),var(--n8));padding:16px}
+.card{background:#fff;border-radius:14px;padding:28px;width:100%;max-width:370px;text-align:center}
+.panel{background:#fff;border:1px solid var(--l);border-radius:10px;padding:18px;margin-bottom:16px}
+header{background:linear-gradient(135deg,var(--n9),var(--n8));color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+.wrap{max-width:1000px;margin:0 auto;padding:18px 12px 50px}
+label{display:block;font-size:12px;font-weight:600;color:#4A5568;margin:8px 0 3px;text-align:left}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--n7);border-radius:7px;background:var(--bg);font:inherit}
+button{border:0;border-radius:7px;padding:8px 14px;font:600 13px inherit;background:var(--n7);color:#fff;cursor:pointer}
+button.o{background:#fff;color:var(--n7);border:1px solid var(--n7)}button.d{background:var(--r)}button.w{background:var(--g)}
+.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}.tabs button{background:#fff;color:#4A5568;border:1px solid var(--l);border-radius:99px}
+.tabs button.on{background:var(--n7);color:#fff}
+h3{background:var(--n7);color:#fff;padding:7px 11px;border-radius:6px;font-size:14px;margin:6px 0 10px}
+.g{display:grid;grid-template-columns:repeat(2,1fr);gap:2px 12px}
+.sc{overflow:auto;max-height:45vh;border:1px solid var(--l);border-radius:8px}
+table{border-collapse:collapse;width:100%}th{background:var(--n9);color:#fff;padding:8px;text-align:left;position:sticky;top:0}
+td{padding:6px 8px;border-bottom:1px solid var(--l)}tr:nth-child(even) td{background:#F8FAFC}
+.err{color:var(--r);font-weight:600;margin:8px 0}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sw{display:flex;justify-content:space-between;width:100%;background:#fff;color:#1A202C;border:1px solid var(--l);margin:4px 0;padding:10px 14px}
+.on-b{color:var(--ok)}.off-b{color:var(--r)}
+</style></head>
+<body>
+
+<div id="app" class="hide">
+  <header><b>⚙ Admin Panel — Shoba Madani Courses</b><button class="d" id="out">Logout</button></header>
+  <div class="wrap">
+    <div class="tabs" id="tabs"></div>
+
+    <div class="panel" id="a_set">
+      <h3>Form / Permission Settings</h3><div id="tg"></div>
+      <h3 style="margin-top:16px">Year Dropdown Range</h3>
+      <div class="row"><input id="yf" type="number" placeholder="From (jaise 2024)" style="width:170px"><input id="yt" type="number" placeholder="To (jaise 2030)" style="width:170px"><button id="yb">Save Years</button></div>
+    </div>
+
+    <div class="panel hide" id="a_opt"></div>
+
+    <div class="panel hide" id="a_imp">
+      <h3>Master Data Import</h3>
+      <p style="font-size:12px">Google Sheet ke "Data" tab ko header ke saath copy-paste karein (Region, State, Division, District, Courses Type, Course Name, Shobajat Courses, Muallim Zimmedari). Purana master data replace ho jayega.</p>
+      <textarea id="mi" rows="8"></textarea><button id="miB" style="margin-top:8px">Import Master</button>
+    </div>
+
+    <div class="panel hide" id="a_usr">
+      <h3>Users</h3><div id="ul"></div>
+      <h3 style="margin-top:16px">User add / update</h3>
+      <div class="g"><div><label>User ID (jaise "Delhi Region")</label><input id="nuId"></div><div><label>Password</label><input id="nuPw"></div>
+      <div><label>Status</label><select id="nuSt"><option>active</option><option>inactive</option></select></div>
+      <div><label>Level (region/state/division, optional)</label><input id="nuLv"></div></div>
+      <button id="nuB" style="margin-top:10px">Save User</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getFirestore,doc,getDoc,setDoc,deleteDoc,collection,getDocs} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const db=getFirestore(initializeApp({
+  apiKey:"AIzaSyCrNMZN32I9zpp62oaZg8ZoJgXbheQ1Mms",authDomain:"madani-courses-hind.firebaseapp.com",
+  projectId:"madani-courses-hind",storageBucket:"madani-courses-hind.firebasestorage.app",
+  messagingSenderId:"169371284614",appId:"1:169371284614:web:3ea03647ab97546d11cd07"}));
+const $=i=>document.getElementById(i),N=v=>(v||'').toString().trim().toLowerCase();
+const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const LOC=['region','state','division','district'];
+const DEF={FormAccessRegion:'ON',FormAccessState:'ON',FormAccessDivision:'ON',FormAccessQuickEntry:'ON',RegionLinkAccess:'OFF',StateLinkAccess:'OFF',EditRemoveRegion:'OFF',EditRemoveState:'OFF',RegionDistrictAccess:'OFF',StateDistrictAccess:'OFF'};
+const TG=[['FormAccessRegion','Region Level Form Access'],['FormAccessState','State Level Form Access'],['FormAccessDivision','Division Level Form Access'],['FormAccessQuickEntry','Quick Entry Form Access'],
+['EditRemoveRegion','Region Users Edit/Remove'],['EditRemoveState','State Users Edit/Remove'],['RegionLinkAccess','Region Quick Link Access'],['StateLinkAccess','State Quick Link Access'],
+['RegionDistrictAccess','Region Link: District Field'],['StateDistrictAccess','State Link: District Field']];
+const AT=[['a_set','Settings'],['a_opt','Dropdown Options'],['a_imp','Master Import'],['a_usr','Users']];
+const OPT=[['courseType','Course Type'],['courseName','Course Name (Type ke saath)'],['shobaName','Shobajat Courses'],['muallimZimmedari','Muallim Zimmedari'],['loc','Locations (Region → District)']];
+const S={m:[],set:{...DEF},us:{},oi:[]};let ot='courseType';
+const uniq=(rows,k)=>[...new Set(rows.map(r=>r[k]).filter(Boolean))];
+
+// ---- Auto login (index.html se redirect) ----
+(async()=>{const pw=sessionStorage.getItem('adm'),go=()=>location.replace('index.html');
+  if(!pw)return go();
+  try{const s=await getDoc(doc(db,'users','admin'));if(!s.exists()||String(s.data().password).trim()!==pw)return go();
+    const m=await getDoc(doc(db,'config','master'));S.m=m.exists()?(m.data().rows||[]):[];
+    const st=await getDoc(doc(db,'config','settings'));S.set={...DEF,...(st.exists()?st.data():{})};
+    $('app').classList.remove('hide');start()}
+  catch(e){alert('Error: '+e.message);go()}})();
+$('out').onclick=()=>{sessionStorage.removeItem('adm');location.href='index.html'};
+
+function start(){$('tabs').innerHTML=AT.map(([k,l])=>`<button data-t="${k}">${l}</button>`).join('');
+  $('tabs').onclick=e=>e.target.dataset.t&&tab(e.target.dataset.t);$('yf').value=S.set.YearFrom||'';$('yt').value=S.set.YearTo||'';drawTg();tab('a_set')}
+function tab(id){AT.forEach(([k])=>$(k).classList.toggle('hide',k!==id));$('tabs').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t===id));if(id==='a_opt')drawOpt();if(id==='a_usr')drawUsers()}
+
+// ---- Settings ----
+function drawTg(){$('tg').innerHTML=TG.map(([k,l])=>`<button class="sw" data-k="${k}"><span>${l}</span><b class="${S.set[k]==='ON'?'on-b':'off-b'}">${S.set[k]}</b></button>`).join('');
+  $('tg').querySelectorAll('button').forEach(b=>b.onclick=async()=>{const k=b.dataset.k,v=S.set[k]==='ON'?'OFF':'ON';await setDoc(doc(db,'config','settings'),{[k]:v},{merge:true});S.set[k]=v;drawTg()})}
+$('yb').onclick=async()=>{const v={YearFrom:$('yf').value,YearTo:$('yt').value};await setDoc(doc(db,'config','settings'),v,{merge:true});Object.assign(S.set,v);alert('Year range save ho gayi.')};
+
+// ---- Dropdown options ----
+const saveM=async()=>{S.m=S.m.filter(r=>Object.values(r).some(v=>v));try{await setDoc(doc(db,'config','master'),{rows:S.m})}catch(e){alert('Error: '+e.message)}drawOpt()};
+function drawOpt(){const v=ot,mk=(a,f)=>[...new Map(a.map(f)).values()];
+  S.oi=v==='loc'?mk(S.m.filter(r=>r.district),r=>{const l=LOC.map(k=>r[k]).join(' → ');return[l,{label:l,p:x=>LOC.every(k=>x[k]===r[k]),f:LOC}]}):
+    v==='courseName'?mk(S.m.filter(r=>r.courseName),r=>{const l=r.courseType+' — '+r.courseName;return[l,{label:l,p:x=>x.courseType===r.courseType&&x.courseName===r.courseName,f:['courseName']}]}):
+    uniq(S.m,v).map(t=>({label:t,p:x=>x[v]===t,f:[v]}));
+  const add=v==='loc'?LOC.map((k,i)=>`<input id="o${i}" placeholder="${k}" style="width:150px">`).join(''):
+    v==='courseName'?`<select id="o0" style="width:200px">${uniq(S.m,'courseType').map(t=>`<option>${esc(t)}</option>`).join('')}</select><input id="o1" placeholder="Naya Course Name" style="width:220px">`:
+    `<input id="o0" placeholder="Naya option" style="width:260px">`;
+  $('a_opt').innerHTML=`<h3>Dropdown Options (Add / Remove)</h3><div class="row"><select id="osel" style="width:auto">${OPT.map(([k,l])=>`<option value="${k}"${k===v?' selected':''}>${l}</option>`).join('')}</select><input id="oq" placeholder="Search" style="width:160px"></div>
+    <div class="row" style="margin:8px 0">${add}<button id="oa">+ Add</button></div><div class="sc"><table><tbody id="ob"></tbody></table></div><p id="oc" style="font-size:12px"></p>`;
+  $('osel').onchange=()=>{ot=$('osel').value;drawOpt()};$('oq').oninput=rowsOpt;
+  $('oa').onclick=()=>{const g=i=>($('o'+i).value||'').trim();const row=v==='loc'?Object.fromEntries(LOC.map((k,i)=>[k,g(i)])):v==='courseName'?{courseType:g(0),courseName:g(1)}:{[v]:g(0)};
+    if(Object.values(row).some(x=>!x))return alert('Sab fields bharein.');S.m.push(row);saveM()};rowsOpt()}
+function rowsOpt(){const q=N($('oq').value);$('ob').innerHTML=S.oi.map((x,i)=>N(x.label).includes(q)?`<tr><td>${esc(x.label)}</td><td style="width:90px"><button class="d" onclick="optDel(${i})">Remove</button></td></tr>`:'').join('')||'<tr><td>Koi option nahi.</td></tr>';$('oc').textContent='Total: '+S.oi.length}
+window.optDel=i=>{const x=S.oi[i];if(!confirm('Remove: '+x.label+' ?'))return;S.m.forEach(r=>{if(x.p(r))x.f.forEach(k=>r[k]='')});saveM()};
+
+// ---- Master import ----
+$('miB').onclick=async()=>{const L=$('mi').value.split(/\r?\n/).filter(x=>x.trim());if(L.length<2)return alert('Header + data paste karein.');
+  if(!confirm('Purana master data replace ho jayega. Aage badhein?'))return;
+  const sp=l=>l.includes('\t')?l.split('\t'):l.split(','),h=sp(L[0]).map(x=>N(x).replace(/\s+/g,''));
+  const key=x=>x.includes('shoba')?'shobaName':x.includes('muallim')?'muallimZimmedari':/course.*type/.test(x)?'courseType':/course.*name/.test(x)?'courseName':LOC.includes(x)?x:null;
+  const rows=L.slice(1).map(l=>{const c=sp(l),o={};h.forEach((x,i)=>{const k=key(x);if(k)o[k]=(c[i]||'').trim()});return o});
+  try{await setDoc(doc(db,'config','master'),{rows});S.m=rows;alert(rows.length+' rows import ho gayi.')}catch(e){alert('Error: '+e.message+' (1MB limit)')}};
+
+// ---- Users ----
+async function drawUsers(){const s=await getDocs(collection(db,'users'));S.us=Object.fromEntries(s.docs.map(d=>[d.id,d.data()]));
+  $('ul').innerHTML='<div class="sc"><table><tr><th>User ID</th><th>Password</th><th>Status</th><th>Level</th><th></th></tr>'+s.docs.map(d=>{const u=d.data();return`<tr><td>${esc(u.login||d.id)}</td><td>${esc(u.password)}</td><td>${esc(u.status)}</td><td>${esc(u.level||'')}</td><td style="white-space:nowrap"><button class="w" onclick="usrEd('${d.id}')">Edit</button> <button class="d" onclick="usrDel('${d.id}')">Delete</button></td></tr>`}).join('')+'</table></div>'}
+window.usrEd=id=>{const u=S.us[id];$('nuId').value=u.login||id;$('nuPw').value=u.password;$('nuSt').value=u.status||'active';$('nuLv').value=u.level||''};
+window.usrDel=async id=>{if(id==='admin')return alert('admin user delete nahi ho sakta.');if(!confirm(id+' ko delete karein?'))return;await deleteDoc(doc(db,'users',id));drawUsers()};
+$('nuB').onclick=async()=>{const id=$('nuId').value.trim(),pw=$('nuPw').value.trim();if(!id||!pw)return alert('ID aur Password dein.');
+  await setDoc(doc(db,'users',N(id)),{login:id,password:pw,status:$('nuSt').value,level:$('nuLv').value.trim()});alert('User saved.');drawUsers()};
+</script>
+</body></html>
