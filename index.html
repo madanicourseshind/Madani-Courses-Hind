@@ -49,7 +49,7 @@ td{padding:6px 8px;border-bottom:1px solid var(--l);white-space:nowrap}tr:nth-ch
   <header>
     <b>Shoba Madani Courses</b>
     <div class="row"><span id="ulab"></span>
-      <button class="o hide" id="admB" style="background:#E2E8F0;color:var(--n9)">⚙ Admin</button>
+      
       <button id="rfB" class="o" style="color:#fff;border-color:#fff;background:transparent">↻ Refresh</button>
       <button class="d" id="outB">Logout</button></div>
   </header>
@@ -84,21 +84,6 @@ td{padding:6px 8px;border-bottom:1px solid var(--l);white-space:nowrap}tr:nth-ch
       <div class="sc"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>
       <div class="row" style="justify-content:space-between;margin-top:8px"><span id="inf"></span><span class="row"><button class="o" id="pv">Previous</button><b id="pn"></b><button class="o" id="nx">Next</button></span></div></div>
     </section>
-  </div>
-</div>
-
-<div id="adm" class="hide" style="position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;padding:12px;z-index:9">
-  <div class="card" style="max-width:520px;max-height:90vh;overflow:auto;text-align:left">
-    <div class="row" style="justify-content:space-between"><b>⚙ Admin Control</b><button class="o" id="admX">Close</button></div>
-    <div id="tg"></div>
-    <h3>Master Data Import (Region/State/Division/District/Course data)</h3>
-    <p style="font-size:12px;margin:4px 0">Google Sheet ke "Data" tab se copy-paste karein (header row ke saath): region, state, division, district, courseType, courseName, shobaName, muallimZimmedari</p>
-    <textarea id="mi" rows="5"></textarea><button id="miB" style="margin-top:6px">Import Master</button>
-    <h3>User add / update</h3>
-    <div class="g" style="--c:2"><div><label>User ID (jaise "Delhi Region")</label><input id="nuId"></div><div><label>Password</label><input id="nuPw"></div>
-    <div><label>Status</label><select id="nuSt"><option>active</option><option>inactive</option></select></div>
-    <div><label>Level (region/state/division, optional)</label><input id="nuLv"></div></div>
-    <button id="nuB" style="margin-top:8px">Save User</button>
   </div>
 </div>
 
@@ -181,7 +166,7 @@ function initForm(){
   S.scoped=mine();chain('');chain('l_');
   const ct=uniq(S.m,'courseType');if(!ct.includes(NOC))ct.push(NOC);
   fill($('courseType'),ct);fill($('shobaName'),uniq(S.m,'shobaName'));fill($('muallimZimmedari'),uniq(S.m,'muallimZimmedari'));fill($('courseName'),[]);
-  const dt=new Date(),Y=dt.getFullYear();fill($('year'),[Y-2,Y-1,Y,Y+1].map(String),String(Y));fill($('month'),MON,MON[dt.getMonth()]);
+  const dt=new Date(),Y=dt.getFullYear();fill($('year'),yrs(Y),String(Y));fill($('month'),MON,MON[dt.getMonth()]);
   $('fload').textContent=(!S.scoped.length&&!isAdm())?'Is location ka data nahi mila.':'';
 }
 
@@ -281,25 +266,13 @@ $('lkG').onclick=async()=>{const loc=lkLoc(),ref=doc(db,'links',lid(loc));let s=
 $('lkD').onclick=async()=>{if(!confirm('Link hamesha ke liye disable karein?'))return;await deleteDoc(doc(db,'links',lid(lkLoc())));$('lkR').classList.add('hide');alert('Link disable ho gayi.')};
 $('lkC').onclick=()=>{$('lkU').select();document.execCommand('copy');alert('Copied!')};
 
-// ---------- Admin ----------
-const TG=[['FormAccessRegion','Region Form Access'],['FormAccessState','State Form Access'],['FormAccessDivision','Division Form Access'],['FormAccessQuickEntry','Quick Entry Form Access'],
-['EditRemoveRegion','Region Edit/Remove'],['EditRemoveState','State Edit/Remove'],['RegionLinkAccess','Region Quick Link'],['StateLinkAccess','State Quick Link'],['RegionDistrictAccess','Region Link: District Field'],['StateDistrictAccess','State Link: District Field']];
-function drawTg(){$('tg').innerHTML=TG.map(([k,l])=>`<button class="sw" data-k="${k}"><span>${l}</span><b class="${S.set[k]==='ON'?'on-b':'off-b'}">${S.set[k]}</b></button>`).join('');
-  $('tg').querySelectorAll('button').forEach(b=>b.onclick=async()=>{const k=b.dataset.k,v=S.set[k]==='ON'?'OFF':'ON';await setDoc(doc(db,'config','settings'),{[k]:v},{merge:true});S.set[k]=v;drawTg()})}
-$('admB').onclick=()=>{drawTg();$('adm').classList.remove('hide')};$('admX').onclick=()=>$('adm').classList.add('hide');
-$('miB').onclick=async()=>{const L=$('mi').value.split(/\r?\n/).filter(x=>x.trim());if(L.length<2)return alert('Header + data paste karein.');
-  const sp=l=>l.includes('\t')?l.split('\t'):l.split(',');const h=sp(L[0]).map(x=>N(x).replace(/\s+/g,''));
-  const key=x=>x.includes('shoba')?'shobaName':x.includes('muallim')?'muallimZimmedari':/course.*type/.test(x)?'courseType':/course.*name/.test(x)?'courseName':['region','state','division','district'].includes(x)?x:null;
-  const rows=L.slice(1).map(l=>{const c=sp(l),o={};h.forEach((x,i)=>{const k=key(x);if(k)o[k]=(c[i]||'').trim()});return o});
-  try{await setDoc(doc(db,'config','master'),{rows});S.m=rows;alert(rows.length+' rows import ho gayi.')}catch(e){alert('Error: '+e.message+' (1MB limit)')}};
-$('nuB').onclick=async()=>{const id=$('nuId').value.trim(),pw=$('nuPw').value.trim();if(!id||!pw)return alert('ID aur Password dein.');
-  await setDoc(doc(db,'users',N(id)),{login:id,password:pw,status:$('nuSt').value,level:$('nuLv').value.trim()});alert('User saved.')};
+const yrs=Y=>{const a=+S.set.YearFrom||Y-2,b=+S.set.YearTo||Y+1,o=[];for(let y=a;y<=b;y++)o.push(String(y));return o};
 
 // ---------- Auth / boot ----------
 function tab(n){$('p1').classList.toggle('hide',n!==1);$('p2').classList.toggle('hide',n!==2);$('t1').classList.toggle('on',n===1);$('t2').classList.toggle('on',n===2);if(n===2)loadRows()}
 $('t1').onclick=()=>tab(1);$('t2').onclick=()=>tab(2);
 function enter(){$('login').classList.add('hide');$('appS').classList.remove('hide');buildForm();initForm();
-  const l=levelOf(S.u),a=isAdm();$('admB').classList.toggle('hide',!a);$('lkD').classList.toggle('hide',!a);
+  const l=levelOf(S.u),a=isAdm();$('lkD').classList.toggle('hide',!a);
   $('lkP').classList.toggle('hide',!(a||(l==='state'&&S.set.StateLinkAccess==='ON')||(l==='region'&&S.set.RegionLinkAccess==='ON')));
   const dd=a||(l==='state'&&S.set.StateDistrictAccess==='ON')||(l==='region'&&S.set.RegionDistrictAccess==='ON');$('l_district').parentElement.classList.toggle('hide',!dd)}
 $('lb').onclick=async()=>{const id=$('uid').value.trim(),pw=$('pw').value.trim(),e=$('lerr');e.classList.add('hide');
@@ -310,7 +283,7 @@ $('lb').onclick=async()=>{const id=$('uid').value.trim(),pw=$('pw').value.trim()
     if(N(d.status)==='inactive')throw Error('Ye account inactive hai.');
     const sc=scopeOf(id,d.level),lv=levelOf(sc);
     if(!sc.admin){const k={region:'FormAccessRegion',state:'FormAccessState',division:'FormAccessDivision'}[lv];if(k&&S.set[k]==='OFF')throw Error(lv+' users ke liye Form abhi band hai.')}
-    S.u={id,...sc,district:'',level:lv};$('ulab').textContent=id;enter()}
+    if(sc.admin){sessionStorage.setItem('adm',pw);location.href='admin.html';return}S.u={id,...sc,district:'',level:lv};$('ulab').textContent=id;enter()}
   catch(x){e.textContent=x.message;e.classList.remove('hide')}
   $('lb').disabled=false};
 $('outB').onclick=()=>location.href=location.pathname;
