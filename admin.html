@@ -25,6 +25,8 @@ td{padding:6px 8px;border-bottom:1px solid var(--l)}tr:nth-child(even) td{backgr
 .err{color:var(--r);font-weight:600;margin:8px 0}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .sw{display:flex;justify-content:space-between;width:100%;background:#fff;color:#1A202C;border:1px solid var(--l);margin:4px 0;padding:10px 14px}
 .on-b{color:var(--ok)}.off-b{color:var(--r)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:12px 0}
+.stat{background:#fff;border:1px solid var(--l);border-left:5px solid var(--n7);border-radius:8px;padding:10px 12px}.stat b{font-size:22px;display:block}
 </style></head>
 <body>
 
@@ -37,6 +39,15 @@ td{padding:6px 8px;border-bottom:1px solid var(--l)}tr:nth-child(even) td{backgr
       <h3>Form / Permission Settings</h3><div id="tg"></div>
       <h3 style="margin-top:16px">Year Dropdown Range</h3>
       <div class="row"><input id="yf" type="number" placeholder="From (jaise 2024)" style="width:170px"><input id="yt" type="number" placeholder="To (jaise 2030)" style="width:170px"><button id="yb">Save Years</button></div>
+    </div>
+
+    <div class="panel hide" id="a_dash">
+      <h3>Courses Monthly Dashboard</h3>
+      <div class="row"><select id="dY" style="width:auto"></select><select id="dM" style="width:auto"></select><select id="dR" style="width:auto"></select>
+        <button class="o" id="dX">Excel</button><button id="dRf">↻ Refresh</button></div>
+      <div class="stats" id="dS"></div>
+      <div style="max-width:100%"><canvas id="dC" height="110"></canvas></div>
+      <h3 style="margin-top:14px">Month-wise Summary</h3><div class="sc"><table id="dT"></table></div>
     </div>
 
     <div class="panel hide" id="a_opt"></div>
@@ -54,10 +65,14 @@ td{padding:6px 8px;border-bottom:1px solid var(--l)}tr:nth-child(even) td{backgr
       <div><label>Status</label><select id="nuSt"><option>active</option><option>inactive</option></select></div>
       <div><label>Level (region/state/division, optional)</label><input id="nuLv"></div></div>
       <button id="nuB" style="margin-top:10px">Save User</button>
+      <h3 style="margin-top:18px">Users Import (Google Sheet ke "User" tab se)</h3>
+      <p style="font-size:12px">Column order: Login ID, Password, Status, Level. Header row ho to bhi chalega. Jo user pehle se hai wo update ho jayega.</p>
+      <textarea id="ui" rows="6"></textarea><button id="uiB" style="margin-top:8px">Import Users</button>
     </div>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getFirestore,doc,getDoc,setDoc,deleteDoc,collection,getDocs} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -72,7 +87,7 @@ const DEF={FormAccessRegion:'ON',FormAccessState:'ON',FormAccessDivision:'ON',Fo
 const TG=[['FormAccessRegion','Region Level Form Access'],['FormAccessState','State Level Form Access'],['FormAccessDivision','Division Level Form Access'],['FormAccessQuickEntry','Quick Entry Form Access'],
 ['EditRemoveRegion','Region Users Edit/Remove'],['EditRemoveState','State Users Edit/Remove'],['RegionLinkAccess','Region Quick Link Access'],['StateLinkAccess','State Quick Link Access'],
 ['RegionDistrictAccess','Region Link: District Field'],['StateDistrictAccess','State Link: District Field']];
-const AT=[['a_set','Settings'],['a_opt','Dropdown Options'],['a_imp','Master Import'],['a_usr','Users']];
+const AT=[['a_set','Settings'],['a_dash','Dashboard'],['a_opt','Dropdown Options'],['a_imp','Master Import'],['a_usr','Users']];
 const OPT=[['courseType','Course Type'],['courseName','Course Name (Type ke saath)'],['shobaName','Shobajat Courses'],['muallimZimmedari','Muallim Zimmedari'],['loc','Locations (Region → District)']];
 const S={m:[],set:{...DEF},us:{},oi:[]};let ot='courseType';
 const uniq=(rows,k)=>[...new Set(rows.map(r=>r[k]).filter(Boolean))];
@@ -89,7 +104,7 @@ $('out').onclick=()=>{sessionStorage.removeItem('adm');location.href='index.html
 
 function start(){$('tabs').innerHTML=AT.map(([k,l])=>`<button data-t="${k}">${l}</button>`).join('');
   $('tabs').onclick=e=>e.target.dataset.t&&tab(e.target.dataset.t);$('yf').value=S.set.YearFrom||'';$('yt').value=S.set.YearTo||'';drawTg();tab('a_set')}
-function tab(id){AT.forEach(([k])=>$(k).classList.toggle('hide',k!==id));$('tabs').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t===id));if(id==='a_opt')drawOpt();if(id==='a_usr')drawUsers()}
+function tab(id){AT.forEach(([k])=>$(k).classList.toggle('hide',k!==id));$('tabs').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t===id));if(id==='a_opt')drawOpt();if(id==='a_dash')drawDash();if(id==='a_usr')drawUsers()}
 
 // ---- Settings ----
 function drawTg(){$('tg').innerHTML=TG.map(([k,l])=>`<button class="sw" data-k="${k}"><span>${l}</span><b class="${S.set[k]==='ON'?'on-b':'off-b'}">${S.set[k]}</b></button>`).join('');
@@ -128,5 +143,32 @@ window.usrEd=id=>{const u=S.us[id];$('nuId').value=u.login||id;$('nuPw').value=u
 window.usrDel=async id=>{if(id==='admin')return alert('admin user delete nahi ho sakta.');if(!confirm(id+' ko delete karein?'))return;await deleteDoc(doc(db,'users',id));drawUsers()};
 $('nuB').onclick=async()=>{const id=$('nuId').value.trim(),pw=$('nuPw').value.trim();if(!id||!pw)return alert('ID aur Password dein.');
   await setDoc(doc(db,'users',N(id)),{login:id,password:pw,status:$('nuSt').value,level:$('nuLv').value.trim()});alert('User saved.');drawUsers()};
+
+// ---- Monthly dashboard ----
+const MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+let DR=[],DT=[],dch;
+async function drawDash(){const s=await getDocs(collection(db,'responses'));
+  DR=s.docs.map(d=>{const r=d.data(),t=new Date(r.ts);return{...r,year:r.year||(isNaN(t)?'':String(t.getFullYear())),month:r.month||(isNaN(t)?'':MON[t.getMonth()])}});
+  const f=(id,k,l)=>{const c=$(id).value;$(id).innerHTML=`<option value="">All ${l}</option>`+[...new Set(DR.map(r=>r[k]).filter(Boolean))].sort().map(v=>`<option>${esc(v)}</option>`).join('');$(id).value=c};
+  f('dY','year','Years');f('dM','month','Months');f('dR','region','Regions');renderDash()}
+function renderDash(){
+  const rows=DR.filter(r=>[['dY','year'],['dM','month'],['dR','region']].every(([i,k])=>!$(i).value||r[k]===$(i).value));
+  const full=r=>N(r.courseType).includes('full'),sh=r=>(r.remark==='Course'||r.remark==='Course Shumar Nahi kiya gaya')?(+r.shuraka||0):0,sum=a=>a.reduce((x,r)=>x+sh(r),0),cr=rows.filter(r=>r.remark==='Course');
+  $('dS').innerHTML=[['Total Courses',cr.length],['Total Shuraka',sum(rows)],['Full Time',cr.filter(full).length],['Part Time',cr.filter(r=>!full(r)).length],['Total Entries',rows.length]].map(([l,v])=>`<div class="stat"><b>${v}</b>${l}</div>`).join('');
+  const g={};rows.forEach(r=>{const k=(r.year||'-')+'|'+String(MON.indexOf(r.month)+1).padStart(2,'0')+'|'+(r.month||'-');(g[k]=g[k]||[]).push(r)});
+  DT=Object.keys(g).sort().map(k=>{const a=g[k],c=a.filter(r=>r.remark==='Course'),p=k.split('|');return[p[0],p[2],c.length,sum(a),c.filter(full).length,c.filter(r=>!full(r)).length,a.length]});
+  $('dT').innerHTML='<tr>'+['Year','Month','Courses','Shuraka','Full Time','Part Time','Entries'].map(h=>`<th>${h}</th>`).join('')+'</tr>'+(DT.map(r=>'<tr>'+r.map(x=>`<td>${esc(x)}</td>`).join('')+'</tr>').join('')||'<tr><td colspan="7">Koi data nahi.</td></tr>');
+  dch&&dch.destroy();dch=new Chart($('dC'),{type:'bar',data:{labels:DT.map(r=>r[1]+' '+r[0]),datasets:[{label:'Courses',backgroundColor:'#2C5282',data:DT.map(r=>r[2])},{label:'Shuraka',backgroundColor:'#F6AD55',data:DT.map(r=>r[3])}]},options:{scales:{y:{beginAtZero:true}}}})}
+['dY','dM','dR'].forEach(i=>$(i).onchange=renderDash);$('dRf').onclick=drawDash;
+$('dX').onclick=()=>{const h=['Year','Month','Courses','Shuraka','Full Time','Part Time','Entries'],t='<html><meta charset="utf-8"><table border="1"><tr>'+h.map(x=>`<th>${x}</th>`).join('')+'</tr>'+DT.map(r=>'<tr>'+r.map(x=>`<td>${esc(x)}</td>`).join('')+'</tr>').join('')+'</table></html>';
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'application/vnd.ms-excel'}));a.download='Monthly_Summary_'+Date.now()+'.xls';a.click()};
+
+// ---- Users import ----
+$('uiB').onclick=async()=>{const L=$('ui').value.split(/\r?\n/).filter(x=>x.trim());if(!L.length)return alert('Users paste karein.');
+  const sp=l=>l.includes('\t')?l.split('\t'):l.split(','),us=[];
+  L.forEach(l=>{const c=sp(l).map(x=>x.trim().replace(/^"|"$/g,''));if(!c[0]||!c[1]||['role','login','user id','userid','user'].includes(N(c[0]))||N(c[1])==='password')return;
+    us.push({login:c[0],password:c[1],status:N(c[2])==='inactive'?'inactive':'active',level:N(c[3])})});
+  if(!us.length)return alert('Koi valid user nahi mila.');if(!confirm(us.length+' users import/update honge. Aage badhein?'))return;
+  try{await Promise.all(us.map(u=>setDoc(doc(db,'users',N(u.login)),u)));alert(us.length+' users import ho gaye.');$('ui').value='';drawUsers()}catch(e){alert('Error: '+e.message)}};
 </script>
 </body></html>
