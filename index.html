@@ -132,6 +132,13 @@
   .set-tabs button.active{ background:var(--teal-700); border-color:var(--teal-700); color:#fff; }
   .opt-list{ max-height:260px; overflow:auto; border:1px solid var(--line-200); border-radius:8px; }
   .opt-list div{ display:flex; justify-content:space-between; align-items:center; gap:8px; padding:5px 10px; border-bottom:1px solid var(--line-200); font-size:0.85rem; }
+  /* Courses stat cards: barabar width, ek jaisi alignment */
+  .crs-eq{ display:grid; grid-template-columns:repeat(var(--n,6),minmax(0,1fr)); gap:14px; margin-bottom:20px; }
+  .crs-eq .dash-card{ min-width:0; height:100%; }
+  .crs-eq .dash-card-title{ min-height:2.4em; display:flex; align-items:flex-start; word-break:break-word; }
+  @media(max-width:1100px){ .crs-eq{ grid-template-columns:repeat(var(--t,3),minmax(0,1fr)); } }
+  @media(max-width:600px){ .crs-eq{ grid-template-columns:repeat(var(--m,2),minmax(0,1fr)); } }
+  #c_ft .dash-card-title{ min-height:3.6em; }
 
   @media (max-width:768px){
     .stat-grid{ grid-template-columns:repeat(2,1fr); }
@@ -345,10 +352,10 @@
         </div>
       </div>
       <div id="c_apb" class="alert alert-warning d-none" style="font-size:0.88rem;padding:10px 14px;"></div>
-      <div class="stat-grid" id="c_st"></div>
-      <div class="stat-grid" id="c_ft"></div>
-      <div class="panel"><b>Courses ki Output Report Summary</b><div class="stat-grid mt-2 mb-0" id="c_ex"></div></div>
-      <div class="panel"><b>Pending &amp; Complete Status (Region, State, Division, District)</b><div class="stat-grid mt-2 mb-0" id="c_cv"></div></div>
+      <div class="crs-eq" id="c_st"></div>
+      <div class="crs-eq" id="c_ft"></div>
+      <div class="panel"><b>Courses ki Output Report Summary</b><div class="crs-eq mt-2" style="margin-bottom:0" id="c_ex"></div></div>
+      <div class="panel"><b>Pending &amp; Complete Status (Region, State, Division, District)</b><div class="crs-eq mt-2" style="margin-bottom:0" id="c_cv"></div></div>
       <div class="crs-charts"><div class="panel"><canvas id="c_c1"></canvas></div><div class="panel"><canvas id="c_c2"></canvas></div></div>
     </div>
     <div class="panel">
@@ -637,6 +644,16 @@
       updateBadge('ctrlCrsApprovalState', ctrls.crsApprovalState);
       updateBadge('ctrlCrsApprovalDivision', ctrls.crsApprovalDiv);
       updateBadge('ctrlCrsApprovalQuick', ctrls.crsApprovalQuick);
+      updateBadge('ctrlCrsExportCountry', ctrls.crsExportCountry);
+      updateBadge('ctrlCrsExportRegion', ctrls.crsExportRegion);
+      updateBadge('ctrlCrsExportState', ctrls.crsExportState);
+      updateBadge('ctrlCrsExportDivision', ctrls.crsExportDivision);
+      updateBadge('ctrlCrsExportQuick', ctrls.crsExportQuick);
+      updateBadge('ctrlExportCountry', ctrls.exportCountry);
+      updateBadge('ctrlExportRegion', ctrls.exportRegion);
+      updateBadge('ctrlExportState', ctrls.exportState);
+      updateBadge('ctrlExportDivision', ctrls.exportDivision);
+      updateBadge('ctrlExportQuick', ctrls.exportQuick);
       if (currentUser) {
          if(!currentUser.controls) currentUser.controls = {};
          currentUser.controls = ctrls;
@@ -669,7 +686,7 @@
     ['EditRemoveRegion', 'Region'], ['EditRemoveState', 'State'], ['EditRemoveDivision', 'Division'], ['EditRemoveQuick', 'Quick Link'],
     ['RegionLinkAccess', 'Region'], ['StateLinkAccess', 'State'],
     ['RegionDistrictAccess', 'Region'], ['StateDistrictAccess', 'State'],
-    ['ApprovalRegion', 'Region'], ['ApprovalState', 'State'], ['ApprovalDivision', 'Division'], ['ApprovalQuick', 'Quick Link'], ['CrsFormAccessRegion', 'Region'], ['CrsFormAccessState', 'State'], ['CrsFormAccessDivision', 'Division'], ['CrsFormAccessQuickEntry', 'Quick Link'], ['CrsEditRemoveRegion', 'Region'], ['CrsEditRemoveState', 'State'], ['CrsEditRemoveDivision', 'Division'], ['CrsEditRemoveQuick', 'Quick Link'], ['CrsRegionLinkAccess', 'Region'], ['CrsStateLinkAccess', 'State'], ['CrsRegionDistrictAccess', 'Region'], ['CrsStateDistrictAccess', 'State'], ['CrsApprovalRegion', 'Region'], ['CrsApprovalState', 'State'], ['CrsApprovalDivision', 'Division'], ['CrsApprovalQuick', 'Quick Link']
+    ['ApprovalRegion', 'Region'], ['ApprovalState', 'State'], ['ApprovalDivision', 'Division'], ['ApprovalQuick', 'Quick Link'], ['CrsFormAccessRegion', 'Region'], ['CrsFormAccessState', 'State'], ['CrsFormAccessDivision', 'Division'], ['CrsFormAccessQuickEntry', 'Quick Link'], ['CrsEditRemoveRegion', 'Region'], ['CrsEditRemoveState', 'State'], ['CrsEditRemoveDivision', 'Division'], ['CrsEditRemoveQuick', 'Quick Link'], ['CrsRegionLinkAccess', 'Region'], ['CrsStateLinkAccess', 'State'], ['CrsRegionDistrictAccess', 'Region'], ['CrsStateDistrictAccess', 'State'], ['CrsApprovalRegion', 'Region'], ['CrsApprovalState', 'State'], ['CrsApprovalDivision', 'Division'], ['CrsApprovalQuick', 'Quick Link'], ['ExportRegion', 'Region'], ['CrsExportRegion', 'Region'], ['ExportState', 'State'], ['CrsExportState', 'State'], ['ExportDivision', 'Division'], ['CrsExportDivision', 'Division'], ['ExportQuick', 'Quick Link'], ['CrsExportQuick', 'Quick Link']
   ];
   let specificLists = {};
 
@@ -1288,6 +1305,9 @@
       else if (res.level === 'state' && ctrls && ctrls.editState === 'ON') { canModify = true; }
       else if (res.level === 'division' && ctrls && ctrls.editDiv === 'ON') { canModify = true; }
       else if (res.level === 'quick' && ctrls && ctrls.editQuick === 'ON') { canModify = true; }
+      // Excel / PDF / Image export: Admin ke control se (default ON)
+      const expBase = { country: 'Country', region: 'Region', state: 'State', division: 'Division', quick: 'Quick' }[res.level];
+      const canExport = (currentUser && currentUser.role === 'Admin') || !expBase || !ctrls || ctrls['export' + expBase] !== 'OFF';
 
       if ($.fn.DataTable.isDataTable('#dataTable')) $('#dataTable').DataTable().destroy();
 
@@ -1339,6 +1359,9 @@
           }
       }
 
+      // Jo location columns hide hain unke filters bhi hide (baaki locked rehte hain)
+      filterCols.forEach(function (f) { $('#' + f.id).closest('[class*="col-"]').toggle(hiddenColumns.indexOf(f.c) < 0); });
+
       table = $('#dataTable').DataTable({
         dom: '<"d-flex flex-wrap gap-2 align-items-center mb-3"lB>frtip',
         scrollY: '50vh',
@@ -1347,7 +1370,7 @@
         columnDefs: [
             { targets: hiddenColumns, visible: false }
         ],
-        buttons: [
+        buttons: !canExport ? [] : [
           // Explicitly defining export columns [0 to 11] so hidden location columns are STILL exported in Excel/PDF
           { extend: 'excelHtml5', text: 'Excel', className: 'dt-button btn-outline-success fw-bold', exportOptions: { columns: [0,1,2,3,4,5,6,7,8,9,10,11,12] }, title: null, filename: function () { return exportFileName(); } },
           {
@@ -1679,6 +1702,7 @@ window.Crs = (function () {
       google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn].apply(null, [window.getSessionToken()].concat(a));
     });
   };
+  const grid = function (el, html, n) { el.innerHTML = html; el.style.setProperty('--n', n); el.style.setProperty('--t', Math.min(n, 3)); el.style.setProperty('--m', Math.min(n, 2)); };
   const fill = function (s, vals, keep) { s.innerHTML = '<option value="">Select</option>' + vals.map(function (v) { return '<option>' + esc(v) + '</option>'; }).join(''); if (keep && vals.indexOf(keep) >= 0) s.value = keep; };
   const uniq = function (rows, k, f) { f = f || {}; return rows.filter(function (r) { return r[k] && Object.keys(f).every(function (p) { return !f[p] || r[p] === f[p]; }); }).map(function (r) { return r[k]; }).filter(function (v, i, a) { return a.indexOf(v) === i; }); };
 
@@ -1776,6 +1800,11 @@ window.Crs = (function () {
     const c = S.ctrl;
     return ({ region: c.crsEditReg, state: c.crsEditState, division: c.crsEditDiv, quick: c.crsEditQuick })[S.level] === 'ON';
   }
+  function canExport() {
+    if (isAdm()) return true;
+    const b = ({ country: 'Country', region: 'Region', state: 'State', division: 'Division', quick: 'Quick' })[S.level];
+    return !b || S.ctrl['crsExport' + b] !== 'OFF';
+  }
   const canReview = function (r) { return r.status === 'Pending' && S.level && N(r.approver) === N(S.level); };
 
   async function loadRows() {
@@ -1795,6 +1824,12 @@ window.Crs = (function () {
       fill(s, S.rows.map(function (r) { return r[f[0]]; }).filter(Boolean).filter(function (v, i, a) { return a.indexOf(v) === i; }).sort(), c);
       s.options[0].text = 'All';
     });
+    const hideN = isAdm() ? 0 : ({ state: 1, division: 2, quick: 3, district: 3, alaqa: 4 })[S.level] || 0;
+    LOC.forEach(function (k, i) {
+      const s = $c('f' + k[0].toUpperCase() + k.slice(1)), sv = !isAdm() && U()[k];
+      if (sv) { s.innerHTML = '<option value="' + esc(sv) + '">' + esc(sv) + '</option>'; s.value = sv; s.disabled = true; }
+      s.parentElement.style.display = i < hideN ? 'none' : '';
+    });
     const rows = curRows(), ok = rows.filter(function (r) { return r.status === 'Approved'; });
     const sh = function (r) { return (r.remark === 'Course' || r.remark === 'Course Shumar Nahi kiya gaya') ? (+r.shuraka || 0) : 0; };
     const cr = ok.filter(function (r) { return r.remark === 'Course'; });
@@ -1805,19 +1840,21 @@ window.Crs = (function () {
     const fa = ok.filter(isF), pa = ok.filter(function (r) { return !isF(r); });
     const shb = cr.filter(function (r) { return r.shobaName && !/madani course/i.test(r.shobaName); });
     const pm = cr.filter(function (r) { return !isF(r) && N(r.courseName).indexOf('muallim') >= 0; });
-    $c('st').innerHTML = box('Total Courses', cr.length) + box('Total Shuraka', sS(ok)) + box('Full Time', ft.length, sS(fa)) + box('Part Time', cr.length - ft.length, sS(pa)) + box('Shobajat', shb.length, sS(shb)) + box('PT Muallim', pm.length, sS(pm));
+    grid($c('st'), box('Total Courses', cr.length) + box('Total Shuraka', sS(ok)) + box('Full Time', ft.length, sS(fa)) + box('Part Time', cr.length - ft.length, sS(pa)) + box('Shobajat', shb.length, sS(shb)) + box('PT Muallim', pm.length, sS(pm)), 6);
     const FT = ['63 Day Madani Course', '12 Deeni Kaam Course', 'Islahe Amal Course', '7 Day Faizane Namaz Course', 'Muallim Madani Course', '1 Mah Madani Course (For Student)'];
     const z = function (s) { return N(s).replace(/[^a-z0-9]/g, ''); };
-    $c('ft').innerHTML = FT.map(function (n) { const a = ft.filter(function (r) { return z(r.courseName) === z(n); }); return box(n, a.length, sS(a)); }).join('');
+    grid($c('ft'), FT.map(function (n) { const a = ft.filter(function (r) { return z(r.courseName) === z(n); }); return box(n, a.length, sS(a)); }).join(''), 6);
     const EX = [['3 Din Qafila', 'qafila3'], ['Shuraka (3 Din)', 'shuraka2'], ['12 Din Qafila', 'qafila12'], ['Shuraka (12 Din)', 'shuraka3'], ['Nek Amal Taqseem', 'nekTaqseem'], ['Nek Amal Wasool', 'nekWasool'], ['Namaz ke Azkar', 'azkar'], ['12 Mah Qafila', 'mah12'], ['Jamiatul Madina', 'jamiatul'], ['Imamat Course', 'imamat'], ['Madrasatul Madina', 'madrasa'], ['Tanzeemi Zimmedari', 'zimmedari']];
-    $c('ex').innerHTML = EX.map(function (e) { return box(e[0], ok.reduce(function (a, r) { return a + (e[1] === 'zimmedari' ? (r[e[1]] ? (isNaN(+r[e[1]]) ? 1 : +r[e[1]]) : 0) : (+r[e[1]] || 0)); }, 0)); }).join('');
+    grid($c('ex'), EX.map(function (e) { return box(e[0], ok.reduce(function (a, r) { return a + (e[1] === 'zimmedari' ? (r[e[1]] ? (isNaN(+r[e[1]]) ? 1 : +r[e[1]]) : 0) : (+r[e[1]] || 0)); }, 0)); }).join(''), 6);
 
     const P = function (o, ks) { return ks.map(function (k) { return N(o[k]); }).join('|'); };
     const sel = {}; LOC.forEach(function (k) { sel[k] = $c('f' + k[0].toUpperCase() + k.slice(1)).value; });
     const stx = (S.struct || []).filter(function (r) { return LOC.every(function (k) { return !sel[k] || r[k] === sel[k]; }); });
     const done = {}; ok.forEach(function (r) { done[P(r, LOC)] = 1; });
     S.cvx = {};
-    $c('cv').innerHTML = LOC.map(function (n, i) {
+    const firstCard = isAdm() ? 0 : ({ state: 1, division: 2, quick: 2, district: 3, alaqa: 3 })[S.level] || 0;
+    grid($c('cv'), LOC.map(function (n, i) {
+      if (i < firstCard) return '';
       const ks = LOC.slice(0, i + 1), mp = {};
       stx.forEach(function (r) { const p = P(r, ks); (mp[p] = mp[p] || { l: r[ks[i]], f: ks.map(function (k) { return r[k]; }).join(' → '), d: [] }).d.push(P(r, LOC)); });
       const A = Object.keys(mp).map(function (k) { return mp[k]; });
@@ -1827,7 +1864,7 @@ window.Crs = (function () {
         return a.length ? '<details><summary style="color:' + col + '">' + t + ': ' + a.length + '</summary><div class="d-flex gap-1 my-1"><button type="button" class="crs-mini" onclick="Crs.expL(\'' + n + '_' + t + '\',\'p\')">PDF</button><button type="button" class="crs-mini" onclick="Crs.expL(\'' + n + '_' + t + '\',\'x\')">Excel</button></div><div class="lst">' + a.map(function (x) { return esc(x.l); }).sort().join('<br>') + '</div></details>' : '';
       };
       return '<div class="dash-card"><div class="dash-card-title">' + n[0].toUpperCase() + n.slice(1) + '</div><div class="dash-card-num" style="margin-bottom:6px">' + cp.length + '/' + A.length + '</div>' + li(pd, 'Pending', '#C0392B') + li(cp, 'Complete', '#1F4E99') + '</div>';
-    }).join('');
+    }).join(''), LOC.length - firstCard);
 
     const lv = S.level, ax = lv === 'division' ? ['district', 'courseName'] : lv === 'state' ? ['division', 'district'] : lv === 'region' ? ['state', 'division'] : ['region', 'state'];
     [['c1', ax[0]], ['c2', ax[1]]].forEach(function (p) {
@@ -1840,6 +1877,7 @@ window.Crs = (function () {
         options: { plugins: { title: { display: true, text: k + '-wise Data (Approved)' } }, scales: { y: { beginAtZero: true } } } });
     });
 
+    ['xl', 'pf', 'it', 'csv'].forEach(function (i) { $c(i).classList.toggle('d-none', !canExport()); });
     const pend = S.rows.filter(canReview).length;
     $c('apb').classList.toggle('d-none', !pend);
     if (pend) $c('apb').innerHTML = '&#9203; <b>' + pend + '</b> Courses entry aapke Approve/Reject ke intezar me hain (Status column dekhein).';
@@ -1956,7 +1994,7 @@ window.Crs = (function () {
       const dist = a || (L === 'country' && c.crsCountryDist === 'ON') || (L === 'region' && c.crsRegionDist === 'ON') || (L === 'state' && c.crsStateDist === 'ON');
       $c('lkP').classList.toggle('d-none', !canLink || L === 'quick');
       $c('l_district').parentElement.style.display = dist ? '' : 'none';
-    } catch (e) { $c('fload').style.color = '#C0392B'; $c('fload').textContent = 'Connection error: ' + (e && e.message ? e.message : e); }
+    } catch (e) { $c('fload').style.color = '#C0392B'; var em = (e && e.message ? e.message : String(e)); $c('fload').textContent = /permission/i.test(em) ? 'Firebase Rules me CourseData aur CourseMaster collection ka access nahi hai. Firestore > Rules me firestore.rules (naya) paste karke Publish karein.' : 'Connection error: ' + em; }
   }
   function refresh() { init().then(function () { if (!$c('p2').classList.contains('d-none')) loadRows(); }); }
   function reset() { S.rows = []; S.scoped = []; $c('lkR') && $c('lkR').classList.add('d-none'); }
@@ -2020,7 +2058,7 @@ function createServer(DB, env) {
     return (val || '').toString().trim().toLowerCase();
   }
 
-  const CRS_BASE = [["FormAccessCountry", "formCountry", "ON"], ["FormAccessRegion", "formRegion", "ON"], ["FormAccessState", "formState", "ON"], ["FormAccessDivision", "formDiv", "ON"], ["FormAccessQuickEntry", "formQuickEntry", "ON"], ["EditRemoveRegion", "editReg", "OFF"], ["EditRemoveState", "editState", "OFF"], ["EditRemoveDivision", "editDiv", "OFF"], ["EditRemoveQuick", "editQuick", "OFF"], ["CountryLinkAccess", "countryLink", "OFF"], ["RegionLinkAccess", "regionLink", "OFF"], ["StateLinkAccess", "stateLink", "OFF"], ["CountryDistrictAccess", "countryDist", "OFF"], ["RegionDistrictAccess", "regionDist", "OFF"], ["StateDistrictAccess", "stateDist", "OFF"], ["ApprovalRegion", "approvalReg", "OFF"], ["ApprovalState", "approvalState", "OFF"], ["ApprovalDivision", "approvalDiv", "OFF"], ["ApprovalQuick", "approvalQuick", "OFF"]];
+  const CRS_BASE = [["FormAccessCountry", "formCountry", "ON"], ["FormAccessRegion", "formRegion", "ON"], ["FormAccessState", "formState", "ON"], ["FormAccessDivision", "formDiv", "ON"], ["FormAccessQuickEntry", "formQuickEntry", "ON"], ["EditRemoveRegion", "editReg", "OFF"], ["EditRemoveState", "editState", "OFF"], ["EditRemoveDivision", "editDiv", "OFF"], ["EditRemoveQuick", "editQuick", "OFF"], ["CountryLinkAccess", "countryLink", "OFF"], ["RegionLinkAccess", "regionLink", "OFF"], ["StateLinkAccess", "stateLink", "OFF"], ["CountryDistrictAccess", "countryDist", "OFF"], ["RegionDistrictAccess", "regionDist", "OFF"], ["StateDistrictAccess", "stateDist", "OFF"], ["ApprovalRegion", "approvalReg", "OFF"], ["ApprovalState", "approvalState", "OFF"], ["ApprovalDivision", "approvalDiv", "OFF"], ["ApprovalQuick", "approvalQuick", "OFF"], ["ExportCountry", "exportCountry", "ON"], ["ExportRegion", "exportRegion", "ON"], ["ExportState", "exportState", "ON"], ["ExportDivision", "exportDivision", "ON"], ["ExportQuick", "exportQuick", "ON"]];
 
   /* ---------- Settings (Firestore: Settings collection) ---------- */
   let settingsCache = null, settingsAt = 0;
@@ -2069,7 +2107,7 @@ function createServer(DB, env) {
       regionDist: g('RegionDistrictAccess', 'OFF'),
       stateDist: g('StateDistrictAccess', 'OFF')
     };
-    CRS_BASE.forEach(function (b) { out['crs' + b[1].charAt(0).toUpperCase() + b[1].slice(1)] = g('Crs' + b[0], b[2]); });
+    CRS_BASE.forEach(function (b) { out['crs' + b[1].charAt(0).toUpperCase() + b[1].slice(1)] = g('Crs' + b[0], b[2]); if (/^Export/.test(b[0])) out[b[1]] = g(b[0], b[2]); });
     return out;
   }
 
@@ -2079,7 +2117,7 @@ function createServer(DB, env) {
       return { success: false, message: 'Unauthorized: Sirf Admin ise change kar sakta hai.' };
     }
     // Form Access ka default ON hai (getAdminControls jaisa), baaki sab ka OFF
-    const current = await getSetting(key, /^(Crs)?FormAccess/i.test(key) ? 'ON' : 'OFF');
+    const current = await getSetting(key, /^(Crs)?(FormAccess|Export)/i.test(key) ? 'ON' : 'OFF');
     const next = current === 'ON' ? 'OFF' : 'ON';
     await putSetting(key, next);
     return { success: true, value: next, key: key };
@@ -2102,7 +2140,11 @@ function createServer(DB, env) {
     { key: 'ApprovalRegion',       prop: 'approvalReg',    level: 'region' },
     { key: 'ApprovalState',        prop: 'approvalState',  level: 'state' },
     { key: 'ApprovalDivision',     prop: 'approvalDiv',    level: 'division' },
-    { key: 'ApprovalQuick',        prop: 'approvalQuick',  level: 'quick' }
+    { key: 'ApprovalQuick',        prop: 'approvalQuick',  level: 'quick' },
+    { key: 'ExportRegion',         prop: 'exportRegion',   level: 'region' },
+    { key: 'ExportState',          prop: 'exportState',    level: 'state' },
+    { key: 'ExportDivision',       prop: 'exportDivision', level: 'division' },
+    { key: 'ExportQuick',          prop: 'exportQuick',    level: 'quick' }
   ];
   const SPECIFIC_DEFS = SPECIFIC_DEFS_BASE.concat(SPECIFIC_DEFS_BASE.map(function (d) {
     return { key: 'Crs' + d.key, prop: 'crs' + d.prop.charAt(0).toUpperCase() + d.prop.slice(1), level: d.level };
