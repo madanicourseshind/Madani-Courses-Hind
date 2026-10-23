@@ -763,6 +763,23 @@
   });
 
 
+  // ===== Appointment dashboard: Pending / Complete naam ki list + PDF / Excel =====
+  function apptLists(i, p, d) {
+    const mk = function (a, t, col) {
+      window.__apptLists[i + '_' + t] = a.map(function (x) { return x.f; }).sort();
+      return a.length ? '<details class="mt-1"><summary style="color:' + col + '">' + t + ' list: ' + a.length + '</summary>' +
+        '<div class="d-flex gap-1 my-1"><button type="button" class="crs-mini" onclick="apptExpL(\'' + i + '_' + t + '\',\'p\')">PDF</button><button type="button" class="crs-mini" onclick="apptExpL(\'' + i + '_' + t + '\',\'x\')">Excel</button></div>' +
+        '<div class="lst">' + a.map(function (x) { return escHtml(x.l); }).sort().join('<br>') + '</div></details>' : '';
+    };
+    return mk(p, 'Pending', '#C0392B') + mk(d, 'Complete', '#1F4E99');
+  }
+  function apptExpL(k, t) {
+    const a = (window.__apptLists || {})[k] || [], p = k.split('_');
+    const nm = ['Regions', 'States', 'Divisions', 'Districts', 'Areas (Alaqa)'][+p[0]];
+    Crs.exportList([nm + ' ' + p[1] + ' List'], a.map(function (x) { return [x]; }), 'Appointment_' + k + '_' + Date.now(), t);
+  }
+
+
   // ===== Appointment / Courses / Settings tabs (ek hi page) =====
   function showMode(m) {
     $('#modeAppt').toggleClass('d-none', m !== 'appt');
@@ -1563,8 +1580,10 @@
     const startIdx = firstCardIdx();
 
     let html = '';
+    window.__apptLists = {};
 
     levels.forEach(function (lv, i) {
+      const pendList = [], doneList = [];
       if (i < startIdx) return;
       let count = 0;
       const appointed = new Set();
@@ -1576,7 +1595,7 @@
         if (r[lv.s]) total.add(pathOf(r, 1, lv.s));
       });
       let pending = 0;
-      total.forEach(function (k) { if (!appointed.has(k)) pending++; });
+      total.forEach(function (k) { if (!appointed.has(k)) pending++; const nm = k.split('\u0001'); (appointed.has(k) ? doneList : pendList).push({ l: nm[nm.length - 1], f: nm.join(' \u2192 ') }); });
 
       let percent = total.size > 0 ? (((total.size - pending) / total.size) * 100).toFixed(1) : 0;
 
@@ -1585,7 +1604,7 @@
               '<div class="dash-card-num">' + total.size + '</div>' +
               '<div class="dash-card-row"><span>Appointed:</span> <span class="text-success-custom">' + (total.size - pending) + ' (' + percent + '%)</span></div>' +
               '<div class="dash-card-row"><span>Pending:</span> <span class="text-danger-custom">' + pending + '</span></div>' +
-              '</div>';
+              apptLists(i, pendList, doneList) + '</div>';
     });
 
     $('#statGrid').html(html);
@@ -1999,7 +2018,9 @@ window.Crs = (function () {
   function refresh() { init().then(function () { if (!$c('p2').classList.contains('d-none')) loadRows(); }); }
   function reset() { S.rows = []; S.scoped = []; $c('lkR') && $c('lkR').classList.add('d-none'); }
 
-  return { init: init, refresh: refresh, reset: reset, review: review, delR: delR, editR: editR, expL: expL };
+  function exportList(h, rs, n, t) { t === 'p' ? pdf(h, rs, n, h[0]) : xls(h, rs, n); }
+
+  return { exportList: exportList, init: init, refresh: refresh, reset: reset, review: review, delR: delR, editR: editR, expL: expL };
 })();
 
 </script>
@@ -3267,7 +3288,7 @@ function createServer(DB, env) {
   /* ---------- Purani Courses data import (Courses dashboard ka export: header ke saath) ---------- */
   const CRS_HDR = {
     timestamp: 'ts', year: 'year', month: 'month', region: 'region', state: 'state', division: 'division', district: 'district',
-    coursetype: 'courseType', coursename: 'courseName', remark: 'remark', coursestartdate: 'startDate', startdate: 'startDate', courseenddate: 'endDate', enddate: 'endDate',
+    coursetype: 'courseType', coursestype: 'courseType', coursename: 'courseName', coursesname: 'courseName', remark: 'remark', coursestartdate: 'startDate', startdate: 'startDate', courseenddate: 'endDate', enddate: 'endDate',
     muallimnaam: 'muallimName', coursekaaddress: 'courseKaAddress', shuraka: 'shuraka', '3dinqafila': 'qafila3', shuraka3din: 'shuraka2',
     '12dinqafila': 'qafila12', shuraka12din: 'shuraka3', '12mahqafila': 'mah12', nekamaltaqseem: 'nekTaqseem', nekamalwasool: 'nekWasool',
     namazkeazkar: 'azkar', jamiatulmadina: 'jamiatul', imamatcourse: 'imamat', madrasatulmadina: 'madrasa', tanzeemizimmedari: 'zimmedari',
@@ -3281,23 +3302,23 @@ function createServer(DB, env) {
     const cols = rows[0].map(function (h) { return CRS_HDR[normalize(h).replace(/[^a-z0-9]/g, '')] || ''; });
     if (cols.indexOf('region') < 0 || cols.indexOf('courseType') < 0) return crsFail('Header me kam se kam Region aur Course Type columns chahiye (Courses dashboard ke Excel/CSV jaisa).');
     const taq = await getTaqarrurRows();
+    // Duplicate check: sirf pehle se maujood rows se (poori row ke fields milne par). File ki apni rows kabhi skip nahi hoti.
+    const dkey = function (d) { return CRS_LOC.concat(['year', 'month'], CRS_SEL, CRS_TXT, CRS_NUM, ['remark']).map(function (k) { return normalize(d[k]); }).join('|'); };
     const exist = {};
-    (await DB.listDocs('CourseData')).forEach(function (d) { exist[[d.data.ts, d.data.district, d.data.courseType, d.data.courseName].map(normalize).join('|')] = true; });
+    (await DB.listDocs('CourseData')).forEach(function (d) { exist[dkey(d.data)] = true; });
     const base = env.now().getTime(), items = [], seenMaster = { types: {}, shobas: [], mus: [] };
     let dup = 0, bad = 0, noLoc = 0;
     rows.slice(1).forEach(function (r, i) {
       const d = {};
       cols.forEach(function (k, c) { if (k) d[k] = (r[c] || '').toString().trim(); });
       if (!d.region || !d.courseType) { bad++; return; }
-      const key = [d.ts, d.district, d.courseType, d.courseName].map(normalize).join('|');
-      if (exist[key]) { dup++; return; }
-      exist[key] = true;
+      if (!d.remark) d.remark = crsRemark(d.courseType, d.courseName, d.shuraka);
+      if (exist[dkey(d)]) { dup++; return; }
       const loc = taq.find(function (t) {
         return normalize(t[1]) === normalize(d.region) && normalize(t[2]) === normalize(d.state) && normalize(t[3]) === normalize(d.division) && normalize(t[4]) === normalize(d.district);
       });
       if (!loc) noLoc++;
       d.country = loc ? loc[0] : '';
-      if (!d.remark) d.remark = crsRemark(d.courseType, d.courseName, d.shuraka);
       d.status = d.status || 'Approved';
       d.submittedBy = d.submittedBy || 'Import';
       const doc = crsToDoc(d);
@@ -3323,6 +3344,21 @@ function createServer(DB, env) {
     return { success: true, count: items.length, message: items.length + ' Courses rows import ho gayi (Courses Dashboard me dikhengi).' +
       (dup ? ' ' + dup + ' pehle se thi (skip).' : '') + (bad ? ' ' + bad + ' rows me Region/Course Type nahi (skip).' : '') +
       (noLoc ? ' ' + noLoc + ' rows ki location Taqarrur me nahi mili (import hui, par Pending/Complete count me nahi aayengi).' : '') };
+  }
+
+  // Import wale data ko mukammal delete karne ke liye (sirf Admin)
+  async function clearData(token, what) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin kar sakta hai.');
+    const cfg = {
+      taq: ['Taqarrur', 'Taqarrur rows'], users: ['User', 'users (admin rahega)'], appt: ['Data', 'Appointment Data rows'],
+      crs: ['CourseData', 'Courses Data rows'], crsmaster: ['CourseMaster', 'Courses dropdown options']
+    }[what];
+    if (!cfg) return crsFail('Galat option.');
+    let ids = (await DB.listDocs(cfg[0])).map(function (d) { return d.id; });
+    if (what === 'users') ids = ids.filter(function (id) { return id !== userDocId('admin'); });
+    if (ids.length) await DB.batchDelete(cfg[0], ids);
+    if (what === 'taq') taqCache = null;
+    return { success: true, count: ids.length, message: ids.length + ' ' + cfg[1] + ' delete ho gaye.' };
   }
 
   // Galti se Appointment "Data" me chali gayi rows hatane ke liye (sirf Admin)
@@ -3373,7 +3409,7 @@ function createServer(DB, env) {
     getDropdownData, saveData, deleteRecord, reviewRecord,
     getDashboardData, generateEntryLink, resolveEntryLink,
     isFirstRun, importTaqarrur, importUsers, importData,
-    getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, generateCourseLink, importCourseData, clearAppointmentData,
+    getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, generateCourseLink, importCourseData, clearAppointmentData, clearData,
     listUsers, saveUser, deleteUser,
     // testing / internal
     _internal: { getSetting, putSetting, normalize, parseDelimited, parseTaqarrurValues, fmtTs, sessions, getTaqarrurRows, resolveScope }
