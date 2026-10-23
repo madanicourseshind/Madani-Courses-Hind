@@ -2010,6 +2010,7 @@ window.Crs = (function () {
     var cfg = {
       taq:   { box: '#impTaq',   fn: 'importTaqarrur', ask: 'Purana Taqarrur data replace ho jayega. Aage badhein?' },
       users: { box: '#impUsers', fn: 'importUsers',    ask: '' },
+      crsdata: { box: '#impCrs', fn: 'importCourseData', ask: 'Ye Courses rows CourseData me jud jayengi (pehle se maujood rows skip hongi). Aage badhein?' },
       data:  { box: '#impData',  fn: 'importData',     ask: 'Ye rows Data me jud jayengi (dobara import karne par duplicate banenge). Aage badhein?' }
     }[kind];
     var text = $(cfg.box).val();
@@ -2019,7 +2020,7 @@ window.Crs = (function () {
     google.script.run.withSuccessHandler(function (res) {
       $('#impMsg').css('color', res.success ? '#146C43' : '#C0392B').text(res.message);
       if (res.success) $(cfg.box).val('');
-      if (res.success && kind === 'taq') { initDropdowns(); if (window.Crs) Crs.refresh(); }
+      if (res.success && (kind === 'taq' || kind === 'crsdata')) { initDropdowns(); if (window.Crs) Crs.refresh(); }
     }).withFailureHandler(function (err) {
       $('#impMsg').css('color', '#C0392B').text('Error: ' + (err && err.message ? err.message : err));
     })[cfg.fn](sessionToken, text);
@@ -3262,6 +3263,76 @@ function createServer(DB, env) {
     return { success: true, url: env.baseUrl() + '?link=' + id, location: payload };
   }
 
+
+  /* ---------- Purani Courses data import (Courses dashboard ka export: header ke saath) ---------- */
+  const CRS_HDR = {
+    timestamp: 'ts', year: 'year', month: 'month', region: 'region', state: 'state', division: 'division', district: 'district',
+    coursetype: 'courseType', coursename: 'courseName', remark: 'remark', coursestartdate: 'startDate', startdate: 'startDate', courseenddate: 'endDate', enddate: 'endDate',
+    muallimnaam: 'muallimName', coursekaaddress: 'courseKaAddress', shuraka: 'shuraka', '3dinqafila': 'qafila3', shuraka3din: 'shuraka2',
+    '12dinqafila': 'qafila12', shuraka12din: 'shuraka3', '12mahqafila': 'mah12', nekamaltaqseem: 'nekTaqseem', nekamalwasool: 'nekWasool',
+    namazkeazkar: 'azkar', jamiatulmadina: 'jamiatul', imamatcourse: 'imamat', madrasatulmadina: 'madrasa', tanzeemizimmedari: 'zimmedari',
+    aamdan: 'aamdan', kharch: 'kharch', shobajatcourses: 'shobaName', muallimzimmedari: 'muallimZimmedari', status: 'status', submittedby: 'submittedBy'
+  };
+
+  async function importCourseData(token, text) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin import kar sakta hai.');
+    const rows = parseDelimited(text);
+    if (rows.length < 2) return crsFail('Header (Timestamp, Year, Month, Region, State, ...) + data paste karein.');
+    const cols = rows[0].map(function (h) { return CRS_HDR[normalize(h).replace(/[^a-z0-9]/g, '')] || ''; });
+    if (cols.indexOf('region') < 0 || cols.indexOf('courseType') < 0) return crsFail('Header me kam se kam Region aur Course Type columns chahiye (Courses dashboard ke Excel/CSV jaisa).');
+    const taq = await getTaqarrurRows();
+    const exist = {};
+    (await DB.listDocs('CourseData')).forEach(function (d) { exist[[d.data.ts, d.data.district, d.data.courseType, d.data.courseName].map(normalize).join('|')] = true; });
+    const base = env.now().getTime(), items = [], seenMaster = { types: {}, shobas: [], mus: [] };
+    let dup = 0, bad = 0, noLoc = 0;
+    rows.slice(1).forEach(function (r, i) {
+      const d = {};
+      cols.forEach(function (k, c) { if (k) d[k] = (r[c] || '').toString().trim(); });
+      if (!d.region || !d.courseType) { bad++; return; }
+      const key = [d.ts, d.district, d.courseType, d.courseName].map(normalize).join('|');
+      if (exist[key]) { dup++; return; }
+      exist[key] = true;
+      const loc = taq.find(function (t) {
+        return normalize(t[1]) === normalize(d.region) && normalize(t[2]) === normalize(d.state) && normalize(t[3]) === normalize(d.division) && normalize(t[4]) === normalize(d.district);
+      });
+      if (!loc) noLoc++;
+      d.country = loc ? loc[0] : '';
+      if (!d.remark) d.remark = crsRemark(d.courseType, d.courseName, d.shuraka);
+      d.status = d.status || 'Approved';
+      d.submittedBy = d.submittedBy || 'Import';
+      const doc = crsToDoc(d);
+      doc.ts = d.ts || fmtTs(new Date(base + i)); doc.seq = base + i;
+      items.push({ id: newId() + i, data: doc });
+      if (d.courseType && normalize(d.courseType) !== normalize(CRS_NOC)) {
+        (seenMaster.types[d.courseType] = seenMaster.types[d.courseType] || []).push(d.courseName);
+      }
+      if (d.shobaName) seenMaster.shobas.push(d.shobaName);
+      if (d.muallimZimmedari) seenMaster.mus.push(d.muallimZimmedari);
+    });
+    if (!items.length) return crsFail('Koi nayi valid row nahi mili' + (dup ? ' (' + dup + ' pehle se maujood)' : '') + (bad ? ' (' + bad + ' rows me Region/Course Type nahi)' : '') + '.');
+    await DB.batchSet('CourseData', items);
+    // dropdown options me bhi jod do
+    const cur = (await DB.getDoc('CourseMaster', 'main')) || {};
+    const types = (cur.courseTypes || []).map(function (t) { return { type: t.type, names: (t.names || []).slice() }; });
+    Object.keys(seenMaster.types).forEach(function (t) {
+      let e = types.find(function (x) { return normalize(x.type) === normalize(t); });
+      if (!e) { e = { type: t, names: [] }; types.push(e); }
+      e.names = cleanList(e.names.concat(seenMaster.types[t].filter(function (n) { return n && normalize(n) !== 'none'; })));
+    });
+    await DB.setDoc('CourseMaster', 'main', { courseTypes: types, shobas: cleanList((cur.shobas || []).concat(seenMaster.shobas)), muallims: cleanList((cur.muallims || []).concat(seenMaster.mus)) });
+    return { success: true, count: items.length, message: items.length + ' Courses rows import ho gayi (Courses Dashboard me dikhengi).' +
+      (dup ? ' ' + dup + ' pehle se thi (skip).' : '') + (bad ? ' ' + bad + ' rows me Region/Course Type nahi (skip).' : '') +
+      (noLoc ? ' ' + noLoc + ' rows ki location Taqarrur me nahi mili (import hui, par Pending/Complete count me nahi aayengi).' : '') };
+  }
+
+  // Galti se Appointment "Data" me chali gayi rows hatane ke liye (sirf Admin)
+  async function clearAppointmentData(token) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin kar sakta hai.');
+    const ids = (await DB.listDocs('Data')).map(function (d) { return d.id; });
+    if (ids.length) await DB.batchDelete('Data', ids);
+    return { success: true, message: ids.length + ' Appointment Data rows delete ho gayi.' };
+  }
+
   /* ---------- Users (Appointment + Courses dono ke liye ek hi User collection) ---------- */
   async function listUsers(token) {
     if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin dekh sakta hai.');
@@ -3302,7 +3373,7 @@ function createServer(DB, env) {
     getDropdownData, saveData, deleteRecord, reviewRecord,
     getDashboardData, generateEntryLink, resolveEntryLink,
     isFirstRun, importTaqarrur, importUsers, importData,
-    getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, generateCourseLink,
+    getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, generateCourseLink, importCourseData, clearAppointmentData,
     listUsers, saveUser, deleteUser,
     // testing / internal
     _internal: { getSetting, putSetting, normalize, parseDelimited, parseTaqarrurValues, fmtTs, sessions, getTaqarrurRows, resolveScope }
