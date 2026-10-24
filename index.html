@@ -359,7 +359,7 @@
       <div class="crs-charts"><div class="panel"><canvas id="c_c1"></canvas></div><div class="panel"><canvas id="c_c2"></canvas></div></div>
     </div>
     <div class="panel">
-      <div class="d-flex justify-content-between align-items-center mb-2"><h2 class="mb-0" style="color:var(--teal-700);">Courses Data Dashboard</h2><button type="button" class="btn btn-sm" style="background:var(--teal-700);color:#fff;" id="c_rd">&#8635; Refresh Data</button></div>
+      <div class="d-flex justify-content-between align-items-center mb-2"><h2 class="mb-0" style="color:var(--teal-700);">Courses Data Dashboard</h2><span class="d-flex gap-2"><button type="button" class="btn btn-sm btn-danger d-none" id="c_delSel">&#128465; Delete Selected (0)</button><button type="button" class="btn btn-sm" style="background:var(--teal-700);color:#fff;" id="c_rd">&#8635; Refresh Data</button></span></div>
       <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
         <span>Show</span><select id="c_ps" class="form-select form-select-sm" style="width:auto"><option>10</option><option>25</option><option selected>50</option><option>100</option></select><span>entries</span>
         <button type="button" class="btn btn-secondary btn-sm" id="c_xl">Excel</button>
@@ -1711,7 +1711,7 @@ window.Crs = (function () {
   const FLT = [['region', 'fRegion'], ['state', 'fState'], ['division', 'fDivision'], ['district', 'fDistrict'], ['courseType', 'fType'], ['courseName', 'fName'], ['shobaName', 'fShoba'], ['muallimZimmedari', 'fMuallim'], ['remark', 'fRemark'], ['year', 'fYear'], ['month', 'fMonth'], ['status', 'fStatus']];
   const FLT_LABEL = { fType: 'Course Type', fName: 'Course Name', fShoba: 'Shobajat Courses', fMuallim: 'Muallim Zimmedari', fRemark: 'Remark', fYear: 'Year', fMonth: 'Month', fStatus: 'Status' };
   const charts = {};
-  const S = { m: { courseTypes: [], shobas: [], muallims: [] }, yf: '', yt: '', scoped: [], rows: [], edit: null, ctrl: {}, level: '', built: false, tr: [], vis: [], pg: 1 };
+  const S = { m: { courseTypes: [], shobas: [], muallims: [] }, yf: '', yt: '', scoped: [], rows: [], edit: null, ctrl: {}, level: '', built: false, tr: [], vis: [], pg: 1, sel: {}, pageIds: [] };
 
   const U = function () { return (window.getCurrentUser && window.getCurrentUser()) || {}; };
   const isAdm = function () { return N(U().role) === 'admin'; };
@@ -1830,7 +1830,8 @@ window.Crs = (function () {
     $c('tb').innerHTML = '<tr><td>Loading...</td></tr>';
     const r = await call('getCourseDashboard');
     if (!r || !r.success) { $c('tb').innerHTML = '<tr><td>' + esc((r && r.message) || 'Data load nahi hua.') + '</td></tr>'; return; }
-    S.rows = r.rows; S.struct = r.structure; S.ctrl = r.controls || {}; S.level = r.level || '';
+    S.rows = r.rows; const live = {}; r.rows.forEach(function (x) { live[x.id] = 1; }); Object.keys(S.sel).forEach(function (k) { if (!live[k]) delete S.sel[k]; });
+    S.struct = r.structure; S.ctrl = r.controls || {}; S.level = r.level || '';
     const keep = {}; FLT.forEach(function (f) { const e = $c(f[1]); if (e) keep[f[1]] = e.value; });
     $c('fl').innerHTML = FLT.map(function (f) { return '<div><span class="field-label">' + (FLT_LABEL[f[1]] || f[0][0].toUpperCase() + f[0].slice(1)) + '</span><select class="form-select form-select-sm" id="c_' + f[1] + '"></select></div>'; }).join('');
     FLT.forEach(function (f) { $c(f[1]).onchange = renderDash; });
@@ -1901,7 +1902,7 @@ window.Crs = (function () {
     $c('apb').classList.toggle('d-none', !pend);
     if (pend) $c('apb').innerHTML = '&#9203; <b>' + pend + '</b> Courses entry aapke Approve/Reject ke intezar me hain (Status column dekhein).';
 
-    $c('th').innerHTML = '<tr>' + COLS.map(function (c) { return '<th>' + c[1] + '</th>'; }).join('') + '<th>Action</th></tr>';
+    $c('th').innerHTML = '<tr>' + (isAdm() ? '<th><input type="checkbox" id="c_selAll" onchange="Crs.selAll(this.checked)" title="Is page ki sab select"></th>' : '') + COLS.map(function (c) { return '<th>' + c[1] + '</th>'; }).join('') + '<th>Action</th></tr>';
     S.tr = rows; S.pg = 1; drawTable();
   }
 
@@ -1910,15 +1911,34 @@ window.Crs = (function () {
     const m = canMod(), q = N($c('sq').value), ps = +$c('ps').value;
     const all = S.tr.filter(function (r) { return !q || COLS.some(function (c) { return N(r[c[0]]).indexOf(q) >= 0; }); });
     const pages = Math.max(1, Math.ceil(all.length / ps)); S.pg = Math.min(S.pg, pages);
-    const a = (S.pg - 1) * ps, v = all.slice(a, a + ps); S.vis = all;
+    const a = (S.pg - 1) * ps, v = all.slice(a, a + ps); S.vis = all; S.pageIds = v.map(function (r) { return r.id; });
     $c('tb').innerHTML = v.map(function (r) {
       let act = '';
       if (canReview(r)) act += '<button type="button" class="btn btn-sm btn-success py-0" onclick="Crs.review(\'' + r.id + '\',\'approve\')">Approve</button> <button type="button" class="btn btn-sm btn-danger py-0" onclick="Crs.review(\'' + r.id + '\',\'reject\')">Reject</button> ';
       if (m) act += '<button type="button" class="btn btn-sm py-0" style="background:#C9A227" onclick="Crs.editR(\'' + r.id + '\')">Edit</button> <button type="button" class="btn btn-sm btn-danger py-0" onclick="Crs.delR(\'' + r.id + '\')">Rem</button>';
-      return '<tr>' + COLS.map(function (c) { return '<td>' + cell(r, c[0]) + '</td>'; }).join('') + '<td>' + (act || '-') + '</td></tr>';
+      return '<tr>' + (isAdm() ? '<td><input type="checkbox" class="c-sel" ' + (S.sel[r.id] ? 'checked ' : '') + 'onchange="Crs.sel(\'' + r.id + '\',this.checked)"></td>' : '') + COLS.map(function (c) { return '<td>' + cell(r, c[0]) + '</td>'; }).join('') + '<td>' + (act || '-') + '</td></tr>';
     }).join('') || '<tr><td>Koi data nahi.</td></tr>';
     $c('inf').textContent = 'Showing ' + (all.length ? a + 1 : 0) + ' to ' + (a + v.length) + ' of ' + all.length + ' entries' + (all.length < S.tr.length ? ' (filtered from ' + S.tr.length + ' total entries)' : '');
     $c('pn').textContent = S.pg + ' / ' + pages;
+    updSel();
+  }
+  function updSel() {
+    const n = Object.keys(S.sel).length;
+    $c('delSel').classList.toggle('d-none', !isAdm());
+    $c('delSel').textContent = '\u{1F5D1} Delete Selected (' + n + ')';
+    const all = $c('selAll'); if (all) all.checked = S.pageIds.length > 0 && S.pageIds.every(function (id) { return S.sel[id]; });
+  }
+  function sel(id, on) { if (on) S.sel[id] = 1; else delete S.sel[id]; updSel(); }
+  function selAll(on) {
+    S.pageIds.forEach(function (id) { if (on) S.sel[id] = 1; else delete S.sel[id]; });
+    $c('tb').querySelectorAll('.c-sel').forEach(function (c) { c.checked = on; });
+    updSel();
+  }
+  async function delSelected() {
+    const ids = Object.keys(S.sel);
+    if (!ids.length) return alert('Pehle table se entries select karein.');
+    if (!confirm(ids.length + ' selected Courses entries delete ho jayengi (wapas nahi aayengi). Aage badhein?')) return;
+    try { const r = await call('deleteCourses', ids); alert(r.message); if (r.success) { S.sel = {}; loadRows(); } } catch (e) { alert('Error: ' + e.message); }
   }
 
   async function review(id, dec) {
@@ -1964,6 +1984,7 @@ window.Crs = (function () {
     $c('pv').onclick = function () { if (S.pg > 1) { S.pg--; drawTable(); } };
     $c('nx').onclick = function () { S.pg++; drawTable(); };
     $c('rd').onclick = loadRows;
+    $c('delSel').onclick = delSelected;
     $c('csv').onclick = function () {
       const q = function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
       const t = [COLS.map(function (c) { return q(c[1]); }).join(',')].concat(curRows().map(function (r) { return COLS.map(function (c) { return q(r[c[0]]); }).join(','); })).join('\n');
@@ -2020,7 +2041,7 @@ window.Crs = (function () {
 
   function exportList(h, rs, n, t) { t === 'p' ? pdf(h, rs, n, h[0]) : xls(h, rs, n); }
 
-  return { exportList: exportList, init: init, refresh: refresh, reset: reset, review: review, delR: delR, editR: editR, expL: expL };
+  return { sel: sel, selAll: selAll, exportList: exportList, init: init, refresh: refresh, reset: reset, review: review, delR: delR, editR: editR, expL: expL };
 })();
 
 </script>
@@ -3183,6 +3204,16 @@ function createServer(DB, env) {
       const row = { country: loc[0], region: loc[1], state: loc[2], division: loc[3], district: loc[4] };
       if (!crsInScope(session, row)) return crsFail('Aap sirf apne scope ka data save kar sakte hain.');
 
+      // Jis district me us mahine "Koi Course Nahi Hua" ki entry ho chuki hai, wahan dobara entry nahi ho sakti
+      const dup = (await DB.listDocs('CourseData')).find(function (x) {
+        const o = x.data;
+        return x.id !== editId && (o.status || 'Approved') !== 'Rejected' && normalize(o.courseType) === normalize(CRS_NOC) &&
+          normalize(o.region) === normalize(row.region) && normalize(o.state) === normalize(row.state) &&
+          normalize(o.division) === normalize(row.division) && normalize(o.district) === normalize(row.district) &&
+          normalize(o.year) === normalize(val('year')) && normalize(o.month) === normalize(val('month'));
+      });
+      if (dup) return crsFail(row.district + ' district ki ' + val('month') + ' ' + val('year') + ' me "' + CRS_NOC + '" ki entry pehle hi ho chuki hai, isliye is district ki dobara entry nahi ho sakti. Pehle us entry ko dashboard se delete karein.');
+
       const doc = {};
       CRS_FIELDS.forEach(function (k) { doc[k] = nc && CRS_SEL.concat(CRS_TXT, CRS_NUM).indexOf(k) >= 0 && k !== 'courseType' && k !== 'courseName' ? '' : val(k); });
       Object.assign(doc, row);
@@ -3254,6 +3285,14 @@ function createServer(DB, env) {
     if (!crsInScope(session, r)) return crsFail('Aap sirf apne scope ka data delete kar sakte hain.');
     await DB.deleteDoc('CourseData', id);
     return { success: true, message: 'Data successfully remove/delete ho gaya hai.' };
+  }
+
+  async function deleteCourses(token, ids) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin ek sath delete kar sakta hai.');
+    ids = (Array.isArray(ids) ? ids : []).filter(function (x) { return typeof x === 'string' && x; }).slice(0, 1000);
+    if (!ids.length) return crsFail('Koi entry select nahi hui.');
+    await DB.batchDelete('CourseData', ids);
+    return { success: true, count: ids.length, message: ids.length + ' Courses entries delete ho gayi.' };
   }
 
   async function generateCourseLink(token, region, state, division, district) {
@@ -3409,7 +3448,7 @@ function createServer(DB, env) {
     getDropdownData, saveData, deleteRecord, reviewRecord,
     getDashboardData, generateEntryLink, resolveEntryLink,
     isFirstRun, importTaqarrur, importUsers, importData,
-    getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, generateCourseLink, importCourseData, clearAppointmentData, clearData,
+    getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, deleteCourses, generateCourseLink, importCourseData, clearAppointmentData, clearData,
     listUsers, saveUser, deleteUser,
     // testing / internal
     _internal: { getSetting, putSetting, normalize, parseDelimited, parseTaqarrurValues, fmtTs, sessions, getTaqarrurRows, resolveScope }
