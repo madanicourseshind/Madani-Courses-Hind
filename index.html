@@ -147,6 +147,92 @@
   @media(max-width:1100px){ .crs-eq{ grid-template-columns:repeat(var(--t,3),minmax(0,1fr)); } }
   @media(max-width:600px){ .crs-eq{ grid-template-columns:repeat(var(--m,2),minmax(0,1fr)); } }
   #c_ft .dash-card-title{ min-height:3.6em; }
+  /* ===================== NEW LOOK: Sidebar + professional colours ===================== */
+  :root{ --sb-w:268px; --nv9:#071733; --nv8:#0E2A63; --nv7:#16408F; --blue:#2563EB; --cyan:#06B6D4; --amber:#F59E0B; }
+  body{ background:linear-gradient(180deg,#EEF3FB 0%,#E4ECF8 100%) fixed; }
+  #loginSection{ background:radial-gradient(1200px 600px at 10% 0%,#2563EB 0%,transparent 55%),radial-gradient(900px 500px at 100% 100%,#06B6D4 0%,transparent 50%),linear-gradient(160deg,#071733,#0E2A63); }
+  .login-card{ border-radius:22px; box-shadow:0 30px 70px rgba(7,23,51,.5); }
+  .login-card h1{ background:linear-gradient(90deg,#0E2A63,#2563EB); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .btn-brand{ background:linear-gradient(135deg,#0E2A63,#2563EB); box-shadow:0 8px 20px rgba(37,99,235,.35); }
+  .btn-brand:hover{ background:linear-gradient(135deg,#0B2250,#1D4ED8); }
+
+  #appSection{ display:none; }
+  .app-shell{ display:flex; min-height:100vh; }
+  #modeBar{ width:var(--sb-w); flex:0 0 var(--sb-w); height:100vh; position:sticky; top:0; overflow-y:auto; z-index:1500; display:flex; flex-direction:column;
+    background:linear-gradient(185deg,#071733 0%,#0E2A63 52%,#16408F 100%); color:#fff; box-shadow:6px 0 28px rgba(7,23,51,.28); }
+  .sb-brand{ display:flex; align-items:center; gap:12px; padding:22px 20px 18px; border-bottom:1px solid rgba(255,255,255,.12); }
+  .sb-brand img{ width:46px; height:46px; border-radius:13px; box-shadow:0 6px 16px rgba(0,0,0,.35); }
+  .sb-brand b{ font-family:'Poppins',sans-serif; font-size:1.05rem; display:block; line-height:1.15; }
+  .sb-brand small{ display:block; opacity:.72; font-size:.72rem; margin-top:2px; }
+  .sb-nav{ padding:14px 12px; flex:1; }
+  .sb-label{ font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:#7F9AD6; padding:6px 14px 2px; }
+  .sb-main{ display:flex; align-items:center; gap:11px; width:100%; text-align:left; background:transparent; border:0; color:#CFE0FF; font:600 .95rem 'Poppins',sans-serif;
+    padding:12px 14px; border-radius:13px; margin-top:6px; transition:all .18s ease; }
+  .sb-main:hover{ background:rgba(255,255,255,.09); color:#fff; }
+  .sb-main.active{ background:linear-gradient(135deg,#2563EB,#06B6D4); color:#fff; box-shadow:0 10px 22px rgba(6,120,220,.4); }
+  .sb-ico{ font-size:1.15rem; width:26px; text-align:center; }
+  .sb-subs{ margin:4px 0 8px 22px; padding-left:12px; border-left:2px solid rgba(255,255,255,.16); }
+  .sb-sub{ display:block; width:100%; text-align:left; background:none; border:0; color:#AFC4EE; padding:8px 12px; border-radius:9px; font-size:.86rem; font-weight:500; transition:all .15s; }
+  .sb-sub:hover{ color:#fff; background:rgba(255,255,255,.08); }
+  .sb-sub.active{ color:#fff; background:rgba(255,255,255,.16); font-weight:600; box-shadow:inset 3px 0 0 #F59E0B; }
+  .sb-foot{ padding:14px 18px; font-size:.7rem; color:#7F9AD6; border-top:1px solid rgba(255,255,255,.1); }
+  #sbOverlay{ display:none; }
+  .main-col{ flex:1; min-width:0; display:flex; flex-direction:column; }
+
+  .app-header{ position:sticky; top:0; z-index:1200; background:rgba(255,255,255,.92); backdrop-filter:blur(10px); color:#071733; border-bottom:1px solid #D9E3F5;
+    box-shadow:0 4px 18px rgba(15,40,100,.07); padding:12px 28px; }
+  .page-title{ font:700 1.25rem 'Poppins',sans-serif; margin:0; color:#0B1F4B; }
+  .page-sub{ font-size:.76rem; color:#5B6B8C; }
+  #sbToggle{ display:none; border:0; background:#E6EEFB; color:#0E2A63; border-radius:10px; width:40px; height:40px; font-size:1.2rem; }
+  .app-header .user-chip{ background:#E6EEFB; color:#0E2A63; }
+  .app-header .btn-ghost-light{ border:1px solid #C7D6F2; color:#0E2A63; background:#fff; }
+  .app-header .btn-ghost-light:hover{ background:#E6EEFB; color:#0E2A63; }
+  .content-wrap{ max-width:none; margin:0; width:100%; min-width:0; padding:24px 28px 60px; }
+  #myTab, #cTabs, #setTabs{ display:none !important; }
+
+  .panel{ border:0; border-radius:16px; box-shadow:0 6px 26px rgba(15,40,100,.08); }
+  .panel h2{ font-family:'Poppins',sans-serif; color:#0B1F4B; }
+  .sec-title{ font:600 1rem 'Poppins',sans-serif; color:#0B1F4B; display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .sec-title::before{ content:''; width:5px; height:22px; border-radius:4px; background:linear-gradient(180deg,#2563EB,#06B6D4); }
+  .crs-h3{ background:linear-gradient(90deg,#0E2A63,#2563EB); border-radius:10px; }
+  .btn-save{ background:linear-gradient(135deg,#0E2A63,#2563EB) !important; color:#fff !important; border-radius:12px; box-shadow:0 8px 20px rgba(37,99,235,.3); }
+  .btn-save:hover{ background:linear-gradient(135deg,#0B2250,#1D4ED8) !important; }
+  #resetFiltersBtn{ background:linear-gradient(135deg,#0E2A63,#2563EB) !important; }
+  .add-row-btn{ border-color:#2563EB; color:#1D4ED8; background:#F2F7FF; }
+  .entry-block{ border-left:5px solid #2563EB; box-shadow:0 4px 16px rgba(15,40,100,.06); }
+  .form-control:focus,.form-select:focus{ border-color:#2563EB; box-shadow:0 0 0 3px rgba(37,99,235,.18); }
+  #editModeBanner,.crs-edit{ background:linear-gradient(90deg,#F59E0B,#FBBF24); color:#3B2A00; }
+
+  /* Stat cards: har card ka apna accha rang */
+  .stat-grid .dash-card, .crs-eq .dash-card{ --ac:#2563EB;
+    background:linear-gradient(150deg,#fff 0%,color-mix(in srgb,var(--ac) 13%,#fff) 100%) !important;
+    border:1px solid color-mix(in srgb,var(--ac) 26%,#fff) !important; border-left:5px solid var(--ac) !important;
+    border-radius:14px !important; box-shadow:0 5px 16px rgba(15,40,100,.07); transition:transform .15s ease, box-shadow .15s ease; }
+  .stat-grid .dash-card:hover, .crs-eq .dash-card:hover{ transform:translateY(-3px); box-shadow:0 12px 26px rgba(15,40,100,.13); }
+  .stat-grid .dash-card:nth-child(6n+2), .crs-eq .dash-card:nth-child(6n+2){ --ac:#0891B2; }
+  .stat-grid .dash-card:nth-child(6n+3), .crs-eq .dash-card:nth-child(6n+3){ --ac:#059669; }
+  .stat-grid .dash-card:nth-child(6n+4), .crs-eq .dash-card:nth-child(6n+4){ --ac:#D97706; }
+  .stat-grid .dash-card:nth-child(6n+5), .crs-eq .dash-card:nth-child(6n+5){ --ac:#7C3AED; }
+  .stat-grid .dash-card:nth-child(6n+6), .crs-eq .dash-card:nth-child(6n+6){ --ac:#DB2777; }
+  .dash-card-title{ color:var(--ac,#1F4E99) !important; letter-spacing:.02em; }
+  .dash-card-num{ color:#0B1F4B !important; }
+  .text-success-custom{ color:#047857 !important; }
+  table.dataTable thead th, .crs-table th{ background:linear-gradient(135deg,#0B1F4B,#16408F) !important; color:#fff !important; }
+  .table-scroll{ border-radius:14px; border-color:#D9E3F5; }
+  .crs-badge.Approved{ background:#D1FAE5; color:#065F46; }
+  .crs-badge.Pending{ background:#FEF3C7; color:#92400E; }
+  .crs-badge.Rejected{ background:#FEE2E2; color:#991B1B; }
+  .set-tabs button.active{ background:#2563EB; border-color:#2563EB; }
+
+  @media (max-width:992px){
+    #modeBar{ position:fixed; left:0; top:0; transform:translateX(-102%); transition:transform .25s ease; width:280px; }
+    body.sb-open #modeBar{ transform:none; }
+    body.sb-open #sbOverlay{ display:block; position:fixed; inset:0; background:rgba(7,23,51,.55); z-index:1400; }
+    #sbToggle{ display:inline-block; }
+    .app-header{ padding:10px 14px; }
+    .content-wrap{ padding:16px 12px 50px; }
+  }
+  .crs-charts .panel{ min-width:0; position:relative; } .crs-charts canvas{ max-width:100%; }
 
   @media (max-width:768px){
     .stat-grid{ grid-template-columns:repeat(2,1fr); }
@@ -177,8 +263,24 @@
 </div>
 
 <div id="appSection">
+<div class="app-shell">
+<aside id="modeBar">
+  <div class="sb-brand"><img src="icons/icon-192.png" alt=""><div><b>Madani Courses</b><small>Appointment &amp; Courses</small></div></div>
+  <nav class="sb-nav">
+    <div class="sb-label">Menu</div>
+    <button type="button" class="sb-main active" id="modeBtnAppt" onclick="showMode('appt')"><span class="sb-ico">&#128197;</span>Appointment Data</button>
+    <div class="sb-subs" id="sbAppt"><button type="button" class="sb-sub active" id="sb_appt_form">Data Entry Form</button><button type="button" class="sb-sub" id="sb_appt_dash">Data Dashboard</button></div>
+    <button type="button" class="sb-main" id="modeBtnCrs" onclick="showMode('crs')"><span class="sb-ico">&#127891;</span>Courses Data</button>
+    <div class="sb-subs d-none" id="sbCrs"><button type="button" class="sb-sub active" id="sb_crs_form">Courses Data Form</button><button type="button" class="sb-sub" id="sb_crs_dash">Courses Dashboard</button></div>
+    <button type="button" class="sb-main" id="modeBtnSet" onclick="showMode('set')" style="display:none"><span class="sb-ico">&#9881;</span>Settings &amp; Permissions</button>
+    <div class="sb-subs d-none" id="sbSet"><button type="button" class="sb-sub active" data-t="setApptCtl">Appointment Controls</button><button type="button" class="sb-sub" data-t="setCrsCtl">Courses Controls</button><button type="button" class="sb-sub" data-t="setUsers">Users</button><button type="button" class="sb-sub" data-t="setCrsOpt">Courses Dropdowns</button><button type="button" class="sb-sub" data-t="setImp">Data Import</button></div>
+  </nav>
+  <div class="sb-foot">Madani Courses &middot; Data Management</div>
+</aside>
+<div id="sbOverlay"></div>
+<div class="main-col">
   <div class="app-header">
-    <p class="brand">Madani Courses<small>Appointment &amp; Courses &mdash; Entry &amp; Dashboard</small></p>
+    <div class="d-flex align-items-center gap-3"><button type="button" id="sbToggle" aria-label="Menu">&#9776;</button><div><h1 class="page-title" id="pageTitle">Appointment Data</h1><div class="page-sub" id="pageSub">Data Entry Form</div></div></div>
     <div class="d-flex align-items-center flex-wrap gap-2">
       <span class="user-chip" id="clockApp"></span>
       <button type="button" class="btn btn-sm btn-ghost-light pwa-install d-none">&#128242; Install</button>
@@ -192,12 +294,6 @@
 
   <div class="content-wrap">
     <div id="quickEntryBanner" class="d-none alert alert-success" style="font-size:0.88rem; padding:12px 16px;"></div>
-    <div class="mode-bar" id="modeBar">
-      <button type="button" class="active" id="modeBtnAppt" onclick="showMode('appt')">&#128197; Appointment Data</button>
-      <button type="button" id="modeBtnCrs" onclick="showMode('crs')">&#127891; Courses Data</button>
-      <button type="button" id="modeBtnSet" onclick="showMode('set')" style="display:none">&#9881; Settings &amp; Permissions</button>
-    </div>
-
     <div id="modeAppt">
     <ul class="nav pill-tabs" id="myTab" role="tablist">
       <li class="nav-item">
@@ -362,10 +458,9 @@
         </div>
       </div>
       <div id="c_apb" class="alert alert-warning d-none" style="font-size:0.88rem;padding:10px 14px;"></div>
-      <div class="crs-eq" id="c_st"></div>
-      <div class="crs-eq" id="c_ft"></div>
-      <div class="panel"><b>Courses ki Output Report Summary</b><div class="crs-eq mt-2" style="margin-bottom:0" id="c_ex"></div></div>
-      <div class="panel"><b>Pending &amp; Complete Status (Region, State, Division, District)</b><div class="crs-eq mt-2" style="margin-bottom:0" id="c_cv"></div></div>
+      <div class="panel"><div class="sec-title">Courses / Shuraka Report</div><div class="crs-eq mt-2" id="c_st"></div><div class="crs-eq" style="margin-bottom:0" id="c_ft"></div></div>
+      <div class="panel"><div class="sec-title">Courses ki Output Report Summary</div><div class="crs-eq mt-2" style="margin-bottom:0" id="c_ex"></div></div>
+      <div class="panel"><div class="sec-title">Pending &amp; Complete Status (Region, State, Division, District)</div><div class="crs-eq mt-2" style="margin-bottom:0" id="c_cv"></div></div>
       <div class="crs-charts"><div class="panel"><canvas id="c_c1"></canvas></div><div class="panel"><canvas id="c_c2"></canvas></div></div>
     </div>
     <div class="panel">
@@ -383,6 +478,8 @@
   </section>
 </div>
   </div>
+</div>
+</div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -527,7 +624,7 @@
     
     applyRoleRestrictions();
     initDropdowns();
-    $('#modeBar').hide();
+    $('#modeBtnSet').hide(); (ENTRY_FORM === 'courses' ? $('#modeBtnAppt') : $('#modeBtnCrs')).hide();
     if (ENTRY_FORM === 'courses') { showMode('crs'); Crs.init(); } else { showMode('appt'); }
   }
 
@@ -803,7 +900,6 @@
   function setupModes(res) {
     const acc = res.access || { appointment: true, courses: true };
     const admin = res.role === 'Admin';
-    $('#modeBar').show();
     $('#modeBtnAppt').toggle(!!acc.appointment);
     $('#modeBtnCrs').toggle(!!acc.courses);
     $('#modeBtnSet').toggle(IS_ADMIN_PAGE && admin);
@@ -827,7 +923,7 @@
     if (sessionToken) google.script.run.logoutUser(sessionToken);
     sessionToken = null; currentUser = null;
     if (window.Crs) Crs.reset();
-    $('#modeBar').show(); showMode('appt');
+    showMode('appt');
     $('#appSection').hide(); $('#loginSection').css('display', 'flex');
     $('#adminModalBtn').addClass('d-none');
     $('#linkGenPanel').hide();
@@ -1902,8 +1998,8 @@ window.Crs = (function () {
       const g = function (l) { return ok.filter(function (r) { return (r[k] || 'Unknown') === l; }); };
       if (charts[id]) charts[id].destroy();
       charts[id] = new Chart($c(id), { type: 'bar', data: { labels: L, datasets: [
-        { label: 'Courses', backgroundColor: '#1F4E99', data: L.map(function (l) { return g(l).filter(function (r) { return r.remark === 'Course'; }).length; }) },
-        { label: 'Shuraka', backgroundColor: '#C9A227', data: L.map(function (l) { return sS(g(l)); }) }] },
+        { label: 'Courses', backgroundColor: '#2563EB', data: L.map(function (l) { return g(l).filter(function (r) { return r.remark === 'Course'; }).length; }) },
+        { label: 'Shuraka', backgroundColor: '#F59E0B', data: L.map(function (l) { return sS(g(l)); }) }] },
         options: { plugins: { title: { display: true, text: k + '-wise Data (Approved)' } }, scales: { y: { beginAtZero: true } } } });
     });
 
@@ -2019,6 +2115,7 @@ window.Crs = (function () {
   function tab(n) {
     $c('p1').classList.toggle('d-none', n !== 1); $c('p2').classList.toggle('d-none', n !== 2);
     $c('t1').classList.toggle('active', n === 1); $c('t2').classList.toggle('active', n === 2);
+    if (window.sbSyncCrs) window.sbSyncCrs(n);
     if (n === 2) loadRows();
   }
 
@@ -2051,7 +2148,46 @@ window.Crs = (function () {
 
   function exportList(h, rs, n, t) { t === 'p' ? pdf(h, rs, n, h[0]) : xls(h, rs, n); }
 
-  return { sel: sel, selAll: selAll, exportList: exportList, init: init, refresh: refresh, reset: reset, review: review, delR: delR, editR: editR, expL: expL };
+  return { tab: tab, sel: sel, selAll: selAll, exportList: exportList, init: init, refresh: refresh, reset: reset, review: review, delR: delR, editR: editR, expL: expL };
+})();
+
+/* ===== Sidebar navigation (purane upar wale tabs ki jagah) ===== */
+(function () {
+  var $ = window.jQuery;
+  var T = { appt_form: ['Appointment Data', 'Data Entry Form'], appt_dash: ['Appointment Data', 'Data Dashboard'], crs_form: ['Courses Data', 'Courses Data Form'], crs_dash: ['Courses Data', 'Courses Dashboard'], set: ['Settings & Permissions', ''] };
+  var cur = { appt: 'appt_form', crs: 'crs_form' };
+  var setNames = { setApptCtl: 'Appointment Controls', setCrsCtl: 'Courses Controls', setUsers: 'Users', setCrsOpt: 'Courses Dropdowns', setImp: 'Data Import' };
+  var mode = 'appt', setSub = 'setApptCtl';
+
+  function title() {
+    var k = mode === 'set' ? 'set' : cur[mode], t = T[k];
+    $('#pageTitle').text(t[0]); $('#pageSub').text(mode === 'set' ? setNames[setSub] : t[1]);
+  }
+  function mark(sel, id) { $(sel + ' .sb-sub').removeClass('active'); $('#' + id).addClass('active'); }
+  function closeNav() { document.body.classList.remove('sb-open'); }
+
+  var _showMode = window.showMode;
+  window.showMode = function (m) {
+    _showMode(m); mode = m;
+    $('#sbAppt').toggleClass('d-none', m !== 'appt'); $('#sbCrs').toggleClass('d-none', m !== 'crs'); $('#sbSet').toggleClass('d-none', m !== 'set');
+    title();
+  };
+  var _showSet = window.showSet;
+  if (_showSet) window.showSet = function (id) { _showSet(id); setSub = id; $('#sbSet .sb-sub').removeClass('active').filter('[data-t="' + id + '"]').addClass('active'); title(); };
+
+  window.sbSyncCrs = function (n) { cur.crs = n === 2 ? 'crs_dash' : 'crs_form'; mark('#sbCrs', 'sb_' + cur.crs); title(); };
+  $(document).on('shown.bs.tab', '#myTab button', function () {
+    cur.appt = this.id === 'formTabBtn' ? 'appt_form' : 'appt_dash'; mark('#sbAppt', 'sb_' + cur.appt); title();
+  });
+
+  $(document).on('click', '#sb_appt_form', function () { window.showMode('appt'); $('#formTabBtn').tab('show'); closeNav(); });
+  $(document).on('click', '#sb_appt_dash', function () { window.showMode('appt'); $('[data-bs-target="#dashboardSection"]').first().tab('show'); window.loadData(); closeNav(); });
+  $(document).on('click', '#sb_crs_form', function () { window.showMode('crs'); Crs.tab(1); closeNav(); });
+  $(document).on('click', '#sb_crs_dash', function () { window.showMode('crs'); Crs.tab(2); closeNav(); });
+  $(document).on('click', '#sbSet .sb-sub', function () { window.showMode('set'); window.showSet($(this).data('t')); closeNav(); });
+  $(document).on('click', '#modeBtnAppt,#modeBtnCrs,#modeBtnSet', function () { if (window.innerWidth > 992) return; });
+  $(document).on('click', '#sbToggle', function () { document.body.classList.toggle('sb-open'); });
+  $(document).on('click', '#sbOverlay', closeNav);
 })();
 
 </script>
