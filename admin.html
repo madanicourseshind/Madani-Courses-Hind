@@ -2,7 +2,7 @@
 <html>
 <head>
 <base target="_top">
-<title>Madani Courses - Appointment &amp; Courses Data</title>
+<title>Madani Courses - Admin Panel</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0A1F44">
@@ -244,7 +244,7 @@
 <div id="loginSection">
   <div class="login-card">
     <h1>Madani Courses</h1>
-    <p class="tagline" style="margin-bottom:8px;">Appointment &amp; Courses Data Management</p>
+    <p class="tagline" style="margin-bottom:8px;">Admin Panel &mdash; Settings, Permissions &amp; Dashboards</p>
     <div id="clockLogin" style="font-size:0.82rem; color:var(--ink-600); margin-bottom:16px;"></div>
     <div id="linkStatusBanner" class="alert alert-warning d-none" style="font-size:0.85rem; padding:8px;"></div>
     <div class="mb-3 text-start">
@@ -265,7 +265,7 @@
 <div id="appSection">
 <div class="app-shell">
 <aside id="modeBar">
-  <div class="sb-brand"><img src="icons/icon-192.png" alt=""><div><b>Madani Courses</b><small>Appointment &amp; Courses</small></div></div>
+  <div class="sb-brand"><img src="icons/icon-192.png" alt=""><div><b>Madani Courses</b><small>Admin Panel</small></div></div>
   <nav class="sb-nav">
     <div class="sb-label">Menu</div>
     <button type="button" class="sb-main active" id="modeBtnAppt" onclick="showMode('appt')"><span class="sb-ico">&#128197;</span>Appointment Data</button>
@@ -477,6 +477,283 @@
     </div>
   </section>
 </div>
+
+    <div id="modeSettings" class="d-none">
+      <div class="set-tabs" id="setTabs">
+        <button type="button" class="active" data-t="setApptCtl" onclick="showSet('setApptCtl')">Appointment Controls</button>
+        <button type="button" data-t="setCrsCtl" onclick="showSet('setCrsCtl')">Courses Controls</button>
+        <button type="button" data-t="setUsers" onclick="showSet('setUsers')">Users</button>
+        <button type="button" data-t="setCrsOpt" onclick="showSet('setCrsOpt')">Courses Dropdowns</button>
+        <button type="button" data-t="setImp" onclick="showSet('setImp')">Data Import</button>
+      </div>
+      <div class="panel" id="setApptCtl"><h2>&#9881; Appointment &mdash; System Admin Control</h2>
+
+          <div class="alert alert-info py-2 px-3 mb-3" style="font-size:0.78rem;">
+            <b>Sirf in ko:</b> Region / State / Division / Quick Link ki har permission ke neeche ek box hai.
+            Usme naam likhkar (comma se alag) <b>Save</b> karein to permission <b>ON</b> hone par <b>sirf wahi naam</b> use kar payenge.
+            Box <b>khali</b> ho to permission pehle ki tarah sabhi ko milegi.
+          </div>
+          
+          <div class="mb-4 p-3 bg-light rounded" style="border:1px solid var(--line-200);">
+            <label class="field-label text-dark text-uppercase fs-6 mb-2 border-bottom pb-1">1. Data Entry Access System</label>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('FormAccessCountry', 'ctrlFormCountry')">
+              <span>Country Level Form Access:</span> <span id="ctrlFormCountry" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('FormAccessRegion', 'ctrlFormReg')">
+              <span>Region Level Form Access:</span> <span id="ctrlFormReg" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('FormAccessState', 'ctrlFormState')">
+              <span>State Level Form Access:</span> <span id="ctrlFormState" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('FormAccessDivision', 'ctrlFormDiv')">
+              <span>Division Level Form Access:</span> <span id="ctrlFormDiv" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2" onclick="toggleCtrl('FormAccessQuickEntry', 'ctrlFormQE')">
+              <span>Quick Entry Level Form Access:</span> <span id="ctrlFormQE" class="badge bg-secondary fs-6">...</span>
+            </button>
+          </div>
+
+          <div class="mb-4 p-3 bg-light rounded" style="border:1px solid var(--line-200);">
+            <label class="field-label text-dark text-uppercase fs-6 mb-2 border-bottom pb-1">2. Data Entry Edit/Remove Permission</label>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('EditRemoveRegion', 'ctrlEditReg')">
+              <span>Region Users Edit/Remove:</span> <span id="ctrlEditReg" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('EditRemoveState', 'ctrlEditState')">
+              <span>State Users Edit/Remove:</span> <span id="ctrlEditState" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('EditRemoveDivision', 'ctrlEditDiv')">
+              <span>Division Users Edit/Remove:</span> <span id="ctrlEditDiv" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2" onclick="toggleCtrl('EditRemoveQuick', 'ctrlEditQuick')">
+              <span>Quick Link Users Edit/Remove:</span> <span id="ctrlEditQuick" class="badge bg-secondary fs-6">...</span>
+            </button>
+          </div>
+
+          <div class="mb-4 p-3 bg-light rounded" style="border:1px solid var(--line-200);">
+            <label class="field-label text-dark text-uppercase fs-6 mb-2 border-bottom pb-1">3. Quick Link Generation Access</label>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CountryLinkAccess', 'ctrlCountryLink')">
+              <span>Country Quick Link Access:</span> <span id="ctrlCountryLink" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('RegionLinkAccess', 'ctrlRegLink')">
+              <span>Region Quick Link Access:</span> <span id="ctrlRegLink" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2" onclick="toggleCtrl('StateLinkAccess', 'ctrlStateLink')">
+              <span>State Quick Link Access:</span> <span id="ctrlStateLink" class="badge bg-secondary fs-6">...</span>
+            </button>
+          </div>
+
+          <div class="mb-4 p-3 bg-light rounded" style="border:1px solid var(--line-200);">
+            <label class="field-label text-dark text-uppercase fs-6 mb-2 border-bottom pb-1">4. District Field in Quick Link</label>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CountryDistrictAccess', 'ctrlCountryDist')">
+              <span>Country District Field:</span> <span id="ctrlCountryDist" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('RegionDistrictAccess', 'ctrlRegDist')">
+              <span>Region District Field:</span> <span id="ctrlRegDist" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2" onclick="toggleCtrl('StateDistrictAccess', 'ctrlStateDist')">
+              <span>State District Field:</span> <span id="ctrlStateDist" class="badge bg-secondary fs-6">...</span>
+            </button>
+          </div>
+
+          <div class="mb-2 p-3 bg-light rounded" style="border:1px solid var(--line-200);">
+            <label class="field-label text-dark text-uppercase fs-6 mb-2 border-bottom pb-1">5. Boss Approval Required</label>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('ApprovalRegion', 'ctrlApprReg')">
+              <span>Region Entry &rarr; Country Approval:</span> <span id="ctrlApprReg" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('ApprovalState', 'ctrlApprState')">
+              <span>State Entry &rarr; Region Approval:</span> <span id="ctrlApprState" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('ApprovalDivision', 'ctrlApprDiv')">
+              <span>Division Entry &rarr; State Approval:</span> <span id="ctrlApprDiv" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2" onclick="toggleCtrl('ApprovalQuick', 'ctrlApprQuick')">
+              <span>Quick Link Entry &rarr; State Approval:</span> <span id="ctrlApprQuick" class="badge bg-secondary fs-6">...</span>
+            </button>
+          </div>
+
+                    <div class="mb-4 p-3 bg-light rounded" style="border:1px solid var(--line-200);">
+            <label class="field-label text-dark text-uppercase fs-6 mb-2 border-bottom pb-1">6. Dashboard Data Export (Excel / PDF / Image)</label>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('ExportCountry', 'ctrlExportCountry')">
+              <span>Country Users Export:</span> <span id="ctrlExportCountry" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('ExportRegion', 'ctrlExportRegion')">
+              <span>Region Users Export:</span> <span id="ctrlExportRegion" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('ExportState', 'ctrlExportState')">
+              <span>State Users Export:</span> <span id="ctrlExportState" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('ExportDivision', 'ctrlExportDivision')">
+              <span>Division Users Export:</span> <span id="ctrlExportDivision" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('ExportQuick', 'ctrlExportQuick')">
+              <span>Quick Link Users Export:</span> <span id="ctrlExportQuick" class="badge bg-secondary fs-6">...</span>
+            </button>
+          </div>
+</div>
+      <div class="panel d-none" id="setCrsCtl"><h2>&#9881; Courses Data &mdash; System Admin Control</h2><div class="alert alert-info py-2 px-3 mb-3" style="font-size:0.78rem;">Ye <b>Courses Data Form</b> ki permissions hain (Appointment jaisi hi). <b>Sirf in ko</b> box me naam likhkar Save karein to ON permission sirf unhi ko milegi; khali ho to sabhi ko.</div>
+          <div class="mb-4 p-3 bg-light rounded" style="border:1px solid var(--line-200);">
+            <label class="field-label text-dark text-uppercase fs-6 mb-2 border-bottom pb-1">1. Courses Data Entry Access System</label>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsFormAccessCountry', 'ctrlCrsFormAccessCountry')">
+              <span>Country Level Form Access:</span> <span id="ctrlCrsFormAccessCountry" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsFormAccessRegion', 'ctrlCrsFormAccessRegion')">
+              <span>Region Level Form Access:</span> <span id="ctrlCrsFormAccessRegion" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsFormAccessState', 'ctrlCrsFormAccessState')">
+              <span>State Level Form Access:</span> <span id="ctrlCrsFormAccessState" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsFormAccessDivision', 'ctrlCrsFormAccessDivision')">
+              <span>Division Level Form Access:</span> <span id="ctrlCrsFormAccessDivision" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsFormAccessQuickEntry', 'ctrlCrsFormAccessQuickEntry')">
+              <span>Quick Entry Level Form Access:</span> <span id="ctrlCrsFormAccessQuickEntry" class="badge bg-secondary fs-6">...</span>
+            </button>
+          </div>
+          <div class="mb-4 p-3 bg-light rounded" style="border:1px solid var(--line-200);">
+            <label class="field-label text-dark text-uppercase fs-6 mb-2 border-bottom pb-1">2. Courses Data Entry Edit/Remove Permission</label>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsEditRemoveRegion', 'ctrlCrsEditRemoveRegion')">
+              <span>Region Users Edit/Remove:</span> <span id="ctrlCrsEditRemoveRegion" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsEditRemoveState', 'ctrlCrsEditRemoveState')">
+              <span>State Users Edit/Remove:</span> <span id="ctrlCrsEditRemoveState" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsEditRemoveDivision', 'ctrlCrsEditRemoveDivision')">
+              <span>Division Users Edit/Remove:</span> <span id="ctrlCrsEditRemoveDivision" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsEditRemoveQuick', 'ctrlCrsEditRemoveQuick')">
+              <span>Quick Link Users Edit/Remove:</span> <span id="ctrlCrsEditRemoveQuick" class="badge bg-secondary fs-6">...</span>
+            </button>
+          </div>
+          <div class="mb-4 p-3 bg-light rounded" style="border:1px solid var(--line-200);">
+            <label class="field-label text-dark text-uppercase fs-6 mb-2 border-bottom pb-1">3. Courses Quick Link Generation Access</label>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsCountryLinkAccess', 'ctrlCrsCountryLinkAccess')">
+              <span>Country Quick Link Access:</span> <span id="ctrlCrsCountryLinkAccess" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsRegionLinkAccess', 'ctrlCrsRegionLinkAccess')">
+              <span>Region Quick Link Access:</span> <span id="ctrlCrsRegionLinkAccess" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsStateLinkAccess', 'ctrlCrsStateLinkAccess')">
+              <span>State Quick Link Access:</span> <span id="ctrlCrsStateLinkAccess" class="badge bg-secondary fs-6">...</span>
+            </button>
+          </div>
+          <div class="mb-4 p-3 bg-light rounded" style="border:1px solid var(--line-200);">
+            <label class="field-label text-dark text-uppercase fs-6 mb-2 border-bottom pb-1">4. District Field in Courses Quick Link</label>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsCountryDistrictAccess', 'ctrlCrsCountryDistrictAccess')">
+              <span>Country District Field:</span> <span id="ctrlCrsCountryDistrictAccess" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsRegionDistrictAccess', 'ctrlCrsRegionDistrictAccess')">
+              <span>Region District Field:</span> <span id="ctrlCrsRegionDistrictAccess" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsStateDistrictAccess', 'ctrlCrsStateDistrictAccess')">
+              <span>State District Field:</span> <span id="ctrlCrsStateDistrictAccess" class="badge bg-secondary fs-6">...</span>
+            </button>
+          </div>
+          <div class="mb-4 p-3 bg-light rounded" style="border:1px solid var(--line-200);">
+            <label class="field-label text-dark text-uppercase fs-6 mb-2 border-bottom pb-1">5. Courses Boss Approval Required</label>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsApprovalRegion', 'ctrlCrsApprovalRegion')">
+              <span>Region Entry &rarr; Country Approval:</span> <span id="ctrlCrsApprovalRegion" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsApprovalState', 'ctrlCrsApprovalState')">
+              <span>State Entry &rarr; Region Approval:</span> <span id="ctrlCrsApprovalState" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsApprovalDivision', 'ctrlCrsApprovalDivision')">
+              <span>Division Entry &rarr; State Approval:</span> <span id="ctrlCrsApprovalDivision" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsApprovalQuick', 'ctrlCrsApprovalQuick')">
+              <span>Quick Link Entry &rarr; State Approval:</span> <span id="ctrlCrsApprovalQuick" class="badge bg-secondary fs-6">...</span>
+            </button>
+          </div>
+          <div class="mb-4 p-3 bg-light rounded" style="border:1px solid var(--line-200);">
+            <label class="field-label text-dark text-uppercase fs-6 mb-2 border-bottom pb-1">6. Dashboard Data Export (Excel / PDF / Image)</label>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsExportCountry', 'ctrlCrsExportCountry')">
+              <span>Country Users Export:</span> <span id="ctrlCrsExportCountry" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsExportRegion', 'ctrlCrsExportRegion')">
+              <span>Region Users Export:</span> <span id="ctrlCrsExportRegion" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsExportState', 'ctrlCrsExportState')">
+              <span>State Users Export:</span> <span id="ctrlCrsExportState" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsExportDivision', 'ctrlCrsExportDivision')">
+              <span>Division Users Export:</span> <span id="ctrlCrsExportDivision" class="badge bg-secondary fs-6">...</span>
+            </button>
+            <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center p-2 mb-2" onclick="toggleCtrl('CrsExportQuick', 'ctrlCrsExportQuick')">
+              <span>Quick Link Users Export:</span> <span id="ctrlCrsExportQuick" class="badge bg-secondary fs-6">...</span>
+            </button>
+          </div>
+</div>
+<div id="setUsers" class="d-none">
+  <div class="panel">
+    <h2>Users (Appointment &amp; Courses &mdash; dono ke liye ek hi User list)</h2>
+    <div class="d-flex gap-2 mb-2"><input id="usQ" class="form-control form-control-sm" placeholder="Search user" style="max-width:240px"><button type="button" class="btn btn-sm btn-secondary" onclick="Adm.loadUsers()">&#8635; Refresh</button><span id="usCnt" class="align-self-center" style="font-size:0.8rem"></span></div>
+    <div class="table-scroll" style="max-height:340px;overflow:auto"><table class="crs-table"><thead><tr><th>User ID</th><th>Status</th><th>Level</th><th></th></tr></thead><tbody id="usBody"></tbody></table></div>
+    <h2 class="mt-4">User add / update</h2>
+    <div class="crs-g" style="--c:4">
+      <div><span class="field-label">User ID (jaise "Bihar State")</span><input id="nuId" class="form-control"></div>
+      <div><span class="field-label">Password (update me khali = purana rahega)</span><input id="nuPw" class="form-control" autocomplete="new-password"></div>
+      <div><span class="field-label">Status</span><select id="nuSt" class="form-select"><option>Active</option><option>Inactive</option></select></div>
+      <div><span class="field-label">Level (optional)</span><select id="nuLv" class="form-select"><option value="">Auto</option><option>Country</option><option>Region</option><option>State</option><option>Division</option><option>District</option><option>Alaqa</option></select></div>
+    </div>
+    <button type="button" class="btn-save mt-3" style="width:auto;padding:9px 24px" onclick="Adm.saveUser()">Save User</button>
+    <div id="usMsg" class="mt-2" style="font-size:0.85rem"></div>
+  </div>
+</div>
+
+<div id="setCrsOpt" class="d-none">
+  <div class="panel">
+    <h2>Courses Dropdown Options</h2>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <span class="field-label">Course Type</span>
+        <div class="d-flex gap-2 mb-2"><select id="coType" class="form-select form-select-sm" onchange="Adm.drawOpt()"></select><button type="button" class="btn btn-sm btn-outline-danger" onclick="Adm.delType()">Type Remove</button></div>
+        <div class="d-flex gap-2 mb-2"><input id="coNewType" class="form-control form-control-sm" placeholder="Naya Course Type"><button type="button" class="btn btn-sm btn-secondary" onclick="Adm.addType()">+ Add</button></div>
+        <span class="field-label">Is Type ke Course Names</span>
+        <div class="d-flex gap-2 mb-2"><input id="coNewName" class="form-control form-control-sm" placeholder="Naya Course Name"><button type="button" class="btn btn-sm btn-secondary" onclick="Adm.addName()">+ Add</button></div>
+        <div class="opt-list" id="coNames"></div>
+      </div>
+      <div class="col-md-3">
+        <span class="field-label">Shobajat Courses</span>
+        <div class="d-flex gap-2 mb-2"><input id="coNewShoba" class="form-control form-control-sm"><button type="button" class="btn btn-sm btn-secondary" onclick="Adm.addList('shobas','coNewShoba')">+</button></div>
+        <div class="opt-list" id="coShobas"></div>
+      </div>
+      <div class="col-md-3">
+        <span class="field-label">Muallim Zimmedari</span>
+        <div class="d-flex gap-2 mb-2"><input id="coNewMu" class="form-control form-control-sm"><button type="button" class="btn btn-sm btn-secondary" onclick="Adm.addList('muallims','coNewMu')">+</button></div>
+        <div class="opt-list" id="coMus"></div>
+      </div>
+    </div>
+    <h2 class="mt-4">Year Dropdown Range</h2>
+    <div class="d-flex gap-2 flex-wrap"><input id="coYf" type="number" class="form-control form-control-sm" placeholder="From (jaise 2024)" style="width:170px"><input id="coYt" type="number" class="form-control form-control-sm" placeholder="To (jaise 2030)" style="width:170px"><button type="button" class="btn btn-sm btn-secondary" onclick="Adm.saveYears()">Save Years</button></div>
+    <h2 class="mt-4">Purani Courses sheet se Options Import</h2>
+    <p style="font-size:0.78rem" class="text-muted">Sheet ka header + data paste karein (columns: Courses Type, Course Name, Shobajat Courses, Muallim Zimmedari &mdash; Region/State wale columns ignore honge). Maujooda options me judd jayenge.</p>
+    <textarea id="coImp" class="form-control form-control-sm" rows="5"></textarea>
+    <button type="button" class="btn btn-sm btn-success mt-2" onclick="Adm.importMaster()">Import Options</button> <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="Adm.clearData('crsmaster')">&#128465; Saare Dropdown options delete</button>
+    <div id="coMsg" class="mt-2" style="font-size:0.85rem"></div>
+  </div>
+</div>
+
+      <div class="panel d-none" id="setImp"><h2>Firebase Data Setup (Import)</h2><div class="mb-2 mt-4 p-3 bg-light rounded" style="border:1px solid var(--line-200);">
+            <label class="field-label text-dark text-uppercase fs-6 mb-2 border-bottom pb-1">7. Firebase Data Setup (Import)</label>
+            <p style="font-size:0.75rem;" class="text-muted mb-2">Google Sheet ka data select karke copy karein aur yahan paste karein (Tab ya comma se alag, pehli row header). Taqarrur import karne par purana Taqarrur replace hota hai; Users aur Data me jud jata hai.</p>
+
+            <span class="field-label">Taqarrur &mdash; Country | Region | State | Division | District | Alaqa</span>
+            <textarea id="impTaq" class="form-control form-control-sm mb-1" rows="3" placeholder="Country&#9;Region&#9;State&#9;Division&#9;District&#9;Alaqa"></textarea>
+            <button type="button" class="btn btn-sm btn-success mb-3" onclick="runImport('taq')">Taqarrur Import</button> <button type="button" class="btn btn-sm btn-outline-danger" onclick="Adm.clearData('taq')">&#128465; Saara Taqarrur delete</button>
+
+            <span class="field-label d-block">Users &mdash; Login | Password | Status | Level</span>
+            <textarea id="impUsers" class="form-control form-control-sm mb-1" rows="3" placeholder="Bihar State&#9;pass123&#9;Active&#9;State"></textarea>
+            <button type="button" class="btn btn-sm btn-success mb-3" onclick="runImport('users')">Users Import</button> <button type="button" class="btn btn-sm btn-outline-danger" onclick="Adm.clearData('users')">&#128465; Saare Users delete (admin rahega)</button>
+
+            <span class="field-label d-block">Purana <u>APPOINTMENT</u> Data (optional) &mdash; Data sheet ke 16 columns (A&ndash;P). Courses ka data yahan na daalein!</span>
+            <textarea id="impData" class="form-control form-control-sm mb-1" rows="3"></textarea>
+            <button type="button" class="btn btn-sm btn-success" onclick="runImport('data')">Data Import</button> <button type="button" class="btn btn-sm btn-outline-danger" onclick="Adm.clearData('appt')">&#128465; Saara Appointment Data delete</button>
+            <div class="mt-3 p-2" style="background:#DCE6F7;border-radius:8px;"><span class="field-label d-block">Purana <u>COURSES</u> Data &mdash; Courses dashboard ke Excel/CSV ka header + rows paste karein (Timestamp, Year, Month, Region, State, Division, District, Course Type, ...)</span><textarea id="impCrs" class="form-control form-control-sm mb-1" rows="4"></textarea><button type="button" class="btn btn-sm btn-success" onclick="runImport('crsdata')">Courses Data Import</button> <button type="button" class="btn btn-sm btn-outline-danger" onclick="Adm.clearData('crs')">&#128465; Saara Courses Data delete</button></div>
+<div id="impMsg" class="mt-2" style="font-size:0.8rem;"></div>
+          </div>
+
+          
+</div>
+    </div>
   </div>
 </div>
 </div>
@@ -542,7 +819,7 @@
   let currentUser = null;
   let table;
   let ENTRY_FORM = 'appointment';
-  const IS_ADMIN_PAGE = false;
+  const IS_ADMIN_PAGE = true;
   window.getSessionToken = function () { return sessionToken; };
   window.getCurrentUser = function () { return currentUser; };
 
@@ -2188,6 +2465,97 @@ window.Crs = (function () {
   $(document).on('click', '#modeBtnAppt,#modeBtnCrs,#modeBtnSet', function () { if (window.innerWidth > 992) return; });
   $(document).on('click', '#sbToggle', function () { document.body.classList.toggle('sb-open'); });
   $(document).on('click', '#sbOverlay', closeNav);
+})();
+
+/* ===== Admin: Users + Courses dropdown options ===== */
+window.Adm = (function () {
+  const $a = function (i) { return document.getElementById(i); };
+  const esc = function (v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); };
+  const call = function (fn) {
+    const a = [].slice.call(arguments, 1);
+    return new Promise(function (res, rej) { google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn].apply(null, [window.getSessionToken()].concat(a)); });
+  };
+  let users = [], M = { courseTypes: [], shobas: [], muallims: [] };
+  const msg = function (id, ok, t) { const e = $a(id); e.style.color = ok ? '#146C43' : '#C0392B'; e.textContent = t; };
+
+  // ----- Users -----
+  async function loadUsers() {
+    try { const r = await call('listUsers'); if (!r.success) return msg('usMsg', false, r.message); users = r.users; drawUsers(); }
+    catch (e) { msg('usMsg', false, 'Error: ' + e.message); }
+  }
+  function drawUsers() {
+    const q = ($a('usQ').value || '').toLowerCase();
+    const list = users.filter(function (u) { return !q || u.login.toLowerCase().indexOf(q) >= 0; });
+    $a('usCnt').textContent = list.length + ' / ' + users.length + ' users';
+    $a('usBody').innerHTML = list.map(function (u, i) {
+      return '<tr><td>' + esc(u.login) + '</td><td>' + esc(u.status) + '</td><td>' + esc(u.level) + '</td><td style="white-space:nowrap"><button type="button" class="btn btn-sm py-0" style="background:#C9A227" onclick="Adm.editUser(' + users.indexOf(u) + ')">Edit</button> <button type="button" class="btn btn-sm btn-danger py-0" onclick="Adm.delUser(' + users.indexOf(u) + ')">Delete</button></td></tr>';
+    }).join('') || '<tr><td colspan="4">Koi user nahi.</td></tr>';
+  }
+  function editUser(i) {
+    const u = users[i]; $a('nuId').value = u.login; $a('nuPw').value = ''; $a('nuSt').value = u.status || 'Active';
+    const lv = (u.level || '').toLowerCase(); $a('nuLv').value = lv ? lv[0].toUpperCase() + lv.slice(1) : '';
+    $a('nuPw').focus();
+  }
+  async function delUser(i) {
+    const u = users[i]; if (!confirm(u.login + ' ko delete karein?')) return;
+    try { const r = await call('deleteUser', u.login); msg('usMsg', r.success, r.message); loadUsers(); } catch (e) { msg('usMsg', false, 'Error: ' + e.message); }
+  }
+  async function saveUser() {
+    try {
+      const r = await call('saveUser', $a('nuId').value, $a('nuPw').value, $a('nuSt').value, $a('nuLv').value);
+      msg('usMsg', r.success, r.message);
+      if (r.success) { $a('nuId').value = ''; $a('nuPw').value = ''; loadUsers(); }
+    } catch (e) { msg('usMsg', false, 'Error: ' + e.message); }
+  }
+
+  // ----- Courses dropdown options -----
+  async function loadMaster() {
+    try {
+      const r = await call('getCourseMaster'); if (!r.success) return msg('coMsg', false, r.message);
+      M = { courseTypes: r.courseTypes || [], shobas: r.shobas || [], muallims: r.muallims || [] };
+      $a('coYf').value = r.yearFrom || ''; $a('coYt').value = r.yearTo || ''; drawOpt();
+    } catch (e) { msg('coMsg', false, 'Error: ' + e.message); }
+  }
+  async function persist() {
+    try { const r = await call('saveCourseMaster', M); msg('coMsg', r.success, r.message); if (r.success && window.Crs) Crs.refresh(); } catch (e) { msg('coMsg', false, 'Error: ' + e.message); }
+    drawOpt();
+  }
+  const curType = function () { const t = $a('coType').value; return M.courseTypes.filter(function (x) { return x.type === t; })[0]; };
+  function drawOpt() {
+    const keep = $a('coType').value;
+    $a('coType').innerHTML = M.courseTypes.map(function (t) { return '<option>' + esc(t.type) + '</option>'; }).join('');
+    if (keep && M.courseTypes.some(function (t) { return t.type === keep; })) $a('coType').value = keep;
+    const t = curType();
+    const row = function (txt, fn, i) { return '<div><span>' + esc(txt) + '</span><button type="button" class="btn btn-sm btn-outline-danger py-0" onclick="Adm.' + fn + '(' + i + ')">&times;</button></div>'; };
+    $a('coNames').innerHTML = t ? t.names.map(function (n, i) { return row(n, 'delName', i); }).join('') || '<div>Koi course name nahi.</div>' : '<div>Pehle Course Type add karein.</div>';
+    $a('coShobas').innerHTML = M.shobas.map(function (n, i) { return row(n, 'delShoba', i); }).join('') || '<div>Khali</div>';
+    $a('coMus').innerHTML = M.muallims.map(function (n, i) { return row(n, 'delMu', i); }).join('') || '<div>Khali</div>';
+  }
+  function addType() { const v = $a('coNewType').value.trim(); if (!v) return; if (!M.courseTypes.some(function (t) { return t.type.toLowerCase() === v.toLowerCase(); })) M.courseTypes.push({ type: v, names: [] }); $a('coNewType').value = ''; $a('coType').value = v; persist(); }
+  function delType() { const t = curType(); if (!t || !confirm('Course Type "' + t.type + '" aur uske saare Course Names remove karein?')) return; M.courseTypes = M.courseTypes.filter(function (x) { return x !== t; }); persist(); }
+  function addName() { const t = curType(), v = $a('coNewName').value.trim(); if (!t) return alert('Pehle Course Type chunein.'); if (!v) return; if (!t.names.some(function (n) { return n.toLowerCase() === v.toLowerCase(); })) t.names.push(v); $a('coNewName').value = ''; persist(); }
+  function delName(i) { const t = curType(); if (t) { t.names.splice(i, 1); persist(); } }
+  function addList(k, inp) { const v = $a(inp).value.trim(); if (!v) return; if (!M[k].some(function (n) { return n.toLowerCase() === v.toLowerCase(); })) M[k].push(v); $a(inp).value = ''; persist(); }
+  function delShoba(i) { M.shobas.splice(i, 1); persist(); }
+  function delMu(i) { M.muallims.splice(i, 1); persist(); }
+  async function saveYears() { try { const r = await call('setCourseYears', $a('coYf').value, $a('coYt').value); msg('coMsg', r.success, r.message); if (r.success && window.Crs) Crs.refresh(); } catch (e) { msg('coMsg', false, 'Error: ' + e.message); } }
+  async function importMaster() {
+    const t = $a('coImp').value; if (!t.trim()) return msg('coMsg', false, 'Pehle data paste karein.');
+    try { const r = await call('importCourseMaster', t); msg('coMsg', r.success, r.message); if (r.success) { $a('coImp').value = ''; loadMaster(); if (window.Crs) Crs.refresh(); } } catch (e) { msg('coMsg', false, 'Error: ' + e.message); }
+  }
+
+  async function clearData(what) {
+    const names = { taq: 'Taqarrur', users: 'Users (admin ke ilawa)', appt: 'Appointment Data', crs: 'Courses Data', crsmaster: 'Courses dropdown options' };
+    if (prompt(names[what] + ' ki SAARI rows delete ho jayengi (wapas nahi aayengi). Jaari rakhne ke liye DELETE likhein:') !== 'DELETE') return;
+    try {
+      const r = await call('clearData', what); alert(r.message);
+      if (r.success) { if (what === 'users') loadUsers(); if (what === 'crsmaster') loadMaster(); if (window.Crs && (what === 'taq' || what === 'crsmaster' || what === 'crs')) Crs.refresh(); }
+    } catch (e) { alert('Error: ' + e.message); }
+  }
+
+  function load() { loadUsers(); loadMaster(); }
+  setTimeout(function () { $a('usQ') && ($a('usQ').oninput = drawUsers); }, 0);
+  return { clearData: clearData, load: load, loadUsers: loadUsers, editUser: editUser, delUser: delUser, saveUser: saveUser, drawOpt: drawOpt, addType: addType, delType: delType, addName: addName, delName: delName, addList: addList, delShoba: delShoba, delMu: delMu, saveYears: saveYears, importMaster: importMaster };
 })();
 
 </script>
