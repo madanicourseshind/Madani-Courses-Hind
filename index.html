@@ -267,6 +267,11 @@
 #c_cap > .panel:first-child .btn-secondary, .panel:has(#resetFiltersBtn) .btn:not(#resetFiltersBtn){ background:rgba(255,255,255,.16) !important; border:1px solid rgba(255,255,255,.4) !important; color:#fff !important; border-radius:9px; }
 #c_cap > .panel:first-child .btn-secondary:hover{ background:rgba(255,255,255,.3) !important; }
 
+/* Sidebar Logout */
+.sb-foot{ display:flex; flex-direction:column; gap:10px; }
+.sb-logout{ display:flex; align-items:center; gap:10px; width:100%; padding:10px 14px; border:0; border-radius:12px; color:#fff; font-weight:600; font-size:.92rem; background:linear-gradient(135deg,#DC2626,#B91C1C); box-shadow:0 4px 12px rgba(220,38,38,.35); cursor:pointer; text-align:left; }
+.sb-logout:hover{ filter:brightness(1.1); }
+
   @media (max-width:768px){
     .stat-grid{ grid-template-columns:repeat(2,1fr); }
   }
@@ -2230,6 +2235,14 @@ document.addEventListener('DOMContentLoaded', function () {
     var $b = jQuery(this); if ($b.parent().hasClass('ctl-card')) return;
     $b.add($b.next('.sp-box')).wrapAll('<div class="ctl-card"></div>');
   });
+});
+
+/* Logout: header se hatakar sidebar ke neeche */
+document.addEventListener('DOMContentLoaded', function () {
+  var b = document.getElementById('logoutBtn'), f = document.querySelector('.sb-foot');
+  if (!b || !f) return;
+  b.className = 'sb-logout'; b.removeAttribute('style'); b.innerHTML = '<span class="sb-ico">&#128274;</span>Logout';
+  f.insertBefore(b, f.firstChild);
 });
 
 </script>
