@@ -234,6 +234,39 @@
   }
   .crs-charts .panel{ min-width:0; position:relative; } .crs-charts canvas{ max-width:100%; }
 
+/* ===== Settings: compact Controls (cards grid) ===== */
+#setApptCtl, #setCrsCtl{ padding:18px 20px; }
+#setApptCtl > h2, #setCrsCtl > h2{ font-size:1.05rem; margin-bottom:10px; }
+#setApptCtl .alert, #setCrsCtl .alert{ padding:7px 12px !important; margin-bottom:12px !important; font-size:.76rem !important; border:0; border-left:4px solid #0891B2; background:#E8F6FB; color:#0B3B4F; border-radius:8px; }
+#setApptCtl .bg-light, #setCrsCtl .bg-light{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:8px 12px; align-items:start;
+  padding:12px 14px !important; margin:0 0 12px !important; border:1px solid #D9E3F5 !important; border-radius:12px !important;
+  background:linear-gradient(180deg,#F7FAFF,#EEF4FF) !important; }
+#setApptCtl .bg-light > label, #setCrsCtl .bg-light > label{ grid-column:1/-1; margin:0 !important; padding:0 0 6px !important; font-size:.8rem !important; letter-spacing:.04em; color:#0B1F4B !important; border-bottom:2px solid #DCE6F7 !important; }
+#setApptCtl .bg-light > p, #setCrsCtl .bg-light > p{ grid-column:1/-1; }
+.ctl-card{ min-width:0; }
+.ctl-card > button{ margin:0 !important; padding:7px 11px !important; font-size:.82rem; background:#fff; border:1px solid #D2DDF3; border-radius:10px; color:#12306B; box-shadow:0 1px 3px rgba(15,40,100,.06); }
+.ctl-card > button:hover{ border-color:#2563EB; background:#F4F8FF; color:#12306B; }
+.ctl-card > button .badge{ font-size:.7rem !important; padding:4px 9px; border-radius:20px; min-width:40px; }
+.ctl-card .sp-box{ margin:4px 0 0; }
+.ctl-card .sp-box .input-group-text{ padding:2px 8px; font-size:.68rem; }
+.ctl-card .sp-box .form-control{ padding:2px 8px; font-size:.74rem; border-radius:0; }
+.ctl-card .sp-box .btn{ padding:2px 10px; font-size:.72rem; }
+.ctl-card .sp-note{ font-size:.68rem; }
+
+/* ===== Dashboard filters: ek rang-sangam ===== */
+.panel:has(#resetFiltersBtn), #c_cap > .panel:first-child{
+  background:linear-gradient(120deg,#0B1F4B 0%,#1E40AF 58%,#0E7490 100%) !important; color:#fff; position:relative; overflow:hidden; padding:16px 20px 18px !important; }
+.panel:has(#resetFiltersBtn)::after, #c_cap > .panel:first-child::after{ content:""; position:absolute; right:-60px; top:-60px; width:200px; height:200px; border-radius:50%; background:radial-gradient(circle,rgba(255,255,255,.14),transparent 70%); pointer-events:none; }
+.panel:has(#resetFiltersBtn) > h2, #c_cap > .panel:first-child > h2{ color:#fff !important; font-size:.95rem !important; letter-spacing:.03em; margin-bottom:10px !important; }
+.panel:has(#resetFiltersBtn) > h2::before, #c_cap > .panel:first-child > h2::before{ content:"\25BC"; font-size:.7rem; margin-right:8px; color:#FBBF24; }
+.panel:has(#resetFiltersBtn) .field-label, #c_cap > .panel:first-child .field-label, #c_fl label, #c_fl .field-label{ color:#BFD7FF !important; font-weight:600; font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; }
+.panel:has(#resetFiltersBtn) .form-select, #c_cap > .panel:first-child select{ background-color:rgba(255,255,255,.96); border:1px solid rgba(255,255,255,.4); border-radius:9px; font-weight:500; color:#0B1F4B; }
+.panel:has(#resetFiltersBtn) .form-select:disabled, #c_cap > .panel:first-child select:disabled{ background-color:rgba(255,255,255,.55) !important; color:#1E3A6B !important; border-color:rgba(255,255,255,.25); }
+.panel:has(#resetFiltersBtn) #resetFiltersBtn, #c_cap > .panel:first-child #c_fr{ background:linear-gradient(135deg,#F59E0B,#F97316) !important; color:#fff !important; border:0 !important; border-radius:9px; font-weight:700; box-shadow:0 4px 12px rgba(249,115,22,.4); }
+#c_cap > .panel:first-child .btn-secondary, .panel:has(#resetFiltersBtn) .btn:not(#resetFiltersBtn){ background:rgba(255,255,255,.16) !important; border:1px solid rgba(255,255,255,.4) !important; color:#fff !important; border-radius:9px; }
+#c_cap > .panel:first-child .btn-secondary:hover{ background:rgba(255,255,255,.3) !important; }
+
   @media (max-width:768px){
     .stat-grid{ grid-template-columns:repeat(2,1fr); }
   }
@@ -2189,6 +2222,15 @@ window.Crs = (function () {
   $(document).on('click', '#sbToggle', function () { document.body.classList.toggle('sb-open'); });
   $(document).on('click', '#sbOverlay', closeNav);
 })();
+
+/* Controls: har toggle button (aur uska "Sirf in ko" box) ek compact card me */
+document.addEventListener('DOMContentLoaded', function () {
+  if (!window.jQuery) return;
+  jQuery('#setApptCtl button[onclick^="toggleCtrl"], #setCrsCtl button[onclick^="toggleCtrl"]').each(function () {
+    var $b = jQuery(this); if ($b.parent().hasClass('ctl-card')) return;
+    $b.add($b.next('.sp-box')).wrapAll('<div class="ctl-card"></div>');
+  });
+});
 
 </script>
 

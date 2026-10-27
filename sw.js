@@ -1,5 +1,5 @@
 /* Madani Courses PWA - app shell cache. Firebase (Firestore) ka data kabhi cache nahi hota. */
-const VER = 'mc-v1';
+const VER = 'mc-v3';
 const SHELL = ['./', './index.html', './admin.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 const CDN = /(^|\.)((cdn\.jsdelivr\.net)|(cdnjs\.cloudflare\.com)|(code\.jquery\.com)|(cdn\.datatables\.net)|(fonts\.googleapis\.com)|(fonts\.gstatic\.com)|(www\.gstatic\.com))$/;
 
