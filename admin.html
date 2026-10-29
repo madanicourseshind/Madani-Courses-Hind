@@ -1633,7 +1633,7 @@
       if (res.success) {
         $('#linkResultInput').val(res.url);
         $('#linkResultBox').removeClass('d-none');
-        alert('Aapki Link Generate ho chuki hai, Copy kar lein.');
+        alert('Aapki Link Generate ho chuki hai, Copy kar lein.\n\n' + [['Region', payload[1]], ['State', payload[2]], ['Division', payload[3]], ['District', payload[4]], ['Alaqa', payload[5]]].filter(function (p) { return p[1]; }).map(function (p) { return p[0] + ': ' + p[1]; }).join('\n'));
       } else {
         alert(res.message);
       }
@@ -2168,6 +2168,7 @@ window.Crs = (function () {
   }
   const updRemark = function () { $c('remark').value = remarkOf($c('courseType').value, $c('courseName').value, $c('shuraka').value); };
 
+  const TXT_ONLY = ['muallimName', 'courseKaAddress', 'zimmedari'], DIGITS = /[0-9\u0660-\u0669\u06F0-\u06F9\u0966-\u096F]/g;
   function buildForm() {
     const SL = {}; SEL.forEach(function (x) { SL[x[0]] = x[1]; });
     const IM = {}; INP.forEach(function (x) { IM[x[0]] = x.slice(1); });
@@ -2184,6 +2185,12 @@ window.Crs = (function () {
       ['Qafila Details', 3, ['qafila3', 'shuraka2', 'qafila12', 'shuraka3', 'mah12', 'azkar']],
       ['Nek Amal &amp; Other Details', 4, ['nekTaqseem', 'nekWasool', 'jamiatul', 'imamat', 'madrasa', 'zimmedari', 'aamdan', 'kharch']]];
     $c('formBox').innerHTML = GR.map(function (g) { return '<h3 class="crs-h3">' + g[0] + '</h3><div class="crs-g" style="--c:' + g[1] + '">' + g[2].map(fld).join('') + '</div>'; }).join('');
+    // Number wale fields me sirf digits, Text wale (Naam/Address/Zimmedari) me sirf text (digits nahi)
+    INP.forEach(function (x) {
+      const el = $c(x[0]); if (!el) return;
+      if (x[2] === 'number' || x[1] === 'number') { el.type = 'text'; el.setAttribute('inputmode', 'numeric'); el.setAttribute('pattern', '[0-9]*'); el.addEventListener('input', function () { const v = el.value.replace(/[^0-9]/g, ''); if (v !== el.value) el.value = v; }); }
+      else if (TXT_ONLY.indexOf(x[0]) >= 0) { el.addEventListener('input', function () { const v = el.value.replace(DIGITS, ''); if (v !== el.value) el.value = v; }); }
+    });
     $c('lkSel').innerHTML = locH('l_');
     wireChain(''); wireChain('l_');
     $c('courseType').onchange = function () { typeChange(); updRemark(); };
@@ -2223,6 +2230,13 @@ window.Crs = (function () {
     const req = nc ? LOC.concat(['year', 'month', 'courseType', 'courseName']) : LOC.concat(['year', 'month'], SEL.map(function (x) { return x[0]; }), INP.map(function (x) { return x[0]; }));
     const miss = req.filter(function (k) { return !d[k]; })[0];
     if (miss) return alert('Sabhi fields bharna zaroori hai: ' + miss);
+    if (!nc) {
+      const lb = {}; INP.forEach(function (x) { lb[x[0]] = x[1]; });
+      const bt = TXT_ONLY.filter(function (k) { return /[0-9\u0660-\u0669\u06F0-\u06F9\u0966-\u096F]/.test(d[k]); })[0];
+      if (bt) return alert((lb[bt] || bt) + ' me sirf text likhein, number nahi.');
+      const bn = INP.filter(function (x) { return x[2] === 'number' && !/^\d+$/.test(d[x[0]]); })[0];
+      if (bn) return alert(bn[1] + ' me sirf number likhein.');
+    }
     $c('sv').disabled = true;
     try {
       const r = await call('saveCourse', d, S.edit);
@@ -2422,6 +2436,7 @@ window.Crs = (function () {
         const r = await call('generateCourseLink', g('region'), g('state'), g('division'), g('district'));
         if (!r.success) return alert(r.message);
         $c('lkU').value = r.url; $c('lkR').classList.remove('d-none');
+        alert('Aapki Courses Link Generate ho chuki hai, Copy kar lein.\n\n' + [['Region', g('region')], ['State', g('state')], ['Division', g('division')], ['District', g('district')]].filter(function (p) { return p[1]; }).map(function (p) { return p[0] + ': ' + p[1]; }).join('\n'));
       } catch (e) { alert('Error: ' + e.message); }
     };
     $c('lkC').onclick = function () { $c('lkU').select(); document.execCommand('copy'); alert('Copied!'); };
@@ -3762,6 +3777,8 @@ function createServer(DB, env) {
       for (let i = 0; i < req.length; i++) if (!val(req[i])) return crsFail('Sabhi fields bharna zaroori hai: ' + req[i]);
       if (!nc) {
         for (let i = 0; i < CRS_NUM.length; i++) if (!/^\d+$/.test(val(CRS_NUM[i]))) return crsFail(CRS_NUM[i] + ' me sirf poora number (0 ya zyada) daalein.');
+        const CRS_TONLY = { muallimName: 'Muallim ka Naam', courseKaAddress: 'Course ka Address', zimmedari: 'Zimmedari' };
+        for (const k in CRS_TONLY) if (/[0-9\u0660-\u0669\u06F0-\u06F9\u0966-\u096F]/.test(val(k))) return crsFail(CRS_TONLY[k] + ' me sirf text likhein, number nahi.');
         if (val('endDate') < val('startDate')) return crsFail('Course End Date, Start Date se pehle nahi ho sakti.');
       }
 
