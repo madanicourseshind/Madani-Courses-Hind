@@ -2124,7 +2124,7 @@ window.Crs = (function () {
   const INP = [['startDate', 'Course Start Date', 'date'], ['endDate', 'Course End Date', 'date'], ['muallimName', 'Muallim Naam', 'text'], ['courseKaAddress', 'Course ka Address', 'text'],
     ['shuraka', 'Shuraka', 'number'], ['qafila3', '3 Din Qafila', 'number'], ['shuraka2', 'Shuraka (3 Din)', 'number'], ['qafila12', '12 Din Qafila', 'number'], ['shuraka3', 'Shuraka (12 Din)', 'number'], ['mah12', '12 Mah Qafila', 'number'],
     ['nekTaqseem', 'Nek Amal Taqseem', 'number'], ['nekWasool', 'Nek Amal Wasool', 'number'], ['azkar', 'Namaz ke Azkar', 'number'], ['jamiatul', 'Jamiatul Madina', 'number'], ['imamat', 'Imamat Course', 'number'], ['madrasa', 'Madrasatul Madina', 'number'],
-    ['zimmedari', 'Tanzeemi Zimmedari', 'text'], ['aamdan', 'Aamdan', 'number'], ['kharch', 'Kharch', 'number']];
+    ['zimmedari', 'Tanzeemi Zimmedari', 'number'], ['aamdan', 'Aamdan', 'number'], ['kharch', 'Kharch', 'number']];
   const MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const COLS = [['ts', 'Timestamp'], ['year', 'Year'], ['month', 'Month']].concat(LOC.map(function (k) { return [k, k[0].toUpperCase() + k.slice(1)]; }),
     [['courseType', 'Course Type'], ['courseName', 'Course Name'], ['remark', 'Remark']], INP.map(function (x) { return [x[0], x[1]]; }),
@@ -2168,7 +2168,7 @@ window.Crs = (function () {
   }
   const updRemark = function () { $c('remark').value = remarkOf($c('courseType').value, $c('courseName').value, $c('shuraka').value); };
 
-  const TXT_ONLY = ['muallimName', 'courseKaAddress', 'zimmedari'], DIGITS = /[0-9\u0660-\u0669\u06F0-\u06F9\u0966-\u096F]/g;
+  const TXT_ONLY = ['muallimName', 'courseKaAddress'], DIGITS = /[0-9\u0660-\u0669\u06F0-\u06F9\u0966-\u096F]/g;
   function buildForm() {
     const SL = {}; SEL.forEach(function (x) { SL[x[0]] = x[1]; });
     const IM = {}; INP.forEach(function (x) { IM[x[0]] = x.slice(1); });
@@ -3613,8 +3613,8 @@ function createServer(DB, env) {
   const CRS_LOC = ['region', 'state', 'division', 'district'];
   const CRS_NOC = 'Is District Me Koi Course Nahi Hua';
   const CRS_SEL = ['courseType', 'courseName', 'shobaName', 'muallimZimmedari'];
-  const CRS_TXT = ['startDate', 'endDate', 'muallimName', 'courseKaAddress', 'zimmedari'];
-  const CRS_NUM = ['shuraka', 'qafila3', 'shuraka2', 'qafila12', 'shuraka3', 'mah12', 'nekTaqseem', 'nekWasool', 'azkar', 'jamiatul', 'imamat', 'madrasa', 'aamdan', 'kharch'];
+  const CRS_TXT = ['startDate', 'endDate', 'muallimName', 'courseKaAddress'];
+  const CRS_NUM = ['zimmedari', 'shuraka', 'qafila3', 'shuraka2', 'qafila12', 'shuraka3', 'mah12', 'nekTaqseem', 'nekWasool', 'azkar', 'jamiatul', 'imamat', 'madrasa', 'aamdan', 'kharch'];
   const CRS_FIELDS = ['country'].concat(CRS_LOC, ['year', 'month'], CRS_SEL, CRS_TXT, CRS_NUM, ['remark', 'submittedBy', 'status', 'approver', 'reviewedBy', 'reviewedAt']);
 
   function crsRemark(ct, cn, sh) {
@@ -3777,7 +3777,7 @@ function createServer(DB, env) {
       for (let i = 0; i < req.length; i++) if (!val(req[i])) return crsFail('Sabhi fields bharna zaroori hai: ' + req[i]);
       if (!nc) {
         for (let i = 0; i < CRS_NUM.length; i++) if (!/^\d+$/.test(val(CRS_NUM[i]))) return crsFail(CRS_NUM[i] + ' me sirf poora number (0 ya zyada) daalein.');
-        const CRS_TONLY = { muallimName: 'Muallim ka Naam', courseKaAddress: 'Course ka Address', zimmedari: 'Zimmedari' };
+        const CRS_TONLY = { muallimName: 'Muallim ka Naam', courseKaAddress: 'Course ka Address' };
         for (const k in CRS_TONLY) if (/[0-9\u0660-\u0669\u06F0-\u06F9\u0966-\u096F]/.test(val(k))) return crsFail(CRS_TONLY[k] + ' me sirf text likhein, number nahi.');
         if (val('endDate') < val('startDate')) return crsFail('Course End Date, Start Date se pehle nahi ho sakti.');
       }
