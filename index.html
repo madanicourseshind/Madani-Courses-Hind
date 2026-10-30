@@ -612,7 +612,10 @@
 
   function checkLinkStatusForLoginPage() {
     google.script.run.withSuccessHandler(function (ctrls) {
-      if (ctrls.formCountry === 'OFF' && ctrls.formRegion === 'OFF' && ctrls.formState === 'OFF' && ctrls.formDiv === 'OFF') {
+      // Banner tabhi jab Appointment AUR Courses dono forms band hon (ek bhi chalu ho to login allowed)
+      const apptOff = ctrls.formCountry === 'OFF' && ctrls.formRegion === 'OFF' && ctrls.formState === 'OFF' && ctrls.formDiv === 'OFF';
+      const crsOff = ctrls.crsFormCountry === 'OFF' && ctrls.crsFormRegion === 'OFF' && ctrls.crsFormState === 'OFF' && ctrls.crsFormDiv === 'OFF';
+      if (apptOff && crsOff) {
         $('#linkStatusBanner').removeClass('d-none').text('Forms are currently CLOSED (Admin Only).');
       } else {
         $('#linkStatusBanner').addClass('d-none');
