@@ -740,6 +740,7 @@
       <div><span class="field-label">District</span><select id="nuLc4" class="form-select"></select></div>
       <div><span class="field-label">Alaqa</span><select id="nuLc5" class="form-select"></select></div>
     </div>
+    <div class="mt-2" style="max-width:420px"><span class="field-label">Courses Dashboard: sirf is "Muallim Zimmedari" ka data dikhao (optional)</span><select id="nuMz" class="form-select"><option value="">Sab (koi pabandi nahi)</option></select></div>
     <div class="text-muted mt-1" style="font-size:.74rem">Level "Auto" rakhne par User ID ka naam Taqarrur ke naam se milna chahiye (purana tareeqa). Level chunne par location Taqarrur se chunein &mdash; tab User ID <b>koi bhi naam</b> ho sakti hai.</div>
     <button type="button" class="btn-save mt-3" style="width:auto;padding:9px 24px" onclick="Adm.saveUser()">Save User</button>
     <div id="usMsg" class="mt-2" style="font-size:0.85rem"></div>
@@ -2291,7 +2292,7 @@ window.Crs = (function () {
     const r = await call('getCourseDashboard');
     if (!r || !r.success) { $c('tb').innerHTML = '<tr><td>' + esc((r && r.message) || 'Data load nahi hua.') + '</td></tr>'; return; }
     S.rows = r.rows; const live = {}; r.rows.forEach(function (x) { live[x.id] = 1; }); Object.keys(S.sel).forEach(function (k) { if (!live[k]) delete S.sel[k]; });
-    S.struct = r.structure; S.ctrl = r.controls || {}; S.level = r.level || '';
+    S.struct = r.structure; S.ctrl = r.controls || {}; S.level = r.level || ''; S.mz = r.mz || '';
     const keep = {}; FLT.forEach(function (f) { const e = $c(f[1]); if (e) keep[f[1]] = e.value; });
     $c('fl').innerHTML = FLT.map(function (f) { return '<div><span class="field-label">' + (FLT_LABEL[f[1]] || f[0][0].toUpperCase() + f[0].slice(1)) + '</span><select class="form-select form-select-sm" id="c_' + f[1] + '"></select></div>'; }).join('');
     FLT.forEach(function (f) { $c(f[1]).onchange = renderDash; });
@@ -2304,6 +2305,7 @@ window.Crs = (function () {
       fill(s, S.rows.map(function (r) { return r[f[0]]; }).filter(Boolean).filter(function (v, i, a) { return a.indexOf(v) === i; }).sort(), c);
       s.options[0].text = 'All';
     });
+    if (S.mz) { const mf = $c('fMuallim'); mf.innerHTML = '<option value="' + esc(S.mz) + '">' + esc(S.mz) + '</option>'; mf.value = S.mz; mf.disabled = true; }
     const hideN = isAdm() ? 0 : ({ state: 1, division: 2, quick: 3, district: 3, alaqa: 4 })[S.level] || 0;
     LOC.forEach(function (k, i) {
       const s = $c('f' + k[0].toUpperCase() + k.slice(1)), sv = !isAdm() && U()[k];
@@ -2583,7 +2585,7 @@ window.Adm = (function () {
     const list = users.filter(function (u) { return !q || u.login.toLowerCase().indexOf(q) >= 0; });
     $a('usCnt').textContent = list.length + ' / ' + users.length + ' users';
     $a('usBody').innerHTML = list.map(function (u, i) {
-      return '<tr><td>' + esc(u.login) + '</td><td>' + esc(u.status) + '</td><td>' + esc(u.level) + (u.scope ? ' <small style="color:#475569">(' + esc(locName(u)) + ')</small>' : '') + '</td><td style="white-space:nowrap"><button type="button" class="btn btn-sm py-0" style="background:#C9A227" onclick="Adm.editUser(' + users.indexOf(u) + ')">Edit</button> <button type="button" class="btn btn-sm btn-danger py-0" onclick="Adm.delUser(' + users.indexOf(u) + ')">Delete</button></td></tr>';
+      return '<tr><td>' + esc(u.login) + '</td><td>' + esc(u.status) + '</td><td>' + esc(u.level) + (u.crsMuallim ? ' <small style="color:#7C3AED">[Courses: ' + esc(u.crsMuallim) + ']</small>' : '') + (u.scope ? ' <small style="color:#475569">(' + esc(locName(u)) + ')</small>' : '') + '</td><td style="white-space:nowrap"><button type="button" class="btn btn-sm py-0" style="background:#C9A227" onclick="Adm.editUser(' + users.indexOf(u) + ')">Edit</button> <button type="button" class="btn btn-sm btn-danger py-0" onclick="Adm.delUser(' + users.indexOf(u) + ')">Delete</button></td></tr>';
     }).join('') || '<tr><td colspan="4">Koi user nahi.</td></tr>';
   }
   // ----- Level + location (Taqarrur se) -----
@@ -2614,8 +2616,12 @@ window.Adm = (function () {
     $a('nuLv').addEventListener('change', function () { initLocData().then(function () { fillLoc(null); }); });
     for (let k = 0; k < 5; k++) (function (k) { $a('nuLc' + k).addEventListener('change', function () { fillLoc(null); }); })(k);
   }
+  function fillMz(cur) {
+    const el = $a('nuMz'), list = (M.muallims || []).slice(); if (cur && list.indexOf(cur) < 0) list.push(cur);
+    el.innerHTML = '<option value="">Sab (koi pabandi nahi)</option>' + list.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join(''); el.value = cur || '';
+  }
   function editUser(i) {
-    const u = users[i]; initLocData().then(function () { fillLoc(u.scope || null); }); $a('nuId').value = u.login; $a('nuPw').value = ''; $a('nuSt').value = u.status || 'Active';
+    const u = users[i]; fillMz(u.crsMuallim || ''); initLocData().then(function () { fillLoc(u.scope || null); }); $a('nuId').value = u.login; $a('nuPw').value = ''; $a('nuSt').value = u.status || 'Active';
     const lv = (u.level || '').toLowerCase(); $a('nuLv').value = lv ? lv[0].toUpperCase() + lv.slice(1) : '';
     fillLoc(u.scope || null);
     $a('nuPw').focus();
@@ -2626,9 +2632,9 @@ window.Adm = (function () {
   }
   async function saveUser() {
     try {
-      const r = await call('saveUser', $a('nuId').value, $a('nuPw').value, $a('nuSt').value, $a('nuLv').value, lvIdx() >= 0 ? KEYS.reduce(function (o, k, n) { o[k] = n <= lvIdx() ? $a('nuLc' + n).value : ''; return o; }, {}) : null);
+      const r = await call('saveUser', $a('nuId').value, $a('nuPw').value, $a('nuSt').value, $a('nuLv').value, lvIdx() >= 0 ? KEYS.reduce(function (o, k, n) { o[k] = n <= lvIdx() ? $a('nuLc' + n).value : ''; return o; }, {}) : null, $a('nuMz').value);
       msg('usMsg', r.success, r.message);
-      if (r.success) { $a('nuId').value = ''; $a('nuPw').value = ''; loadUsers(); }
+      if (r.success) { $a('nuId').value = ''; $a('nuPw').value = ''; fillMz(''); loadUsers(); }
     } catch (e) { msg('usMsg', false, 'Error: ' + e.message); }
   }
 
@@ -2637,7 +2643,7 @@ window.Adm = (function () {
     try {
       const r = await call('getCourseMaster'); if (!r.success) return msg('coMsg', false, r.message);
       M = { courseTypes: r.courseTypes || [], shobas: r.shobas || [], muallims: r.muallims || [] };
-      $a('coYf').value = r.yearFrom || ''; $a('coYt').value = r.yearTo || ''; drawOpt();
+      $a('coYf').value = r.yearFrom || ''; $a('coYt').value = r.yearTo || ''; drawOpt(); fillMz($a('nuMz') ? $a('nuMz').value : '');
     } catch (e) { msg('coMsg', false, 'Error: ' + e.message); }
   }
   async function persist() {
@@ -3197,7 +3203,7 @@ function createServer(DB, env) {
       const sessionData = {
         userId: rLogin, role: role, country: scope.country,
         region: scope.region, state: scope.state, division: scope.division,
-        district: scope.district, alaqa: scope.alaqa, level: userLevel
+        district: scope.district, alaqa: scope.alaqa, level: userLevel, crsMuallim: (u.crsMuallim || '').toString()
       };
       sessions.set(token, { data: sessionData, exp: Date.now() + SESSION_DURATION_MS });
 
@@ -3905,14 +3911,14 @@ function createServer(DB, env) {
         const o = Object.assign({ id: x.id, ts: x.data.ts || '', seq: x.data.seq || 0 }, crsToDoc(x.data));
         o.status = o.status || 'Approved';
         return o;
-      }).filter(function (r) { return crsInScope(session, r); });
+      }).filter(function (r) { return crsInScope(session, r) && (!session.crsMuallim || normalize(r.muallimZimmedari) === normalize(session.crsMuallim)); });
       rows.sort(function (a, b) { return b.seq - a.seq; });
       const seen = {}, structure = [];
       (await getScopedTaqarrur(session)).forEach(function (r) {
         const k = [r[1], r[2], r[3], r[4]].map(normalize).join('|');
         if (r[4] && !seen[k]) { seen[k] = true; structure.push({ region: r[1], state: r[2], division: r[3], district: r[4] }); }
       });
-      return { success: true, rows: rows, structure: structure, level: session.level, role: session.role, controls: await getControlsFor(session) };
+      return { success: true, rows: rows, structure: structure, level: session.level, role: session.role, mz: session.crsMuallim || '', controls: await getControlsFor(session) };
     } catch (err) {
       return crsFail('Dashboard Error: ' + err.toString());
     }
@@ -4068,7 +4074,7 @@ function createServer(DB, env) {
   async function listUsers(token) {
     if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin dekh sakta hai.');
     const users = (await DB.listDocs('User')).map(function (d) {
-      return { login: d.data.login || '', status: d.data.status || 'Active', level: d.data.level || '', scope: d.data.scope || null };
+      return { login: d.data.login || '', status: d.data.status || 'Active', level: d.data.level || '', scope: d.data.scope || null, crsMuallim: d.data.crsMuallim || '' };
     });
     users.sort(function (a, b) { return a.login.toLowerCase() < b.login.toLowerCase() ? -1 : 1; });
     return { success: true, users: users };
@@ -4080,7 +4086,7 @@ function createServer(DB, env) {
   }
 
   // scope = { country, region, state, division, district, alaqa }: Level ke hisab se location chunkar user banta hai (User ID koi bhi ho sakti hai)
-  async function saveUser(token, login, password, status, level, scope) {
+  async function saveUser(token, login, password, status, level, scope, crsMuallim) {
     if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin change kar sakta hai.');
     login = (login || '').toString().trim();
     if (!login) return crsFail('User ID zaroori hai.');
@@ -4094,6 +4100,7 @@ function createServer(DB, env) {
       login: login, status: st, level: lv,
       passHash: password ? await hashPassword(login, password) : old.passHash
     };
+    if ((crsMuallim || '').toString().trim() && normalize(login) !== 'admin') doc.crsMuallim = crsMuallim.toString().trim();
     const KEYS = ['country', 'region', 'state', 'division', 'district', 'alaqa'];
     const li = KEYS.indexOf(normalize(lv));
     let noLoc = false;
