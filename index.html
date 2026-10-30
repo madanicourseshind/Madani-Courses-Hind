@@ -2672,7 +2672,17 @@ function createServer(DB, env) {
     return rows.map(function (r) { return r.slice(); });
   }
 
+  // Ek hi level ke kai users: "India", "India 2", "India Country 3" ... sab ek hi location se judte hain (admin kabhi nahi)
   async function resolveScope(loginValue, levelHint) {
+    let r = await resolveScope0(loginValue, levelHint);
+    if (!r.isAdmin && !r.country) {
+      const base = normalize(loginValue).replace(/\s+/g, ' ').replace(/[\s\-_#.]*\d+$/, '').trim();
+      if (base && base !== normalize(loginValue).replace(/\s+/g, ' ') && base !== 'admin') r = await resolveScope0(base, levelHint);
+      if (r.isAdmin) r = { isAdmin: false, country: '', region: '', state: '', division: '', district: '', alaqa: '' };
+    }
+    return r;
+  }
+  async function resolveScope0(loginValue, levelHint) {
     const none = { isAdmin: false, country: '', region: '', state: '', division: '', district: '', alaqa: '' };
     const key = function (v) { return normalize(v).replace(/\s+/g, ' '); };
     const full = key(loginValue);
@@ -2751,7 +2761,8 @@ function createServer(DB, env) {
         return { success: false, message: 'Ye account inactive hai. Admin se sampark karein.' };
       }
 
-      const scope = await resolveScope(rLogin, u.level);
+      // Admin ne Level + location chunkar user banaya ho to wahi scope; warna purana tareeqa (User ID ke naam se)
+      const scope = (u.scope && u.scope.country && normalize(rLogin) !== 'admin') ? Object.assign({ isAdmin: false, country: '', region: '', state: '', division: '', district: '', alaqa: '' }, u.scope) : await resolveScope(rLogin, u.level);
       const controls = await getAdminControls();
       const role = scope.isAdmin ? 'Admin' : 'User';
 
@@ -2812,6 +2823,7 @@ function createServer(DB, env) {
   function rowInScope(session, row) {
     if (isAdmin(session)) return true;
     const keys = ['country', 'region', 'state', 'division', 'district', 'alaqa'];
+    if (!keys.some(function (x) { return session[x]; })) return false; // location se na judne wale user ko koi data nahi
     for (let k = 0; k < keys.length; k++) {
       if (session[keys[k]] && normalize(row[k + 1]) !== normalize(session[keys[k]])) return false;
     }
@@ -3316,6 +3328,7 @@ function createServer(DB, env) {
   function crsInScope(session, row) {
     if (isAdmin(session)) return true;
     const keys = ['country', 'region', 'state', 'division', 'district'];
+    if (!keys.some(function (x) { return session[x]; })) return false; // location se na judne wale user ko koi data nahi
     for (let i = 0; i < keys.length; i++) {
       if (session[keys[i]] && normalize(row[keys[i]]) !== normalize(session[keys[i]])) return false;
     }
@@ -3646,13 +3659,19 @@ function createServer(DB, env) {
   async function listUsers(token) {
     if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin dekh sakta hai.');
     const users = (await DB.listDocs('User')).map(function (d) {
-      return { login: d.data.login || '', status: d.data.status || 'Active', level: d.data.level || '' };
+      return { login: d.data.login || '', status: d.data.status || 'Active', level: d.data.level || '', scope: d.data.scope || null };
     });
     users.sort(function (a, b) { return a.login.toLowerCase() < b.login.toLowerCase() ? -1 : 1; });
     return { success: true, users: users };
   }
 
-  async function saveUser(token, login, password, status, level) {
+  async function getTaqarrurTree(token) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin dekh sakta hai.');
+    return { success: true, rows: (await getTaqarrurRows()).map(function (r) { return [r[0], r[1], r[2], r[3], r[4], r[5]]; }) };
+  }
+
+  // scope = { country, region, state, division, district, alaqa }: Level ke hisab se location chunkar user banta hai (User ID koi bhi ho sakti hai)
+  async function saveUser(token, login, password, status, level, scope) {
     if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin change kar sakta hai.');
     login = (login || '').toString().trim();
     if (!login) return crsFail('User ID zaroori hai.');
@@ -3661,11 +3680,26 @@ function createServer(DB, env) {
     password = (password || '').toString().trim();
     if (!old && !password) return crsFail('Naye user ke liye Password zaroori hai.');
     const st = normalize(status) === 'inactive' ? 'Inactive' : 'Active';
-    await DB.setDoc('User', id, {
-      login: login, status: st, level: (level || '').toString().trim(),
+    const lv = (level || '').toString().trim();
+    const doc = {
+      login: login, status: st, level: lv,
       passHash: password ? await hashPassword(login, password) : old.passHash
-    });
-    return { success: true, message: old ? 'User update ho gaya.' : 'User add ho gaya.' };
+    };
+    const KEYS = ['country', 'region', 'state', 'division', 'district', 'alaqa'];
+    const li = KEYS.indexOf(normalize(lv));
+    let noLoc = false;
+    if (scope && li >= 0 && normalize(login) !== 'admin' && (scope[KEYS[li]] || '').toString().trim()) {
+      const want = {}; for (let k = 0; k <= li; k++) want[KEYS[k]] = (scope[KEYS[k]] || '').toString().trim();
+      const hit = (await getTaqarrurRows()).find(function (r) {
+        for (let k = 0; k <= li; k++) if (normalize(r[k]) !== normalize(want[KEYS[k]])) return false;
+        return true;
+      });
+      if (!hit) return crsFail('Ye location Taqarrur data me nahi mila. Pehle Taqarrur me add karein.');
+      const sc = {}; for (let k = 0; k < KEYS.length; k++) sc[KEYS[k]] = k <= li ? hit[k] : '';
+      doc.scope = sc;
+    } else if (li >= 0 && normalize(login) !== 'admin') noLoc = true;
+    await DB.setDoc('User', id, doc);
+    return { success: true, message: (old ? 'User update ho gaya.' : 'User add ho gaya.') + (noLoc ? ' (Location nahi chuni: ab User ID ka naam Taqarrur ke naam se milna chahiye.)' : '') };
   }
 
   async function deleteUser(token, login) {
@@ -3682,7 +3716,7 @@ function createServer(DB, env) {
     getDropdownData, saveData, deleteRecord, reviewRecord,
     getDashboardData, generateEntryLink, resolveEntryLink,
     isFirstRun, importTaqarrur, importUsers, importData,
-    getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, deleteCourses, generateCourseLink, importCourseData, clearAppointmentData, clearData,
+    getTaqarrurTree, getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, deleteCourses, generateCourseLink, importCourseData, clearAppointmentData, clearData,
     listUsers, saveUser, deleteUser,
     // testing / internal
     _internal: { getSetting, putSetting, normalize, parseDelimited, parseTaqarrurValues, fmtTs, sessions, getTaqarrurRows, resolveScope }
