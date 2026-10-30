@@ -732,6 +732,15 @@
       <div><span class="field-label">Status</span><select id="nuSt" class="form-select"><option>Active</option><option>Inactive</option></select></div>
       <div><span class="field-label">Level (optional)</span><select id="nuLv" class="form-select"><option value="">Auto</option><option>Country</option><option>Region</option><option>State</option><option>Division</option><option>District</option><option>Alaqa</option></select></div>
     </div>
+    <div class="crs-g mt-2" style="--c:5;display:none" id="nuLoc">
+      <div><span class="field-label">Country</span><select id="nuLc0" class="form-select"></select></div>
+      <div><span class="field-label">Region</span><select id="nuLc1" class="form-select"></select></div>
+      <div><span class="field-label">State</span><select id="nuLc2" class="form-select"></select></div>
+      <div><span class="field-label">Division</span><select id="nuLc3" class="form-select"></select></div>
+      <div><span class="field-label">District</span><select id="nuLc4" class="form-select"></select></div>
+      <div><span class="field-label">Alaqa</span><select id="nuLc5" class="form-select"></select></div>
+    </div>
+    <div class="text-muted mt-1" style="font-size:.74rem">Level "Auto" rakhne par User ID ka naam Taqarrur ke naam se milna chahiye (purana tareeqa). Level chunne par location Taqarrur se chunein &mdash; tab User ID <b>koi bhi naam</b> ho sakti hai.</div>
     <button type="button" class="btn-save mt-3" style="width:auto;padding:9px 24px" onclick="Adm.saveUser()">Save User</button>
     <div id="usMsg" class="mt-2" style="font-size:0.85rem"></div>
   </div>
@@ -2571,12 +2580,41 @@ window.Adm = (function () {
     const list = users.filter(function (u) { return !q || u.login.toLowerCase().indexOf(q) >= 0; });
     $a('usCnt').textContent = list.length + ' / ' + users.length + ' users';
     $a('usBody').innerHTML = list.map(function (u, i) {
-      return '<tr><td>' + esc(u.login) + '</td><td>' + esc(u.status) + '</td><td>' + esc(u.level) + '</td><td style="white-space:nowrap"><button type="button" class="btn btn-sm py-0" style="background:#C9A227" onclick="Adm.editUser(' + users.indexOf(u) + ')">Edit</button> <button type="button" class="btn btn-sm btn-danger py-0" onclick="Adm.delUser(' + users.indexOf(u) + ')">Delete</button></td></tr>';
+      return '<tr><td>' + esc(u.login) + '</td><td>' + esc(u.status) + '</td><td>' + esc(u.level) + (u.scope ? ' <small style="color:#475569">(' + esc(locName(u)) + ')</small>' : '') + '</td><td style="white-space:nowrap"><button type="button" class="btn btn-sm py-0" style="background:#C9A227" onclick="Adm.editUser(' + users.indexOf(u) + ')">Edit</button> <button type="button" class="btn btn-sm btn-danger py-0" onclick="Adm.delUser(' + users.indexOf(u) + ')">Delete</button></td></tr>';
     }).join('') || '<tr><td colspan="4">Koi user nahi.</td></tr>';
   }
+  // ----- Level + location (Taqarrur se) -----
+  let TQ = [], locWired = false;
+  const KEYS = ['country', 'region', 'state', 'division', 'district', 'alaqa'];
+  function locName(u) { const s = u.scope || {}; for (let k = 5; k >= 0; k--) if (s[KEYS[k]]) return s[KEYS[k]]; return ''; }
+  function lvIdx() { return KEYS.indexOf(($a('nuLv').value || '').toLowerCase()); }
+  function fillLoc(pre) {
+    const li = lvIdx(); $a('nuLoc').style.display = li < 0 ? 'none' : '';
+    if (li < 0) return;
+    for (let k = 0; k < 6; k++) {
+      const el = $a('nuLc' + k), box = el.parentNode; box.style.display = k <= li ? '' : 'none';
+      if (k > li) { el.innerHTML = ''; continue; }
+      const cur = pre ? (pre[KEYS[k]] || '') : el.value;
+      const seen = {}, opts = [];
+      TQ.forEach(function (r) {
+        for (let p = 0; p < k; p++) if (($a('nuLc' + p).value || '') !== r[p]) return;
+        if (r[k] && !seen[r[k]]) { seen[r[k]] = 1; opts.push(r[k]); }
+      });
+      el.innerHTML = '<option value="">Select</option>' + opts.sort().map(function (o) { return '<option>' + esc(o) + '</option>'; }).join('');
+      if (cur && opts.indexOf(cur) >= 0) el.value = cur; else if (opts.length === 1 && k === 0) el.value = opts[0];
+    }
+  }
+  async function initLocData() { try { const r = await call('getTaqarrurTree'); if (r.success) TQ = r.rows || []; } catch (e) { /* Taqarrur abhi nahi */ } }
+  async function initLoc() {
+    await initLocData();
+    if (locWired) return; locWired = true;
+    $a('nuLv').addEventListener('change', function () { initLocData().then(function () { fillLoc(null); }); });
+    for (let k = 0; k < 5; k++) (function (k) { $a('nuLc' + k).addEventListener('change', function () { fillLoc(null); }); })(k);
+  }
   function editUser(i) {
-    const u = users[i]; $a('nuId').value = u.login; $a('nuPw').value = ''; $a('nuSt').value = u.status || 'Active';
+    const u = users[i]; initLocData().then(function () { fillLoc(u.scope || null); }); $a('nuId').value = u.login; $a('nuPw').value = ''; $a('nuSt').value = u.status || 'Active';
     const lv = (u.level || '').toLowerCase(); $a('nuLv').value = lv ? lv[0].toUpperCase() + lv.slice(1) : '';
+    fillLoc(u.scope || null);
     $a('nuPw').focus();
   }
   async function delUser(i) {
@@ -2585,7 +2623,7 @@ window.Adm = (function () {
   }
   async function saveUser() {
     try {
-      const r = await call('saveUser', $a('nuId').value, $a('nuPw').value, $a('nuSt').value, $a('nuLv').value);
+      const r = await call('saveUser', $a('nuId').value, $a('nuPw').value, $a('nuSt').value, $a('nuLv').value, lvIdx() >= 0 ? KEYS.reduce(function (o, k, n) { o[k] = n <= lvIdx() ? $a('nuLc' + n).value : ''; return o; }, {}) : null);
       msg('usMsg', r.success, r.message);
       if (r.success) { $a('nuId').value = ''; $a('nuPw').value = ''; loadUsers(); }
     } catch (e) { msg('usMsg', false, 'Error: ' + e.message); }
@@ -2632,11 +2670,11 @@ window.Adm = (function () {
     if (prompt(names[what] + ' ki SAARI rows delete ho jayengi (wapas nahi aayengi). Jaari rakhne ke liye DELETE likhein:') !== 'DELETE') return;
     try {
       const r = await call('clearData', what); alert(r.message);
-      if (r.success) { if (what === 'users') loadUsers(); if (what === 'crsmaster') loadMaster(); if (window.Crs && (what === 'taq' || what === 'crsmaster' || what === 'crs')) Crs.refresh(); }
+      if (r.success) { if (what === 'users') loadUsers(); if (what === 'taq') initLoc(); if (what === 'crsmaster') loadMaster(); if (window.Crs && (what === 'taq' || what === 'crsmaster' || what === 'crs')) Crs.refresh(); }
     } catch (e) { alert('Error: ' + e.message); }
   }
 
-  function load() { loadUsers(); loadMaster(); }
+  function load() { loadUsers(); loadMaster(); initLoc(); }
   setTimeout(function () { $a('usQ') && ($a('usQ').oninput = drawUsers); }, 0);
   return { clearData: clearData, load: load, loadUsers: loadUsers, editUser: editUser, delUser: delUser, saveUser: saveUser, drawOpt: drawOpt, addType: addType, delType: delType, addName: addName, delName: delName, addList: addList, delShoba: delShoba, delMu: delMu, saveYears: saveYears, importMaster: importMaster };
 })();
@@ -3040,7 +3078,17 @@ function createServer(DB, env) {
     return rows.map(function (r) { return r.slice(); });
   }
 
+  // Ek hi level ke kai users: "India", "India 2", "India Country 3" ... sab ek hi location se judte hain (admin kabhi nahi)
   async function resolveScope(loginValue, levelHint) {
+    let r = await resolveScope0(loginValue, levelHint);
+    if (!r.isAdmin && !r.country) {
+      const base = normalize(loginValue).replace(/\s+/g, ' ').replace(/[\s\-_#.]*\d+$/, '').trim();
+      if (base && base !== normalize(loginValue).replace(/\s+/g, ' ') && base !== 'admin') r = await resolveScope0(base, levelHint);
+      if (r.isAdmin) r = { isAdmin: false, country: '', region: '', state: '', division: '', district: '', alaqa: '' };
+    }
+    return r;
+  }
+  async function resolveScope0(loginValue, levelHint) {
     const none = { isAdmin: false, country: '', region: '', state: '', division: '', district: '', alaqa: '' };
     const key = function (v) { return normalize(v).replace(/\s+/g, ' '); };
     const full = key(loginValue);
@@ -3119,7 +3167,8 @@ function createServer(DB, env) {
         return { success: false, message: 'Ye account inactive hai. Admin se sampark karein.' };
       }
 
-      const scope = await resolveScope(rLogin, u.level);
+      // Admin ne Level + location chunkar user banaya ho to wahi scope; warna purana tareeqa (User ID ke naam se)
+      const scope = (u.scope && u.scope.country && normalize(rLogin) !== 'admin') ? Object.assign({ isAdmin: false, country: '', region: '', state: '', division: '', district: '', alaqa: '' }, u.scope) : await resolveScope(rLogin, u.level);
       const controls = await getAdminControls();
       const role = scope.isAdmin ? 'Admin' : 'User';
 
@@ -3180,6 +3229,7 @@ function createServer(DB, env) {
   function rowInScope(session, row) {
     if (isAdmin(session)) return true;
     const keys = ['country', 'region', 'state', 'division', 'district', 'alaqa'];
+    if (!keys.some(function (x) { return session[x]; })) return false; // location se na judne wale user ko koi data nahi
     for (let k = 0; k < keys.length; k++) {
       if (session[keys[k]] && normalize(row[k + 1]) !== normalize(session[keys[k]])) return false;
     }
@@ -3684,6 +3734,7 @@ function createServer(DB, env) {
   function crsInScope(session, row) {
     if (isAdmin(session)) return true;
     const keys = ['country', 'region', 'state', 'division', 'district'];
+    if (!keys.some(function (x) { return session[x]; })) return false; // location se na judne wale user ko koi data nahi
     for (let i = 0; i < keys.length; i++) {
       if (session[keys[i]] && normalize(row[keys[i]]) !== normalize(session[keys[i]])) return false;
     }
@@ -4014,13 +4065,19 @@ function createServer(DB, env) {
   async function listUsers(token) {
     if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin dekh sakta hai.');
     const users = (await DB.listDocs('User')).map(function (d) {
-      return { login: d.data.login || '', status: d.data.status || 'Active', level: d.data.level || '' };
+      return { login: d.data.login || '', status: d.data.status || 'Active', level: d.data.level || '', scope: d.data.scope || null };
     });
     users.sort(function (a, b) { return a.login.toLowerCase() < b.login.toLowerCase() ? -1 : 1; });
     return { success: true, users: users };
   }
 
-  async function saveUser(token, login, password, status, level) {
+  async function getTaqarrurTree(token) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin dekh sakta hai.');
+    return { success: true, rows: (await getTaqarrurRows()).map(function (r) { return [r[0], r[1], r[2], r[3], r[4], r[5]]; }) };
+  }
+
+  // scope = { country, region, state, division, district, alaqa }: Level ke hisab se location chunkar user banta hai (User ID koi bhi ho sakti hai)
+  async function saveUser(token, login, password, status, level, scope) {
     if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin change kar sakta hai.');
     login = (login || '').toString().trim();
     if (!login) return crsFail('User ID zaroori hai.');
@@ -4029,11 +4086,26 @@ function createServer(DB, env) {
     password = (password || '').toString().trim();
     if (!old && !password) return crsFail('Naye user ke liye Password zaroori hai.');
     const st = normalize(status) === 'inactive' ? 'Inactive' : 'Active';
-    await DB.setDoc('User', id, {
-      login: login, status: st, level: (level || '').toString().trim(),
+    const lv = (level || '').toString().trim();
+    const doc = {
+      login: login, status: st, level: lv,
       passHash: password ? await hashPassword(login, password) : old.passHash
-    });
-    return { success: true, message: old ? 'User update ho gaya.' : 'User add ho gaya.' };
+    };
+    const KEYS = ['country', 'region', 'state', 'division', 'district', 'alaqa'];
+    const li = KEYS.indexOf(normalize(lv));
+    let noLoc = false;
+    if (scope && li >= 0 && normalize(login) !== 'admin' && (scope[KEYS[li]] || '').toString().trim()) {
+      const want = {}; for (let k = 0; k <= li; k++) want[KEYS[k]] = (scope[KEYS[k]] || '').toString().trim();
+      const hit = (await getTaqarrurRows()).find(function (r) {
+        for (let k = 0; k <= li; k++) if (normalize(r[k]) !== normalize(want[KEYS[k]])) return false;
+        return true;
+      });
+      if (!hit) return crsFail('Ye location Taqarrur data me nahi mila. Pehle Taqarrur me add karein.');
+      const sc = {}; for (let k = 0; k < KEYS.length; k++) sc[KEYS[k]] = k <= li ? hit[k] : '';
+      doc.scope = sc;
+    } else if (li >= 0 && normalize(login) !== 'admin') noLoc = true;
+    await DB.setDoc('User', id, doc);
+    return { success: true, message: (old ? 'User update ho gaya.' : 'User add ho gaya.') + (noLoc ? ' (Location nahi chuni: ab User ID ka naam Taqarrur ke naam se milna chahiye.)' : '') };
   }
 
   async function deleteUser(token, login) {
@@ -4050,7 +4122,7 @@ function createServer(DB, env) {
     getDropdownData, saveData, deleteRecord, reviewRecord,
     getDashboardData, generateEntryLink, resolveEntryLink,
     isFirstRun, importTaqarrur, importUsers, importData,
-    getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, deleteCourses, generateCourseLink, importCourseData, clearAppointmentData, clearData,
+    getTaqarrurTree, getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, deleteCourses, generateCourseLink, importCourseData, clearAppointmentData, clearData,
     listUsers, saveUser, deleteUser,
     // testing / internal
     _internal: { getSetting, putSetting, normalize, parseDelimited, parseTaqarrurValues, fmtTs, sessions, getTaqarrurRows, resolveScope }
