@@ -1892,6 +1892,17 @@ window.Crs = (function () {
   const updRemark = function () { $c('remark').value = remarkOf($c('courseType').value, $c('courseName').value, $c('shuraka').value); };
 
   const TXT_ONLY = ['muallimName', 'courseKaAddress'], DIGITS = /[0-9\u0660-\u0669\u06F0-\u06F9\u0966-\u096F]/g;
+  // Year+Month ke hisab se Start/End date calendar us mahine tak limit
+  const p2 = function (n) { return (n < 10 ? '0' : '') + n; };
+  const fmtD = function (v) { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ''); return m ? m[3] + '-' + m[2] + '-' + m[1] : (v == null ? '' : v); };
+  function dateBounds(clear) {
+    const y = parseInt($c('year').value, 10), m = MON.indexOf($c('month').value) + 1, s = $c('startDate'), e = $c('endDate');
+    if (!y || !m) { [s, e].forEach(function (x) { x.min = ''; x.max = ''; }); return; }
+    const lo = y + '-' + p2(m) + '-01', hi = y + '-' + p2(m) + '-' + p2(new Date(y, m, 0).getDate());
+    s.min = lo; s.max = hi; e.min = s.value && s.value >= lo && s.value <= hi ? s.value : lo; e.max = hi;
+    if (clear) [s, e].forEach(function (x) { if (x.value && (x.value < lo || x.value > hi)) x.value = ''; });
+    if (s.value && e.value && e.value < s.value) e.value = '';
+  }
   function buildForm() {
     const SL = {}; SEL.forEach(function (x) { SL[x[0]] = x[1]; });
     const IM = {}; INP.forEach(function (x) { IM[x[0]] = x.slice(1); });
@@ -1908,6 +1919,8 @@ window.Crs = (function () {
       ['Qafila Details', 3, ['qafila3', 'shuraka2', 'qafila12', 'shuraka3', 'mah12', 'azkar']],
       ['Nek Amal &amp; Other Details', 4, ['nekTaqseem', 'nekWasool', 'jamiatul', 'imamat', 'madrasa', 'zimmedari', 'aamdan', 'kharch']]];
     $c('formBox').innerHTML = GR.map(function (g) { return '<h3 class="crs-h3">' + g[0] + '</h3><div class="crs-g" style="--c:' + g[1] + '">' + g[2].map(fld).join('') + '</div>'; }).join('');
+    ['year', 'month'].forEach(function (k) { $c(k).addEventListener('change', function () { dateBounds(true); }); });
+    $c('startDate').addEventListener('change', function () { dateBounds(false); });
     // Number wale fields me sirf digits, Text wale (Naam/Address/Zimmedari) me sirf text (digits nahi)
     INP.forEach(function (x) {
       const el = $c(x[0]); if (!el) return;
@@ -1935,7 +1948,7 @@ window.Crs = (function () {
     const ct = S.m.courseTypes.map(function (x) { return x.type; }); if (ct.indexOf(NOC) < 0) ct.push(NOC);
     fill($c('courseType'), ct); fill($c('shobaName'), S.m.shobas); fill($c('muallimZimmedari'), S.m.muallims); fill($c('courseName'), []);
     const dt = new Date(), Y = dt.getFullYear();
-    fill($c('year'), yrs(Y), String(Y)); fill($c('month'), MON, MON[dt.getMonth()]);
+    fill($c('year'), yrs(Y), String(Y)); fill($c('month'), MON, MON[dt.getMonth()]); dateBounds(true);
     typeChange();
     $c('fload').textContent = (!S.scoped.length && !isAdm()) ? 'Is location ka Taqarrur data nahi mila.' : '';
   }
@@ -2064,7 +2077,7 @@ window.Crs = (function () {
     S.tr = rows; S.pg = 1; drawTable();
   }
 
-  function cell(r, k) { return k === 'status' ? '<span class="crs-badge ' + esc(r.status) + '">' + esc(r.status) + '</span>' : esc(r[k]); }
+  function cell(r, k) { if (k === 'startDate' || k === 'endDate') return esc(fmtD(r[k])); return k === 'status' ? '<span class="crs-badge ' + esc(r.status) + '">' + esc(r.status) + '</span>' : esc(r[k]); }
   function drawTable() {
     const m = canMod(), q = N($c('sq').value), ps = +$c('ps').value;
     const all = S.tr.filter(function (r) { return !q || COLS.some(function (c) { return N(r[c[0]]).indexOf(q) >= 0; }); });
@@ -2113,13 +2126,13 @@ window.Crs = (function () {
     LOC.forEach(function (k) { $c(k).value = r[k] || ''; chain(''); });
     $c('courseType').value = r.courseType; typeChange(); $c('courseName').value = r.courseName;
     SEL.slice(2).concat(INP).forEach(function (x) { if (!$c(x[0]).disabled) $c(x[0]).value = r[x[0]] || ''; });
-    $c('year').value = r.year || ''; $c('month').value = r.month || ''; updRemark();
+    $c('year').value = r.year || ''; $c('month').value = r.month || ''; dateBounds(false); updRemark();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   // ---------- Exports ----------
   const hd = COLS.map(function (c) { return c[1]; });
-  const tv = function () { return (S.vis || []).map(function (r) { return COLS.map(function (c) { return r[c[0]] == null ? '' : r[c[0]]; }); }); };
+  const tv = function () { return (S.vis || []).map(function (r) { return COLS.map(function (c) { return r[c[0]] == null ? '' : (c[0] === 'startDate' || c[0] === 'endDate' ? fmtD(r[c[0]]) : r[c[0]]); }); }); };
   const dl = function (b, n) { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = n; a.click(); };
   const tbl = function (h, rs, st) { return '<table border="1" style="border-collapse:collapse' + (st || '') + '"><tr>' + h.map(function (x) { return '<th style="background:#0A1F44;color:#fff;padding:4px">' + esc(x) + '</th>'; }).join('') + '</tr>' + rs.map(function (r) { return '<tr>' + r.map(function (x) { return '<td style="padding:4px">' + esc(x) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table>'; };
   const xls = function (h, rs, n) { dl(new Blob(['﻿<html><meta charset="utf-8">' + tbl(h, rs) + '</html>'], { type: 'application/vnd.ms-excel' }), n + '.xls'); };
@@ -2145,7 +2158,7 @@ window.Crs = (function () {
     $c('delSel').onclick = delSelected;
     $c('csv').onclick = function () {
       const q = function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
-      const t = [COLS.map(function (c) { return q(c[1]); }).join(',')].concat(curRows().map(function (r) { return COLS.map(function (c) { return q(r[c[0]]); }).join(','); })).join('\n');
+      const t = [COLS.map(function (c) { return q(c[1]); }).join(',')].concat(curRows().map(function (r) { return COLS.map(function (c) { return q(c[0] === 'startDate' || c[0] === 'endDate' ? fmtD(r[c[0]]) : r[c[0]]); }).join(','); })).join('\n');
       dl(new Blob(['﻿' + t], { type: 'text/csv' }), 'Courses_Data_' + Date.now() + '.csv');
     };
   }
@@ -3411,6 +3424,9 @@ function createServer(DB, env) {
         for (let i = 0; i < CRS_NUM.length; i++) if (!/^\d+$/.test(val(CRS_NUM[i]))) return crsFail(CRS_NUM[i] + ' me sirf poora number (0 ya zyada) daalein.');
         const CRS_TONLY = { muallimName: 'Muallim ka Naam', courseKaAddress: 'Course ka Address' };
         for (const k in CRS_TONLY) if (/[0-9\u0660-\u0669\u06F0-\u06F9\u0966-\u096F]/.test(val(k))) return crsFail(CRS_TONLY[k] + ' me sirf text likhein, number nahi.');
+        const MONS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+        const mi = MONS.indexOf(normalize(val('month'))) + 1, ym = val('year') + '-' + (mi < 10 ? '0' : '') + mi;
+        if (mi && (val('startDate').slice(0, 7) !== ym || val('endDate').slice(0, 7) !== ym)) return crsFail('Course Start/End Date selected Year-Month (' + val('month') + ' ' + val('year') + ') ke andar hi honi chahiye.');
         if (val('endDate') < val('startDate')) return crsFail('Course End Date, Start Date se pehle nahi ho sakti.');
       }
 
