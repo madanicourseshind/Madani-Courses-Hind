@@ -5,7 +5,7 @@
 <title>Madani Courses - Admin Panel</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#0A1F44">
+<meta name="theme-color" content="#1687A8">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -272,6 +272,10 @@
 .sb-logout{ display:flex; align-items:center; gap:10px; width:100%; padding:10px 14px; border:0; border-radius:12px; color:#fff; font-weight:600; font-size:.92rem; background:linear-gradient(135deg,#DC2626,#B91C1C); box-shadow:0 4px 12px rgba(220,38,38,.35); cursor:pointer; text-align:left; }
 .sb-logout:hover{ filter:brightness(1.1); }
 
+/* Login logo */
+.login-logo{ display:block; width:100%; max-width:280px; height:auto; margin:0 auto 12px; }
+.login-card h1.lg-h{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; margin:0; padding:0; }
+
   @media (max-width:768px){
     .stat-grid{ grid-template-columns:repeat(2,1fr); }
   }
@@ -281,7 +285,8 @@
 
 <div id="loginSection">
   <div class="login-card">
-    <h1>Madani Courses</h1>
+    <img src="icons/logo.png" alt="Dawat-e-Islami India - Shoba Madani Courses" class="login-logo">
+    <h1 class="lg-h">Madani Courses</h1>
     <p class="tagline" style="margin-bottom:8px;">Admin Panel &mdash; Settings, Permissions &amp; Dashboards</p>
     <div id="clockLogin" style="font-size:0.82rem; color:var(--ink-600); margin-bottom:16px;"></div>
     <div id="linkStatusBanner" class="alert alert-warning d-none" style="font-size:0.85rem; padding:8px;"></div>
