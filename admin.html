@@ -148,59 +148,59 @@
   @media(max-width:600px){ .crs-eq{ grid-template-columns:repeat(var(--m,2),minmax(0,1fr)); } }
   #c_ft .dash-card-title{ min-height:3.6em; }
   /* ===================== NEW LOOK: Sidebar + professional colours ===================== */
-  :root{ --sb-w:268px; --nv9:#071733; --nv8:#0E2A63; --nv7:#16408F; --blue:#2563EB; --cyan:#06B6D4; --amber:#F59E0B; }
-  body{ background:linear-gradient(180deg,#EEF3FB 0%,#E4ECF8 100%) fixed; }
-  #loginSection{ background:radial-gradient(1200px 600px at 10% 0%,#2563EB 0%,transparent 55%),radial-gradient(900px 500px at 100% 100%,#06B6D4 0%,transparent 50%),linear-gradient(160deg,#071733,#0E2A63); }
-  .login-card{ border-radius:22px; box-shadow:0 30px 70px rgba(7,23,51,.5); }
-  .login-card h1{ background:linear-gradient(90deg,#0E2A63,#2563EB); -webkit-background-clip:text; background-clip:text; color:transparent; }
-  .btn-brand{ background:linear-gradient(135deg,#0E2A63,#2563EB); box-shadow:0 8px 20px rgba(37,99,235,.35); }
-  .btn-brand:hover{ background:linear-gradient(135deg,#0B2250,#1D4ED8); }
+  :root{ --teal-900:#0B4A60; --teal-800:#0E5A74; --teal-700:#126F8A; --teal-500:#1687A8; --sb-w:268px; --nv9:#0B4A60; --nv8:#126F8A; --nv7:#1687A8; --blue:#1687A8; --cyan:#06B6D4; --amber:#F59E0B; }
+  body{ background:linear-gradient(180deg,#EEF6F9 0%,#E2EFF4 100%) fixed; }
+  #loginSection{ background:radial-gradient(1200px 600px at 10% 0%,#27A3C2 0%,transparent 55%),radial-gradient(900px 500px at 100% 100%,#1687A8 0%,transparent 50%),linear-gradient(160deg,#0B4A60,#126F8A); }
+  .login-card{ border-radius:22px; box-shadow:0 30px 70px rgba(11,74,96,.5); }
+  .login-card h1{ background:linear-gradient(90deg,#126F8A,#1687A8); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .btn-brand{ background:linear-gradient(135deg,#126F8A,#1687A8); box-shadow:0 8px 20px rgba(22,135,168,.35); }
+  .btn-brand:hover{ background:linear-gradient(135deg,#0B2250,#126F8A); }
 
   #appSection{ display:none; }
   .app-shell{ display:flex; min-height:100vh; }
   #modeBar{ width:var(--sb-w); flex:0 0 var(--sb-w); height:100vh; position:sticky; top:0; overflow-y:auto; z-index:1500; display:flex; flex-direction:column;
-    background:linear-gradient(185deg,#071733 0%,#0E2A63 52%,#16408F 100%); color:#fff; box-shadow:6px 0 28px rgba(7,23,51,.28); }
+    background:linear-gradient(185deg,#1687A8 0%,#126F8A 55%,#0E5A74 100%); color:#fff; box-shadow:6px 0 28px rgba(11,74,96,.28); }
   .sb-brand{ display:flex; align-items:center; gap:12px; padding:22px 20px 18px; border-bottom:1px solid rgba(255,255,255,.12); }
   .sb-brand img{ width:46px; height:46px; border-radius:13px; box-shadow:0 6px 16px rgba(0,0,0,.35); }
   .sb-brand b{ font-family:'Poppins',sans-serif; font-size:1.05rem; display:block; line-height:1.15; }
   .sb-brand small{ display:block; opacity:.72; font-size:.72rem; margin-top:2px; }
   .sb-nav{ padding:14px 12px; flex:1; }
-  .sb-label{ font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:#7F9AD6; padding:6px 14px 2px; }
-  .sb-main{ display:flex; align-items:center; gap:11px; width:100%; text-align:left; background:transparent; border:0; color:#CFE0FF; font:600 .95rem 'Poppins',sans-serif;
+  .sb-label{ font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:#C9E6EF; padding:6px 14px 2px; }
+  .sb-main{ display:flex; align-items:center; gap:11px; width:100%; text-align:left; background:transparent; border:0; color:#E3F3F8; font:600 .95rem 'Poppins',sans-serif;
     padding:12px 14px; border-radius:13px; margin-top:6px; transition:all .18s ease; }
   .sb-main:hover{ background:rgba(255,255,255,.09); color:#fff; }
-  .sb-main.active{ background:linear-gradient(135deg,#2563EB,#06B6D4); color:#fff; box-shadow:0 10px 22px rgba(6,120,220,.4); }
+  .sb-main.active{ background:rgba(255,255,255,.22); color:#fff; box-shadow:inset 4px 0 0 #F59E0B, 0 8px 18px rgba(0,0,0,.14); }
   .sb-ico{ font-size:1.15rem; width:26px; text-align:center; }
   .sb-subs{ margin:4px 0 8px 22px; padding-left:12px; border-left:2px solid rgba(255,255,255,.16); }
-  .sb-sub{ display:block; width:100%; text-align:left; background:none; border:0; color:#AFC4EE; padding:8px 12px; border-radius:9px; font-size:.86rem; font-weight:500; transition:all .15s; }
+  .sb-sub{ display:block; width:100%; text-align:left; background:none; border:0; color:#D3ECF5; padding:8px 12px; border-radius:9px; font-size:.86rem; font-weight:500; transition:all .15s; }
   .sb-sub:hover{ color:#fff; background:rgba(255,255,255,.08); }
   .sb-sub.active{ color:#fff; background:rgba(255,255,255,.16); font-weight:600; box-shadow:inset 3px 0 0 #F59E0B; }
-  .sb-foot{ padding:14px 18px; font-size:.7rem; color:#7F9AD6; border-top:1px solid rgba(255,255,255,.1); }
+  .sb-foot{ padding:14px 18px; font-size:.7rem; color:#C9E6EF; border-top:1px solid rgba(255,255,255,.1); }
   #sbOverlay{ display:none; }
   .main-col{ flex:1; min-width:0; display:flex; flex-direction:column; }
 
-  .app-header{ position:sticky; top:0; z-index:1200; background:rgba(255,255,255,.92); backdrop-filter:blur(10px); color:#071733; border-bottom:1px solid #D9E3F5;
+  .app-header{ position:sticky; top:0; z-index:1200; background:rgba(255,255,255,.92); backdrop-filter:blur(10px); color:#0B4A60; border-bottom:1px solid #D9E3F5;
     box-shadow:0 4px 18px rgba(15,40,100,.07); padding:12px 28px; }
-  .page-title{ font:700 1.25rem 'Poppins',sans-serif; margin:0; color:#0B1F4B; }
+  .page-title{ font:700 1.25rem 'Poppins',sans-serif; margin:0; color:#0B4A60; }
   .page-sub{ font-size:.76rem; color:#5B6B8C; }
-  #sbToggle{ display:none; border:0; background:#E6EEFB; color:#0E2A63; border-radius:10px; width:40px; height:40px; font-size:1.2rem; }
-  .app-header .user-chip{ background:#E6EEFB; color:#0E2A63; }
-  .app-header .btn-ghost-light{ border:1px solid #C7D6F2; color:#0E2A63; background:#fff; }
-  .app-header .btn-ghost-light:hover{ background:#E6EEFB; color:#0E2A63; }
+  #sbToggle{ display:none; border:0; background:#E6EEFB; color:#126F8A; border-radius:10px; width:40px; height:40px; font-size:1.2rem; }
+  .app-header .user-chip{ background:#E6EEFB; color:#126F8A; }
+  .app-header .btn-ghost-light{ border:1px solid #C7D6F2; color:#126F8A; background:#fff; }
+  .app-header .btn-ghost-light:hover{ background:#E6EEFB; color:#126F8A; }
   .content-wrap{ max-width:none; margin:0; width:100%; min-width:0; padding:24px 28px 60px; }
   #myTab, #cTabs, #setTabs{ display:none !important; }
 
   .panel{ border:0; border-radius:16px; box-shadow:0 6px 26px rgba(15,40,100,.08); }
-  .panel h2{ font-family:'Poppins',sans-serif; color:#0B1F4B; }
-  .sec-title{ font:600 1rem 'Poppins',sans-serif; color:#0B1F4B; display:flex; align-items:center; gap:10px; margin-bottom:6px; }
-  .sec-title::before{ content:''; width:5px; height:22px; border-radius:4px; background:linear-gradient(180deg,#2563EB,#06B6D4); }
-  .crs-h3{ background:linear-gradient(90deg,#0E2A63,#2563EB); border-radius:10px; }
-  .btn-save{ background:linear-gradient(135deg,#0E2A63,#2563EB) !important; color:#fff !important; border-radius:12px; box-shadow:0 8px 20px rgba(37,99,235,.3); }
-  .btn-save:hover{ background:linear-gradient(135deg,#0B2250,#1D4ED8) !important; }
-  #resetFiltersBtn{ background:linear-gradient(135deg,#0E2A63,#2563EB) !important; }
-  .add-row-btn{ border-color:#2563EB; color:#1D4ED8; background:#F2F7FF; }
-  .entry-block{ border-left:5px solid #2563EB; box-shadow:0 4px 16px rgba(15,40,100,.06); }
-  .form-control:focus,.form-select:focus{ border-color:#2563EB; box-shadow:0 0 0 3px rgba(37,99,235,.18); }
+  .panel h2{ font-family:'Poppins',sans-serif; color:#0B4A60; }
+  .sec-title{ font:600 1rem 'Poppins',sans-serif; color:#0B4A60; display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .sec-title::before{ content:''; width:5px; height:22px; border-radius:4px; background:linear-gradient(180deg,#1687A8,#06B6D4); }
+  .crs-h3{ background:linear-gradient(90deg,#126F8A,#1687A8); border-radius:10px; }
+  .btn-save{ background:linear-gradient(135deg,#126F8A,#1687A8) !important; color:#fff !important; border-radius:12px; box-shadow:0 8px 20px rgba(22,135,168,.3); }
+  .btn-save:hover{ background:linear-gradient(135deg,#0B2250,#126F8A) !important; }
+  #resetFiltersBtn{ background:linear-gradient(135deg,#126F8A,#1687A8) !important; }
+  .add-row-btn{ border-color:#1687A8; color:#126F8A; background:#F2F7FF; }
+  .entry-block{ border-left:5px solid #1687A8; box-shadow:0 4px 16px rgba(15,40,100,.06); }
+  .form-control:focus,.form-select:focus{ border-color:#1687A8; box-shadow:0 0 0 3px rgba(22,135,168,.18); }
   #editModeBanner,.crs-edit{ background:linear-gradient(90deg,#F59E0B,#FBBF24); color:#3B2A00; }
 
   /* Stat cards: har card ka apna accha rang */
@@ -215,19 +215,19 @@
   .stat-grid .dash-card:nth-child(6n+5), .crs-eq .dash-card:nth-child(6n+5){ --ac:#7C3AED; }
   .stat-grid .dash-card:nth-child(6n+6), .crs-eq .dash-card:nth-child(6n+6){ --ac:#DB2777; }
   .dash-card-title{ color:var(--ac,#1F4E99) !important; letter-spacing:.02em; }
-  .dash-card-num{ color:#0B1F4B !important; }
+  .dash-card-num{ color:#0B4A60 !important; }
   .text-success-custom{ color:#047857 !important; }
-  table.dataTable thead th, .crs-table th{ background:linear-gradient(135deg,#0B1F4B,#16408F) !important; color:#fff !important; }
+  table.dataTable thead th, .crs-table th{ background:linear-gradient(135deg,#0B4A60,#1687A8) !important; color:#fff !important; }
   .table-scroll{ border-radius:14px; border-color:#D9E3F5; }
   .crs-badge.Approved{ background:#D1FAE5; color:#065F46; }
   .crs-badge.Pending{ background:#FEF3C7; color:#92400E; }
   .crs-badge.Rejected{ background:#FEE2E2; color:#991B1B; }
-  .set-tabs button.active{ background:#2563EB; border-color:#2563EB; }
+  .set-tabs button.active{ background:#1687A8; border-color:#1687A8; }
 
   @media (max-width:992px){
     #modeBar{ position:fixed; left:0; top:0; transform:translateX(-102%); transition:transform .25s ease; width:280px; }
     body.sb-open #modeBar{ transform:none; }
-    body.sb-open #sbOverlay{ display:block; position:fixed; inset:0; background:rgba(7,23,51,.55); z-index:1400; }
+    body.sb-open #sbOverlay{ display:block; position:fixed; inset:0; background:rgba(11,74,96,.55); z-index:1400; }
     #sbToggle{ display:inline-block; }
     .app-header{ padding:10px 14px; }
     .content-wrap{ padding:16px 12px 50px; }
@@ -242,11 +242,11 @@
   display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:8px 12px; align-items:start;
   padding:12px 14px !important; margin:0 0 12px !important; border:1px solid #D9E3F5 !important; border-radius:12px !important;
   background:linear-gradient(180deg,#F7FAFF,#EEF4FF) !important; }
-#setApptCtl .bg-light > label, #setCrsCtl .bg-light > label{ grid-column:1/-1; margin:0 !important; padding:0 0 6px !important; font-size:.8rem !important; letter-spacing:.04em; color:#0B1F4B !important; border-bottom:2px solid #DCE6F7 !important; }
+#setApptCtl .bg-light > label, #setCrsCtl .bg-light > label{ grid-column:1/-1; margin:0 !important; padding:0 0 6px !important; font-size:.8rem !important; letter-spacing:.04em; color:#0B4A60 !important; border-bottom:2px solid #DCE6F7 !important; }
 #setApptCtl .bg-light > p, #setCrsCtl .bg-light > p{ grid-column:1/-1; }
 .ctl-card{ min-width:0; }
-.ctl-card > button{ margin:0 !important; padding:7px 11px !important; font-size:.82rem; background:#fff; border:1px solid #D2DDF3; border-radius:10px; color:#12306B; box-shadow:0 1px 3px rgba(15,40,100,.06); }
-.ctl-card > button:hover{ border-color:#2563EB; background:#F4F8FF; color:#12306B; }
+.ctl-card > button{ margin:0 !important; padding:7px 11px !important; font-size:.82rem; background:#fff; border:1px solid #D2DDF3; border-radius:10px; color:#0E5A74; box-shadow:0 1px 3px rgba(15,40,100,.06); }
+.ctl-card > button:hover{ border-color:#1687A8; background:#F4F8FF; color:#0E5A74; }
 .ctl-card > button .badge{ font-size:.7rem !important; padding:4px 9px; border-radius:20px; min-width:40px; }
 .ctl-card .sp-box{ margin:4px 0 0; }
 .ctl-card .sp-box .input-group-text{ padding:2px 8px; font-size:.68rem; }
@@ -256,12 +256,12 @@
 
 /* ===== Dashboard filters: ek rang-sangam ===== */
 .panel:has(#resetFiltersBtn), #c_cap > .panel:first-child{
-  background:linear-gradient(120deg,#0B1F4B 0%,#1E40AF 58%,#0E7490 100%) !important; color:#fff; position:relative; overflow:hidden; padding:16px 20px 18px !important; }
+  background:linear-gradient(120deg,#0E5A74 0%,#1687A8 62%,#27A3C2 100%) !important; color:#fff; position:relative; overflow:hidden; padding:16px 20px 18px !important; }
 .panel:has(#resetFiltersBtn)::after, #c_cap > .panel:first-child::after{ content:""; position:absolute; right:-60px; top:-60px; width:200px; height:200px; border-radius:50%; background:radial-gradient(circle,rgba(255,255,255,.14),transparent 70%); pointer-events:none; }
 .panel:has(#resetFiltersBtn) > h2, #c_cap > .panel:first-child > h2{ color:#fff !important; font-size:.95rem !important; letter-spacing:.03em; margin-bottom:10px !important; }
 .panel:has(#resetFiltersBtn) > h2::before, #c_cap > .panel:first-child > h2::before{ content:"\25BC"; font-size:.7rem; margin-right:8px; color:#FBBF24; }
 .panel:has(#resetFiltersBtn) .field-label, #c_cap > .panel:first-child .field-label, #c_fl label, #c_fl .field-label{ color:#BFD7FF !important; font-weight:600; font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; }
-.panel:has(#resetFiltersBtn) .form-select, #c_cap > .panel:first-child select{ background-color:rgba(255,255,255,.96); border:1px solid rgba(255,255,255,.4); border-radius:9px; font-weight:500; color:#0B1F4B; }
+.panel:has(#resetFiltersBtn) .form-select, #c_cap > .panel:first-child select{ background-color:rgba(255,255,255,.96); border:1px solid rgba(255,255,255,.4); border-radius:9px; font-weight:500; color:#0B4A60; }
 .panel:has(#resetFiltersBtn) .form-select:disabled, #c_cap > .panel:first-child select:disabled{ background-color:rgba(255,255,255,.55) !important; color:#1E3A6B !important; border-color:rgba(255,255,255,.25); }
 .panel:has(#resetFiltersBtn) #resetFiltersBtn, #c_cap > .panel:first-child #c_fr{ background:linear-gradient(135deg,#F59E0B,#F97316) !important; color:#fff !important; border:0 !important; border-radius:9px; font-weight:700; box-shadow:0 4px 12px rgba(249,115,22,.4); }
 #c_cap > .panel:first-child .btn-secondary, .panel:has(#resetFiltersBtn) .btn:not(#resetFiltersBtn){ background:rgba(255,255,255,.16) !important; border:1px solid rgba(255,255,255,.4) !important; color:#fff !important; border-radius:9px; }
@@ -743,6 +743,9 @@
     <div class="mt-2" style="max-width:460px"><span class="field-label">Courses Dashboard: sirf in "Muallim Zimmedari" ka data dikhao (optional, ek ya zyada chunein)</span>
       <div class="dropdown"><button type="button" class="form-select text-start" id="nuMzBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">Sab (koi pabandi nahi)</button>
       <div class="dropdown-menu p-2" id="nuMzMenu" style="max-height:260px;overflow:auto;min-width:100%"></div></div></div>
+    <div class="mt-2" style="max-width:460px"><span class="field-label">Courses Form + Dashboard: sirf in "Course Type" ka option/data (optional, ek ya zyada chunein)</span>
+      <div class="dropdown"><button type="button" class="form-select text-start" id="nuCtBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">Sab (koi pabandi nahi)</button>
+      <div class="dropdown-menu p-2" id="nuCtMenu" style="max-height:260px;overflow:auto;min-width:100%"></div></div></div>
     <div class="text-muted mt-1" style="font-size:.74rem">Level "Auto" rakhne par User ID ka naam Taqarrur ke naam se milna chahiye (purana tareeqa). Level chunne par location Taqarrur se chunein &mdash; tab User ID <b>koi bhi naam</b> ho sakti hai.</div>
     <button type="button" class="btn-save mt-3" style="width:auto;padding:9px 24px" onclick="Adm.saveUser()">Save User</button>
     <div id="usMsg" class="mt-2" style="font-size:0.85rem"></div>
@@ -2237,7 +2240,7 @@ window.Crs = (function () {
 
   function initForm() {
     chain(''); chain('l_');
-    const ct = S.m.courseTypes.map(function (x) { return x.type; }); if (ct.indexOf(NOC) < 0) ct.push(NOC);
+    let ct = S.m.courseTypes.map(function (x) { return x.type; }); if (!isAdm() && (S.m.allowedTypes || []).length) { const al = S.m.allowedTypes.map(function (x) { return N(x); }); ct = ct.filter(function (x) { return al.indexOf(N(x)) >= 0; }); } if (ct.indexOf(NOC) < 0) ct.push(NOC);
     fill($c('courseType'), ct); fill($c('shobaName'), S.m.shobas); fill($c('muallimZimmedari'), S.m.muallims); fill($c('courseName'), []);
     const dt = new Date(), Y = dt.getFullYear();
     fill($c('year'), yrs(Y), String(Y)); fill($c('month'), MON, MON[dt.getMonth()]); dateBounds(true);
@@ -2586,7 +2589,7 @@ window.Adm = (function () {
     const list = users.filter(function (u) { return !q || u.login.toLowerCase().indexOf(q) >= 0; });
     $a('usCnt').textContent = list.length + ' / ' + users.length + ' users';
     $a('usBody').innerHTML = list.map(function (u, i) {
-      return '<tr><td>' + esc(u.login) + '</td><td>' + esc(u.status) + '</td><td>' + esc(u.level) + ((u.crsMuallim && u.crsMuallim.length) ? ' <small style="color:#7C3AED">[Courses: ' + esc((u.crsMuallim || []).join(', ')) + ']</small>' : '') + (u.scope ? ' <small style="color:#475569">(' + esc(locName(u)) + ')</small>' : '') + '</td><td style="white-space:nowrap"><button type="button" class="btn btn-sm py-0" style="background:#C9A227" onclick="Adm.editUser(' + users.indexOf(u) + ')">Edit</button> <button type="button" class="btn btn-sm btn-danger py-0" onclick="Adm.delUser(' + users.indexOf(u) + ')">Delete</button></td></tr>';
+      return '<tr><td>' + esc(u.login) + '</td><td>' + esc(u.status) + '</td><td>' + esc(u.level) + (((u.crsMuallim && u.crsMuallim.length) || (u.crsTypes && u.crsTypes.length)) ? ' <small style="color:#7C3AED">[Courses: ' + esc((u.crsTypes || []).concat(u.crsMuallim || []).join(', ')) + ']</small>' : '') + (u.scope ? ' <small style="color:#475569">(' + esc(locName(u)) + ')</small>' : '') + '</td><td style="white-space:nowrap"><button type="button" class="btn btn-sm py-0" style="background:#C9A227" onclick="Adm.editUser(' + users.indexOf(u) + ')">Edit</button> <button type="button" class="btn btn-sm btn-danger py-0" onclick="Adm.delUser(' + users.indexOf(u) + ')">Delete</button></td></tr>';
     }).join('') || '<tr><td colspan="4">Koi user nahi.</td></tr>';
   }
   // ----- Level + location (Taqarrur se) -----
@@ -2628,12 +2631,26 @@ window.Adm = (function () {
     }).join('') : '<div class="text-muted" style="font-size:.8rem">Pehle Courses Dropdowns me Muallim Zimmedari add karein.</div>';
     mzLabel();
   }
+  let ctSel = [];
+  function ctLabel() { $a('nuCtBtn').textContent = ctSel.length ? (ctSel.length > 2 ? ctSel.length + ' Course Type chune gaye' : ctSel.join(', ')) : 'Sab (koi pabandi nahi)'; }
+  function fillCt(cur) {
+    ctSel = (cur || []).slice();
+    const list = (M.courseTypes || []).map(function (t) { return t.type; }); ctSel.forEach(function (x) { if (list.indexOf(x) < 0) list.push(x); });
+    $a('nuCtMenu').innerHTML = list.length ? list.map(function (o, n) {
+      return '<div class="form-check"><input class="form-check-input ct-cb" type="checkbox" id="ctc' + n + '" value="' + esc(o) + '"' + (ctSel.indexOf(o) >= 0 ? ' checked' : '') + '><label class="form-check-label" for="ctc' + n + '" style="font-size:.85rem">' + esc(o) + '</label></div>';
+    }).join('') : '<div class="text-muted" style="font-size:.8rem">Pehle Courses Dropdowns me Course Type add karein.</div>';
+    ctLabel();
+  }
+  document.addEventListener('change', function (ev) {
+    if (!ev.target.classList || !ev.target.classList.contains('ct-cb')) return;
+    ctSel = Array.prototype.map.call(document.querySelectorAll('#nuCtMenu .ct-cb:checked'), function (c) { return c.value; }); ctLabel();
+  });
   document.addEventListener('change', function (ev) {
     if (!ev.target.classList || !ev.target.classList.contains('mz-cb')) return;
     mzSel = Array.prototype.map.call(document.querySelectorAll('#nuMzMenu .mz-cb:checked'), function (c) { return c.value; }); mzLabel();
   });
   function editUser(i) {
-    const u = users[i]; fillMz(u.crsMuallim || []); initLocData().then(function () { fillLoc(u.scope || null); }); $a('nuId').value = u.login; $a('nuPw').value = ''; $a('nuSt').value = u.status || 'Active';
+    const u = users[i]; fillMz(u.crsMuallim || []); fillCt(u.crsTypes || []); initLocData().then(function () { fillLoc(u.scope || null); }); $a('nuId').value = u.login; $a('nuPw').value = ''; $a('nuSt').value = u.status || 'Active';
     const lv = (u.level || '').toLowerCase(); $a('nuLv').value = lv ? lv[0].toUpperCase() + lv.slice(1) : '';
     fillLoc(u.scope || null);
     $a('nuPw').focus();
@@ -2644,9 +2661,9 @@ window.Adm = (function () {
   }
   async function saveUser() {
     try {
-      const r = await call('saveUser', $a('nuId').value, $a('nuPw').value, $a('nuSt').value, $a('nuLv').value, lvIdx() >= 0 ? KEYS.reduce(function (o, k, n) { o[k] = n <= lvIdx() ? $a('nuLc' + n).value : ''; return o; }, {}) : null, mzSel.slice());
+      const r = await call('saveUser', $a('nuId').value, $a('nuPw').value, $a('nuSt').value, $a('nuLv').value, lvIdx() >= 0 ? KEYS.reduce(function (o, k, n) { o[k] = n <= lvIdx() ? $a('nuLc' + n).value : ''; return o; }, {}) : null, mzSel.slice(), ctSel.slice());
       msg('usMsg', r.success, r.message);
-      if (r.success) { $a('nuId').value = ''; $a('nuPw').value = ''; fillMz([]); loadUsers(); }
+      if (r.success) { $a('nuId').value = ''; $a('nuPw').value = ''; fillMz([]); fillCt([]); loadUsers(); }
     } catch (e) { msg('usMsg', false, 'Error: ' + e.message); }
   }
 
@@ -2655,7 +2672,7 @@ window.Adm = (function () {
     try {
       const r = await call('getCourseMaster'); if (!r.success) return msg('coMsg', false, r.message);
       M = { courseTypes: r.courseTypes || [], shobas: r.shobas || [], muallims: r.muallims || [] };
-      $a('coYf').value = r.yearFrom || ''; $a('coYt').value = r.yearTo || ''; drawOpt(); fillMz(mzSel);
+      $a('coYf').value = r.yearFrom || ''; $a('coYt').value = r.yearTo || ''; drawOpt(); fillMz(mzSel); fillCt(ctSel);
     } catch (e) { msg('coMsg', false, 'Error: ' + e.message); }
   }
   async function persist() {
@@ -3215,7 +3232,7 @@ function createServer(DB, env) {
       const sessionData = {
         userId: rLogin, role: role, country: scope.country,
         region: scope.region, state: scope.state, division: scope.division,
-        district: scope.district, alaqa: scope.alaqa, level: userLevel, crsMuallim: (Array.isArray(u.crsMuallim) ? u.crsMuallim : (u.crsMuallim ? [u.crsMuallim.toString()] : []))
+        district: scope.district, alaqa: scope.alaqa, level: userLevel, crsMuallim: (Array.isArray(u.crsMuallim) ? u.crsMuallim : (u.crsMuallim ? [u.crsMuallim.toString()] : [])), crsTypes: (Array.isArray(u.crsTypes) ? u.crsTypes : [])
       };
       sessions.set(token, { data: sessionData, exp: Date.now() + SESSION_DURATION_MS });
 
@@ -3777,7 +3794,7 @@ function createServer(DB, env) {
     const m = await readSettings();
     return {
       success: true, courseTypes: d.courseTypes || [], shobas: d.shobas || [], muallims: d.muallims || [],
-      yearFrom: m['crsyearfrom'] || '', yearTo: m['crsyearto'] || ''
+      yearFrom: m['crsyearfrom'] || '', yearTo: m['crsyearto'] || '', allowedTypes: isAdmin(session) ? [] : (session.crsTypes || [])
     };
   }
 
@@ -3855,6 +3872,7 @@ function createServer(DB, env) {
       if (editId && !crsCanModify(session, controls)) return crsFail('Aapko Courses Data Edit karne ki permission nahi hai (Admin ne band rakha hai).');
 
       d = d || {};
+      if (!isAdmin(session) && !crsTypeOk(session, (d.courseType || '').toString())) return crsFail('Aapko ye Course Type enter karne ki ijazat nahi hai.');
       const val = function (k) { return (d[k] === undefined || d[k] === null ? '' : d[k]).toString().trim(); };
       const nc = normalize(val('courseType')) === normalize(CRS_NOC);
       const req = nc ? CRS_LOC.concat(['year', 'month', 'courseType', 'courseName'])
@@ -3915,6 +3933,8 @@ function createServer(DB, env) {
     }
   }
 
+  // User par Course Type ki pabandi ho to sirf wahi types (aur "Koi Course Nahi Hua" entry) allowed
+  const crsTypeOk = function (session, t) { const a = session.crsTypes; return !(a && a.length) || normalize(t) === normalize(CRS_NOC) || a.some(function (x) { return mzKey(x) === mzKey(t); }); };
   const mzKey = function (v) { return (v == null ? '' : v).toString().toLowerCase().replace(/[^a-z0-9]/g, ''); };
   async function getCourseDashboard(token) {
     try {
@@ -3924,7 +3944,7 @@ function createServer(DB, env) {
         const o = Object.assign({ id: x.id, ts: x.data.ts || '', seq: x.data.seq || 0 }, crsToDoc(x.data));
         o.status = o.status || 'Approved';
         return o;
-      }).filter(function (r) { return crsInScope(session, r) && (!(session.crsMuallim && session.crsMuallim.length) || session.crsMuallim.some(function (m) { return mzKey(m) === mzKey(r.muallimZimmedari); })); });
+      }).filter(function (r) { return crsInScope(session, r) && (!(session.crsMuallim && session.crsMuallim.length) || session.crsMuallim.some(function (m) { return mzKey(m) === mzKey(r.muallimZimmedari); })) && crsTypeOk(session, r.courseType); });
       rows.sort(function (a, b) { return b.seq - a.seq; });
       const seen = {}, structure = [];
       (await getScopedTaqarrur(session)).forEach(function (r) {
@@ -4087,7 +4107,7 @@ function createServer(DB, env) {
   async function listUsers(token) {
     if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin dekh sakta hai.');
     const users = (await DB.listDocs('User')).map(function (d) {
-      return { login: d.data.login || '', status: d.data.status || 'Active', level: d.data.level || '', scope: d.data.scope || null, crsMuallim: Array.isArray(d.data.crsMuallim) ? d.data.crsMuallim : (d.data.crsMuallim ? [d.data.crsMuallim.toString()] : []) };
+      return { login: d.data.login || '', status: d.data.status || 'Active', level: d.data.level || '', scope: d.data.scope || null, crsTypes: Array.isArray(d.data.crsTypes) ? d.data.crsTypes : [], crsMuallim: Array.isArray(d.data.crsMuallim) ? d.data.crsMuallim : (d.data.crsMuallim ? [d.data.crsMuallim.toString()] : []) };
     });
     users.sort(function (a, b) { return a.login.toLowerCase() < b.login.toLowerCase() ? -1 : 1; });
     return { success: true, users: users };
@@ -4099,7 +4119,7 @@ function createServer(DB, env) {
   }
 
   // scope = { country, region, state, division, district, alaqa }: Level ke hisab se location chunkar user banta hai (User ID koi bhi ho sakti hai)
-  async function saveUser(token, login, password, status, level, scope, crsMuallim) {
+  async function saveUser(token, login, password, status, level, scope, crsMuallim, crsTypes) {
     if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin change kar sakta hai.');
     login = (login || '').toString().trim();
     if (!login) return crsFail('User ID zaroori hai.');
@@ -4115,6 +4135,8 @@ function createServer(DB, env) {
     };
     const mzList = (Array.isArray(crsMuallim) ? crsMuallim : (crsMuallim ? [crsMuallim] : [])).map(function (x) { return (x || '').toString().trim(); }).filter(Boolean);
     if (mzList.length && normalize(login) !== 'admin') doc.crsMuallim = mzList;
+    const ctList = (Array.isArray(crsTypes) ? crsTypes : []).map(function (x) { return (x || '').toString().trim(); }).filter(Boolean);
+    if (ctList.length && normalize(login) !== 'admin') doc.crsTypes = ctList;
     const KEYS = ['country', 'region', 'state', 'division', 'district', 'alaqa'];
     const li = KEYS.indexOf(normalize(lv));
     let noLoc = false;
