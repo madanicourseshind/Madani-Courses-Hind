@@ -3334,7 +3334,7 @@ function createServer(DB, env) {
       const controls = await getAdminControls();
       await applySpecificAccess(controls, session);
       if (session.userId === QUICK_ENTRY_USER && controls.formQuickEntry === 'OFF') {
-        return 'Error: Quick Entry Form abhi Admin dwara band (OFF) kiya gaya hai.';
+        return 'Error: Quick Entry Form (OFF) He.';
       }
 
       if (!isAdmin(session) && !formAllowed(controls, session.level, false)) return 'Error: Appointment Form abhi aapke level ke liye band hai.';
