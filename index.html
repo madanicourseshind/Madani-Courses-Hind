@@ -2893,7 +2893,7 @@ function createServer(DB, env) {
       const controls = await getAdminControls();
       await applySpecificAccess(controls, session);
       if (session.userId === QUICK_ENTRY_USER && controls.formQuickEntry === 'OFF') {
-        return 'Error: Quick Entry Form (OFF) Hai.';
+        return 'Error: Quick Entry Form abhi Admin dwara band (OFF) kiya gaya hai.';
       }
 
       if (!isAdmin(session) && !formAllowed(controls, session.level, false)) return 'Error: Appointment Form abhi aapke level ke liye band hai.';
@@ -3165,7 +3165,7 @@ function createServer(DB, env) {
     const form = d.form === 'courses' ? 'courses' : 'appointment';
     const qeKey = form === 'courses' ? 'CrsFormAccessQuickEntry' : 'FormAccessQuickEntry';
     if ((await getSetting(qeKey, 'ON')) === 'OFF') {
-      return { error: 'Quick Entry Form (OFF) Hai.' };
+      return { error: 'Quick Entry Form abhi Admin dwara band (OFF) kiya gaya hai.' };
     }
     const loc = { country: d.country, region: d.region, state: d.state, division: d.division, district: d.district || '', alaqa: d.alaqa || '' };
     if (!(await quickLinkAllowed(qeKey, loc))) {
@@ -3801,7 +3801,7 @@ function createServer(DB, env) {
     var b = ev.target.closest && ev.target.closest('.pwa-install'); if (!b) return;
     if (deferred) { deferred.prompt(); deferred.userChoice.then(function () { deferred = null; show(false); }); }
     else if (isIOS) alert('iPhone/iPad par install karne ke liye: Safari me Share (\u2B06\uFE0F) dabayein > "Add to Home Screen".');
-    else alert('Browser menu (\u22EE) me "Install app" ya "Add to Home screen" chunein.\n\nAgar ye option wahan nahi hai to GitHub me manifest.webmanifest, sw.js aur icons folder (icon-192.png, icon-512.png) sahi jagah upload karein.');
+    else alert('Agar app pehle se install hai to Home screen ya App list me "Madani Courses" dhundhein.\n\nWarna ye link Chrome me kholein aur menu (\u22EE) me "Install app" ya "Add to Home screen" chunein.');
   });
   show(true); // button hamesha dikhe: prompt na mile to manual install ka tareeqa batata hai
 })();
