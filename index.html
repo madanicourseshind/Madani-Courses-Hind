@@ -187,6 +187,10 @@
   .rgp-b.pd{ background:#FDECEA; color:#B03A2E; } .rgp-b.cp{ background:#E6EEFA; color:#1F4E99; }
   .rgp-rp{ font-weight:800; font-size:.85rem; color:var(--ac); min-width:38px; text-align:right; }
   .rgp-c .rgp-ch{ background:var(--ac); color:#fff !important; border-radius:12px; padding:5px 14px; margin-bottom:6px; font-size:1rem; }
+  .rgp-grid.one{ grid-template-columns:minmax(0,1fr); max-width:520px; margin-left:auto; margin-right:auto; }
+  .rgp-tot{ border-top:2px solid #D8E2EC !important; margin-top:2px; }
+  .rgp-tot .rgp-rn{ color:var(--ac); }
+  .px-t{ font-size:1.7rem; }
   /* ===================== NEW LOOK: Sidebar + professional colours ===================== */
   :root{ --teal-900:#0B4A60; --teal-800:#0E5A74; --teal-700:#126F8A; --teal-500:#1687A8; --sb-w:268px; --nv9:#0B4A60; --nv8:#126F8A; --nv7:#1687A8; --blue:#1687A8; --cyan:#06B6D4; --amber:#F59E0B; }
   body{ background:linear-gradient(180deg,#EEF6F9 0%,#E2EFF4 100%) fixed; }
@@ -548,7 +552,7 @@ body.view-as{ padding-top:40px; }
       <div id="c_apb" class="alert alert-warning d-none" style="font-size:0.88rem;padding:10px 14px;"></div>
       <div class="panel"><div class="sec-title">Courses / Shuraka Report</div><div class="crs-eq mt-2" id="c_st"></div><div class="crs-eq" style="margin-bottom:0" id="c_ft"></div></div>
       <div class="panel"><div class="sec-title">Courses ki Output Report Summary</div><div class="crs-eq mt-2" style="margin-bottom:0" id="c_ex"></div></div>
-      <div class="panel" data-nocap><div class="sec-title">Pending &amp; Complete Status (Region, State, Division, District)</div><div class="crs-eq mt-2" style="margin-bottom:0" id="c_cv"></div><button type="button" class="btn-save mt-3" style="width:auto;padding:8px 18px" id="c_rb">Region Wise Report</button><div id="c_rv" class="d-none"></div></div>
+      <div class="panel" data-nocap><div class="sec-title">Pending &amp; Complete Status (Region, State, Division, District)</div><div class="crs-eq mt-2" style="margin-bottom:0" id="c_cv"></div><button type="button" class="btn-save mt-3" style="width:auto;padding:8px 18px" id="c_rb">Monthly Report</button><div id="c_rv" class="d-none"></div></div>
       <div class="crs-charts"><div class="panel"><div class="crs-ch-h"><span id="c_tc1"></span><button type="button" class="crs-dl" data-c="c1" title="Download image">&#11015;</button></div><canvas id="c_c1"></canvas></div><div class="panel"><div class="crs-ch-h"><span id="c_tc2"></span><button type="button" class="crs-dl" data-c="c2" title="Download image">&#11015;</button></div><canvas id="c_c2"></canvas></div></div>
     </div>
     <div class="panel">
@@ -2128,7 +2132,7 @@ window.Crs = (function () {
       });
       return { g: g, lv: lv };
     });
-    S.period = periodTxt();
+    S.okRows = ok; S.period = periodTxt(true, ok);
     S.rgHtml = S.rgD.length ? rgBlock() : '';
     if (!$c('rv').classList.contains('d-none')) $c('rv').innerHTML = S.rgHtml || '<p class="m-2">Data nahi hai.</p>';
 
@@ -2137,12 +2141,12 @@ window.Crs = (function () {
     [['c1', ax[0]], ['c2', ax[1]]].forEach(function (p) {
       const id = p[0], k = p[1], cap = k[0].toUpperCase() + k.slice(1).replace(/([A-Z])/g, ' $1');
       const g = function (l) { return ok.filter(function (r) { return (r[k] || 'Unknown') === l; }); };
-      const rows = ok.map(function (r) { return r[k] || 'Unknown'; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).map(function (l) { const q = g(l); return { l: l, sh: sS(q), c: q.filter(function (r) { return r.remark === 'Course'; }).length }; }).sort(function (a, b) { return b.sh - a.sh; });
-      $c('t' + id).textContent = cap + '-wise Shuraka Report (' + S.period + ')';
+      const rows = ok.map(function (r) { return r[k] || 'Unknown'; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).map(function (l) { const q = g(l); return { l: l, sh: sS(q), c: q.filter(function (r) { return r.remark === 'Course'; }).length }; }).sort(function (a, b) { return b.c - a.c || b.sh - a.sh; });
+      $c('t' + id).textContent = cap + '-wise Courses Report (' + S.period + ')';
       if (charts[id]) charts[id].destroy();
       charts[id] = new Chart($c(id), { type: 'bar', plugins: [rankPlug],
-        data: { labels: rows.map(function (x) { return [x.l, x.c + (x.c === 1 ? ' Course' : ' Courses')]; }), datasets: [{ data: rows.map(function (x) { return x.sh; }), borderRadius: 12, borderSkipped: false, maxBarThickness: 64, backgroundColor: function (cx) { const ch = cx.chart, ca = ch.chartArea; if (!ca || cx.dataIndex == null) return PAL[0][0]; const gr = ch.ctx.createLinearGradient(0, ca.top, 0, ca.bottom), c = PAL[cx.dataIndex % PAL.length]; gr.addColorStop(0, c[0]); gr.addColorStop(1, c[1]); return gr; } }] },
-        options: { maintainAspectRatio: true, aspectRatio: 1.9, layout: { padding: { top: 26 } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (c) { return c.parsed.y + ' Shuraka'; } } } }, scales: { y: { beginAtZero: true, grid: { color: '#EEF1F6' }, border: { display: false }, ticks: { color: '#6B7280' } }, x: { grid: { display: false }, ticks: { color: '#374151', font: { size: 10, weight: '600' }, maxRotation: 30 } } } } });
+        data: { labels: rows.map(function (x) { return [x.l, x.sh + ' Shuraka']; }), datasets: [{ data: rows.map(function (x) { return x.c; }), borderRadius: 12, borderSkipped: false, maxBarThickness: 64, backgroundColor: function (cx) { const ch = cx.chart, ca = ch.chartArea; if (!ca || cx.dataIndex == null) return PAL[0][0]; const gr = ch.ctx.createLinearGradient(0, ca.top, 0, ca.bottom), c = PAL[cx.dataIndex % PAL.length]; gr.addColorStop(0, c[0]); gr.addColorStop(1, c[1]); return gr; } }] },
+        options: { maintainAspectRatio: true, aspectRatio: 1.9, layout: { padding: { top: 26 } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (c) { return c.parsed.y + ' Courses'; } } } }, scales: { y: { beginAtZero: true, grid: { color: '#EEF1F6' }, border: { display: false }, ticks: { color: '#6B7280', precision: 0 } }, x: { grid: { display: false }, ticks: { color: '#374151', font: { size: 10, weight: '600' }, maxRotation: 30 } } } } });
     });
 
     ['xl', 'pf', 'it', 'csv'].forEach(function (i) { $c(i).classList.toggle('d-none', !canExport()); });
@@ -2226,20 +2230,25 @@ window.Crs = (function () {
       c.restore();
     });
   } };
-  function periodTxt() { const y = $c('fYear').value, m = $c('fMonth').value; return (m || y) ? (m + ' ' + y).trim() : 'All Periods'; }
+  function periodTxt(short, rows) {
+    const m = $c('fMonth').value; let y = $c('fYear').value;
+    if (!y) { const u = (rows || S.okRows || []).map(function (r) { return r.year; }).filter(function (v, i, a) { return v && a.indexOf(v) === i; }); y = u.length === 1 ? String(u[0]) : u.join('/'); }
+    return m ? ((short ? m.slice(0, 3) : m) + ' ' + y).trim() : ('All Months ' + y).trim();
+  }
   function filtInfo() { return FLT.filter(function (f) { return f[1] !== 'fYear' && f[1] !== 'fMonth' && $c(f[1]).value; }).map(function (f) { return (FLT_LABEL[f[1]] || f[0][0].toUpperCase() + f[0].slice(1)) + ': ' + $c(f[1]).value; }); }
   const BG = 'linear-gradient(180deg,#D9EEFB 0%,#E8F7F3 100%)';
   function capOpt() {
-    const info = filtInfo(), per = periodTxt();
+    const info = filtInfo(), per = periodTxt(false), im = {};
+    ['c1', 'c2'].forEach(function (i) { try { im['c_' + i] = $c(i).toDataURL('image/png'); } catch (e) {} });
     return { scale: 2, backgroundColor: '#E3F2F8', windowWidth: 1250, onclone: function (d) {
       d.querySelectorAll('#c_cap [data-nocap],#c_cap .crs-dl').forEach(function (e) { e.remove(); });
+      Object.keys(im).forEach(function (id) { const cv = d.getElementById(id); if (!cv) return; const g = d.createElement('img'); g.src = im[id]; g.style.cssText = 'width:100%;height:auto;display:block'; cv.parentNode.replaceChild(g, cv); });
       const cap = d.getElementById('c_cap'), fp = d.getElementById('c_fl').closest('.panel');
       cap.style.cssText = 'background:' + BG + ';padding:26px;border-radius:0';
       [['background', 'none'], ['background-image', 'none'], ['box-shadow', 'none'], ['border', '0'], ['padding', '0 0 14px'], ['text-align', 'center'], ['color', '#0B4A60']].forEach(function (q) { fp.style.setProperty(q[0], q[1], 'important'); });
       fp.classList.add('px-fp');
-      fp.innerHTML = '<div class="px-t">Courses Dashboard</div><div class="px-s">Courses Dashboard Filters</div>' +
-        (info.length ? '<div class="px-ch">' + info.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join('') + '</div>' : '<div class="px-ch"><span>All Data</span></div>') +
-        '<div class="px-p">' + esc(per) + '</div>';
+      fp.innerHTML = '<div class="px-t">Shoba Madani Course Hind Report</div><div class="px-p" style="margin-top:14px">' + esc(per) + '</div>' +
+        (info.length ? '<div class="px-ch">' + info.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join('') + '</div>' : '');
     } };
   }
   const pdfFromCanvas = function (c, title, name) { const h = c.height * 210 / c.width, d = new window.jspdf.jsPDF({ unit: 'mm', format: [210, h + 20] }); d.text(title, 10, 10); d.addImage(c.toDataURL('image/png'), 'PNG', 0, 15, 210, h); d.save(name + '.pdf'); };
@@ -2252,12 +2261,13 @@ window.Crs = (function () {
         const p = v.A.length ? Math.round(v.cp.length * 100 / v.A.length) : 0;
         return '<div class="rgp-r"><div class="rgp-rn">' + nm(v.n) + '</div><div class="rgp-rv"><span class="rgp-b pd">Pending ' + v.pd.length + '</span><span class="rgp-b cp">Complete ' + v.cp.length + '</span></div><div class="rgp-rp">' + p + '%</div></div>';
       }).join('');
-      const l = d.lv[d.lv.length - 1]; if (l) { tot.p += l.pd.length; tot.c += l.cp.length; tot.a += l.A.length; }
-      return '<div class="rgp-c" style="--ac:rgb(' + ac + ');--acr:' + ac + '"><div class="rgp-ch">' + esc(d.g) + '</div>' + rows + '</div>';
+      const l = d.lv[d.lv.length - 1]; let trow = '';
+      if (l) { tot.p += l.pd.length; tot.c += l.cp.length; tot.a += l.A.length; const tp = l.A.length ? Math.round(l.cp.length * 100 / l.A.length) : 0; trow = '<div class="rgp-r rgp-tot"><div class="rgp-rn">Total ' + l.A.length + '</div><div class="rgp-rv"><span class="rgp-b pd">Pending ' + l.pd.length + '</span><span class="rgp-b cp">Complete ' + l.cp.length + '</span></div><div class="rgp-rp">' + tp + '%</div></div>'; }
+      return '<div class="rgp-c" style="--ac:rgb(' + ac + ');--acr:' + ac + '"><div class="rgp-ch">' + esc(d.g) + '</div>' + rows + trow + '</div>';
     }).join('');
     const pc = tot.a ? Math.round(tot.c * 100 / tot.a) : 0, ln = D[0] && D[0].lv.length ? D[0].lv[D[0].lv.length - 1].n.toUpperCase() : '';
     const tile = function (t, n, sb, col) { return '<div class="rgp-t3" style="border-color:' + col + '"><div class="rgp-t3t">' + t + '</div><div class="rgp-t3n" style="color:' + col + '">' + n + '</div><div class="rgp-t3s" style="background:' + col + '22;color:' + col + '">' + sb + '</div></div>'; };
-    return '<div class="rgp-wrap"><div class="rgp" id="c_rgpAll"><div class="rgp-t">Region Wise Report</div><div class="rgp-s">Pending &amp; Complete Status</div><div class="rgp-p">' + esc(S.period) + '</div><div class="rgp-grid">' + cards + '</div>' +
+    return '<div class="rgp-wrap"><div class="rgp" id="c_rgpAll"><div class="rgp-t">Monthly Report ' + esc(S.period) + '</div><div class="rgp-s">Pending &amp; Complete Status</div><div class="rgp-grid' + (D.length === 1 ? ' one' : '') + '">' + cards + '</div>' +
       '<div class="rgp-sum">' + tile('Completion', pc + '%', 'OVERALL', '#0F766E') + tile('Pending', tot.p, ln, '#C0392B') + tile('Complete', tot.c, ln, '#1F4E99') + '</div></div>' +
       '<div class="rgp-btns d-flex flex-wrap gap-2 mt-2"><button type="button" class="btn-save" style="width:auto;padding:6px 14px" onclick="Crs.rgShare(0,\'s\')">Share (WhatsApp)</button><button type="button" class="crs-mini" onclick="Crs.rgShare(0,\'d\')">Image</button><button type="button" class="crs-mini" onclick="Crs.rgShare(0,\'p\')">PDF</button><button type="button" class="crs-mini" onclick="Crs.rgShare(0,\'x\')">Excel</button></div></div>';
   }
@@ -2266,7 +2276,7 @@ window.Crs = (function () {
     if (t === 'x') { const rs = []; S.rgD.forEach(function (d) { d.lv.forEach(function (v) { v.pd.forEach(function (x) { rs.push([d.g, v.n, x.f, 'Pending']); }); v.cp.forEach(function (x) { rs.push([d.g, v.n, x.f, 'Complete']); }); }); }); return xls(['Region', 'Level', 'Name', 'Status'], rs, 'Region_Wise_Report'); }
     html2canvas($c('rgpAll'), { scale: 2, backgroundColor: null, windowWidth: 1250, onclone: function (c) { const e = c.getElementById('c_rgpAll'); e.style.width = '920px'; e.style.maxWidth = 'none'; } }).then(function (c) {
       const nm = 'Region_Wise_Report';
-      if (t === 'p') return pdfFromCanvas(c, 'Madani Courses - Region Wise Report', nm);
+      if (t === 'p') return pdfFromCanvas(c, 'Madani Courses - Monthly Report', nm);
       c.toBlob(function (b) {
         const f = new File([b], nm + '.png', { type: 'image/png' });
         if (t === 's' && navigator.canShare && navigator.canShare({ files: [f] })) return navigator.share({ files: [f], title: nm }).catch(function () {});
@@ -2277,7 +2287,7 @@ window.Crs = (function () {
   function dlChart(id) { const p = $c(id).closest('.panel'); html2canvas(p, { scale: 2, backgroundColor: '#ffffff', onclone: function (d) { d.querySelectorAll('.crs-dl').forEach(function (e) { e.remove(); }); } }).then(function (c) { const a = document.createElement('a'); a.href = c.toDataURL(); a.download = 'Chart_' + id + '_' + Date.now() + '.png'; a.click(); }); }
   function wireDash() {
     document.querySelectorAll('.crs-dl').forEach(function (b) { b.onclick = function () { dlChart(b.dataset.c); }; });
-    $c('rb').onclick = function () { const v = $c('rv'), on = v.classList.contains('d-none'); v.classList.toggle('d-none', !on); $c('rb').textContent = on ? 'Hide Region Wise Report' : 'Region Wise Report'; if (on) v.innerHTML = S.rgHtml || '<p class="m-2">Data nahi hai.</p>'; };
+    $c('rb').onclick = function () { const v = $c('rv'), on = v.classList.contains('d-none'); v.classList.toggle('d-none', !on); $c('rb').textContent = on ? 'Hide Monthly Report' : 'Monthly Report'; if (on) v.innerHTML = S.rgHtml || '<p class="m-2">Data nahi hai.</p>'; };
     $c('fr').onclick = function () { FLT.forEach(function (f) { $c(f[1]).value = ''; }); renderDash(); };
     $c('img').onclick = function () { html2canvas($c('cap'), capOpt()).then(function (c) { const a = document.createElement('a'); a.href = c.toDataURL(); a.download = 'Courses_Dashboard_' + Date.now() + '.png'; a.click(); }); };
     $c('xl').onclick = function () { xls(hd, tv(), 'Courses_Data_' + Date.now()); };
