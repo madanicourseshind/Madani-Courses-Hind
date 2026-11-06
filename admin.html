@@ -276,6 +276,11 @@
 .login-logo{ display:block; width:100%; max-width:280px; height:auto; margin:0 auto 12px; }
 .login-card h1.lg-h{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; margin:0; padding:0; }
 
+/* Admin View (user ka dashboard) */
+#viewAsBar{ position:fixed; top:0; left:0; right:0; z-index:2000; display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; padding:7px 14px; background:linear-gradient(90deg,#B45309,#F59E0B); color:#fff; font-size:.88rem; box-shadow:0 3px 12px rgba(0,0,0,.25); }
+#viewAsBar button{ border:0; border-radius:8px; padding:4px 12px; font-weight:700; background:#fff; color:#92400E; cursor:pointer; }
+body.view-as{ padding-top:40px; }
+
   @media (max-width:768px){
     .stat-grid{ grid-template-columns:repeat(2,1fr); }
   }
@@ -978,15 +983,17 @@
 
     $('#loginBtn').prop('disabled', true).text('Wait...');
 
-    google.script.run.withSuccessHandler(function (res) {
+    google.script.run.withSuccessHandler(handleLoginResult).loginUser(userId, password);
+  }
+  function handleLoginResult(res) {
       $('#loginBtn').prop('disabled', false).text('Login Securely');
       if (res.success && res.role === 'Admin' && !IS_ADMIN_PAGE) {
         // Admin ke liye alag Admin Panel (admin.html): login wahan auto ho jata hai
-        try { sessionStorage.setItem('mcAdm', btoa(unescape(encodeURIComponent(JSON.stringify({ u: userId, p: password }))))); } catch (e) {}
+        try { sessionStorage.setItem('mcAdm', btoa(unescape(encodeURIComponent(JSON.stringify({ u: $('#loginUserId').val().trim(), p: $('#loginPassword').val().trim() }))))); } catch (e) {}
         location.href = 'admin.html';
         return;
       }
-      if (res.success && res.role !== 'Admin' && IS_ADMIN_PAGE) {
+      if (res.success && res.role !== 'Admin' && IS_ADMIN_PAGE && !window.__viewAs) {
         google.script.run.logoutUser(res.token);
         $('#loginError').text('Ye Admin Panel hai. Sirf Admin login kar sakta hai (users index.html se login karein).').show();
         return;
@@ -1041,7 +1048,6 @@
       } else {
         $('#loginError').text(res.message).show();
       }
-    }).loginUser(userId, password);
   }
 
   function refreshAdminControls() {
@@ -1258,6 +1264,7 @@
   }
 
   function doLogout() {
+    if (window.__viewAs && window.Adm) { Adm.backFromView(); return; }
     if (sessionToken) google.script.run.logoutUser(sessionToken);
     sessionToken = null; currentUser = null;
     // Admin Panel se logout karne par seedha index (user login) page par
@@ -2597,7 +2604,7 @@ window.Adm = (function () {
     const list = users.filter(function (u) { return !q || u.login.toLowerCase().indexOf(q) >= 0; });
     $a('usCnt').textContent = list.length + ' / ' + users.length + ' users';
     $a('usBody').innerHTML = list.map(function (u, i) {
-      return '<tr><td>' + esc(u.login) + '</td><td>' + esc(u.status) + '</td><td>' + esc(u.level) + (((u.crsMuallim && u.crsMuallim.length) || (u.crsTypes && u.crsTypes.length)) ? ' <small style="color:#7C3AED">[Courses: ' + esc((u.crsTypes || []).concat(u.crsMuallim || []).join(', ')) + ']</small>' : '') + (u.scope ? ' <small style="color:#475569">(' + esc(locName(u)) + ')</small>' : '') + '</td><td style="white-space:nowrap"><button type="button" class="btn btn-sm py-0" style="background:#C9A227" onclick="Adm.editUser(' + users.indexOf(u) + ')">Edit</button> <button type="button" class="btn btn-sm btn-danger py-0" onclick="Adm.delUser(' + users.indexOf(u) + ')">Delete</button></td></tr>';
+      return '<tr><td>' + esc(u.login) + '</td><td>' + esc(u.status) + '</td><td>' + esc(u.level) + (((u.crsMuallim && u.crsMuallim.length) || (u.crsTypes && u.crsTypes.length)) ? ' <small style="color:#7C3AED">[Courses: ' + esc((u.crsTypes || []).concat(u.crsMuallim || []).join(', ')) + ']</small>' : '') + (u.scope ? ' <small style="color:#475569">(' + esc(locName(u)) + ')</small>' : '') + '</td><td style="white-space:nowrap">' + ((u.login || '').toLowerCase() === 'admin' ? '' : '<button type="button" class="btn btn-sm py-0" style="background:#1687A8;color:#fff" onclick="Adm.viewUser(' + users.indexOf(u) + ')" title="Is user ka dashboard dekhein">&#128202; Dashboard</button> ') + '<button type="button" class="btn btn-sm py-0" style="background:#C9A227" onclick="Adm.editUser(' + users.indexOf(u) + ')">Edit</button> <button type="button" class="btn btn-sm btn-danger py-0" onclick="Adm.delUser(' + users.indexOf(u) + ')">Delete</button></td></tr>';
     }).join('') || '<tr><td colspan="4">Koi user nahi.</td></tr>';
   }
   // ----- Level + location (Taqarrur se) -----
@@ -2722,7 +2729,31 @@ window.Adm = (function () {
 
   function load() { loadUsers(); loadMaster(); initLoc(); }
   setTimeout(function () { $a('usQ') && ($a('usQ').oninput = drawUsers); }, 0);
-  return { clearData: clearData, load: load, loadUsers: loadUsers, editUser: editUser, delUser: delUser, saveUser: saveUser, drawOpt: drawOpt, addType: addType, delType: delType, addName: addName, delName: delName, addList: addList, delShoba: delShoba, delMu: delMu, saveYears: saveYears, importMaster: importMaster };
+  // ----- Admin: user ka dashboard (view-as) -----
+  let stash = null;
+  async function viewUser(i) {
+    const u = users[i]; if (!u) return;
+    if ((u.login || '').toLowerCase() === 'admin') return alert('Admin ka dashboard Admin Panel me hi hai.');
+    let r; try { r = await call('viewAsUser', u.login); } catch (e) { return alert('Error: ' + e); }
+    if (!r || !r.success) return alert((r && r.message) || 'Dashboard nahi khul paya.');
+    if (!stash) stash = { token: window.getSessionToken(), user: window.getCurrentUser() };
+    window.__viewAs = true; window.handleLoginResult(r);
+    let bar = document.getElementById('viewAsBar');
+    if (!bar) { bar = document.createElement('div'); bar.id = 'viewAsBar'; document.body.appendChild(bar); }
+    bar.innerHTML = '<span>&#128065; Admin View: aap <b>' + esc(u.login) + '</b> ka dashboard dekh rahe hain</span><button type="button" onclick="Adm.backFromView()">&larr; Admin Panel par wapas</button>';
+    document.body.classList.add('view-as');
+    setTimeout(function () { const ac = r.access || { appointment: true, courses: true }; jQuery(ac.appointment ? '#sb_appt_dash' : '#sb_crs_dash').trigger('click'); }, 250);
+  }
+  function backFromView() {
+    if (!stash) return;
+    const st = stash; stash = null;
+    try { const t = window.getSessionToken(); if (t && t !== st.token) google.script.run.logoutUser(t); } catch (e) { /* ignore */ }
+    window.__viewAs = false; document.body.classList.remove('view-as');
+    const bar = document.getElementById('viewAsBar'); if (bar) bar.remove();
+    window.handleLoginResult(st.user);
+    setTimeout(function () { jQuery('#modeBtnSet').trigger('click'); }, 250);
+  }
+  return { viewUser: viewUser, backFromView: backFromView, clearData: clearData, load: load, loadUsers: loadUsers, editUser: editUser, delUser: delUser, saveUser: saveUser, drawOpt: drawOpt, addType: addType, delType: delType, addName: addName, delName: delName, addList: addList, delShoba: delShoba, delMu: delMu, saveYears: saveYears, importMaster: importMaster };
 })();
 
 </script>
@@ -3190,9 +3221,10 @@ function createServer(DB, env) {
     return DB.isEmpty('User');
   }
 
-  async function loginUser(userId, password) {
+  async function loginUser(userId, password) { return loginCore(userId, password, false); }
+  async function loginCore(userId, password, viaAdmin) {
     try {
-      if (!userId || !password) return { success: false, message: 'User ID aur Password dono bharein.' };
+      if (!userId || (!password && !viaAdmin)) return { success: false, message: 'User ID aur Password dono bharein.' };
 
       // Pehli baar (koi user nahi): "admin" naam se pehla Admin ban jata hai
       if (await DB.isEmpty('User')) {
@@ -3204,12 +3236,12 @@ function createServer(DB, env) {
       }
 
       const u = await DB.getDoc('User', userDocId(userId));
-      const hash = await hashPassword(userId, password);
-      if (!u || !u.passHash || u.passHash !== hash) return { success: false, message: 'Galat User ID ya Password.' };
+      const hash = viaAdmin ? '' : await hashPassword(userId, password);
+      if (!u || (!viaAdmin && (!u.passHash || u.passHash !== hash))) return { success: false, message: 'Galat User ID ya Password.' };
 
       const rLogin = (u.login || '').toString().trim();
       const rStatus = (u.status || '').toString().trim().toLowerCase();
-      if (rStatus === 'inactive') {
+      if (rStatus === 'inactive' && !viaAdmin) {
         return { success: false, message: 'Ye account inactive hai. Admin se sampark karein.' };
       }
 
@@ -3228,10 +3260,11 @@ function createServer(DB, env) {
 
       await applySpecificAccess(controls, { role: role, level: userLevel, country: scope.country, region: scope.region, state: scope.state, division: scope.division, district: scope.district, alaqa: scope.alaqa });
 
-      const access = {
+      const access0 = {
         appointment: scope.isAdmin || formAllowed(controls, userLevel, false),
         courses: scope.isAdmin || formAllowed(controls, userLevel, true)
       };
+      const access = (viaAdmin && !access0.appointment && !access0.courses) ? { appointment: true, courses: true } : access0;
       if (!access.appointment && !access.courses) {
         return { success: false, message: capFirst(userLevel) + ' Users ke liye Appointment aur Courses dono Form abhi band hain.' };
       }
@@ -4119,6 +4152,15 @@ function createServer(DB, env) {
     return { success: true, users: users };
   }
 
+  // Admin: kisi user ke naam se uska dashboard dekhna (password ki zaroorat nahi; sirf Admin session se)
+  async function viewAsUser(token, login) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin.');
+    if (normalize(login) === 'admin') return crsFail('Admin ka dashboard Admin Panel me hi hai.');
+    const r = await loginCore(login, null, true);
+    if (r && r.success) r.viewAs = true;
+    return r;
+  }
+
   async function getTaqarrurTree(token) {
     if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin dekh sakta hai.');
     return { success: true, rows: (await getTaqarrurRows()).map(function (r) { return [r[0], r[1], r[2], r[3], r[4], r[5]]; }) };
@@ -4174,7 +4216,7 @@ function createServer(DB, env) {
     getDropdownData, saveData, deleteRecord, reviewRecord,
     getDashboardData, generateEntryLink, resolveEntryLink,
     isFirstRun, importTaqarrur, importUsers, importData,
-    getTaqarrurTree, getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, deleteCourses, generateCourseLink, importCourseData, clearAppointmentData, clearData,
+    getTaqarrurTree, viewAsUser, getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, deleteCourses, generateCourseLink, importCourseData, clearAppointmentData, clearData,
     listUsers, saveUser, deleteUser,
     // testing / internal
     _internal: { getSetting, putSetting, normalize, parseDelimited, parseTaqarrurValues, fmtTs, sessions, getTaqarrurRows, resolveScope }
