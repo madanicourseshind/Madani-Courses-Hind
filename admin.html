@@ -498,7 +498,7 @@ body.view-as{ padding-top:40px; }
       <div class="panel">
         <h2 class="mb-3" style="font-size:1rem;">Courses Dashboard Filters</h2>
         <div class="crs-g" style="--c:4" id="c_fl"></div>
-        <div class="d-flex flex-wrap gap-2 mt-3">
+        <div class="d-flex flex-wrap gap-2 mt-3" id="c_fb">
           <button type="button" class="btn-save" style="width:auto;padding:8px 18px" id="c_fr">Reset Filters</button>
           <button type="button" class="btn btn-secondary btn-sm" id="c_csv">Export CSV</button>
           <button type="button" class="btn btn-secondary btn-sm" id="c_img">Export Dashboard Image</button>
@@ -508,7 +508,7 @@ body.view-as{ padding-top:40px; }
       <div id="c_apb" class="alert alert-warning d-none" style="font-size:0.88rem;padding:10px 14px;"></div>
       <div class="panel"><div class="sec-title">Courses / Shuraka Report</div><div class="crs-eq mt-2" id="c_st"></div><div class="crs-eq" style="margin-bottom:0" id="c_ft"></div></div>
       <div class="panel"><div class="sec-title">Courses ki Output Report Summary</div><div class="crs-eq mt-2" style="margin-bottom:0" id="c_ex"></div></div>
-      <div class="panel"><div class="sec-title">Pending &amp; Complete Status (Region, State, Division, District)</div><div class="crs-eq mt-2" style="margin-bottom:0" id="c_cv"></div></div>
+      <div class="panel" data-nocap><div class="sec-title">Pending &amp; Complete Status (Region, State, Division, District)</div><div class="crs-eq mt-2" style="margin-bottom:0" id="c_cv"></div><button type="button" class="btn-save mt-3" style="width:auto;padding:8px 18px" id="c_rb">Region Wise Report</button><div id="c_rv" class="d-none"></div></div>
       <div class="crs-charts"><div class="panel"><canvas id="c_c1"></canvas></div><div class="panel"><canvas id="c_c2"></canvas></div></div>
     </div>
     <div class="panel">
@@ -2354,18 +2354,23 @@ window.Crs = (function () {
     const done = {}; ok.forEach(function (r) { done[P(r, LOC)] = 1; });
     S.cvx = {};
     const firstCard = isAdm() ? 0 : ({ state: 1, division: 2, quick: 2, district: 3, alaqa: 3 })[S.level] || 0;
-    grid($c('cv'), LOC.map(function (n, i) {
+    const mkCards = function (sx, pre) { return LOC.map(function (n, i) {
       if (i < firstCard) return '';
       const ks = LOC.slice(0, i + 1), mp = {};
-      stx.forEach(function (r) { const p = P(r, ks); (mp[p] = mp[p] || { l: r[ks[i]], f: ks.map(function (k) { return r[k]; }).join(' → '), d: [] }).d.push(P(r, LOC)); });
+      sx.forEach(function (r) { const p = P(r, ks); (mp[p] = mp[p] || { l: r[ks[i]], f: ks.map(function (k) { return r[k]; }).join(' → '), d: [] }).d.push(P(r, LOC)); });
       const A = Object.keys(mp).map(function (k) { return mp[k]; });
       const cp = A.filter(function (x) { return x.d.every(function (d) { return done[d]; }); }), pd = A.filter(function (x) { return cp.indexOf(x) < 0; });
       const li = function (a, t, col) {
-        S.cvx[n + '_' + t] = a.map(function (x) { return x.f; }).sort();
-        return a.length ? '<details><summary style="color:' + col + '">' + t + ': ' + a.length + '</summary><div class="d-flex gap-1 my-1"><button type="button" class="crs-mini" onclick="Crs.expL(\'' + n + '_' + t + '\',\'p\')">PDF</button><button type="button" class="crs-mini" onclick="Crs.expL(\'' + n + '_' + t + '\',\'x\')">Excel</button></div><div class="lst">' + a.map(function (x) { return esc(x.l); }).sort().join('<br>') + '</div></details>' : '';
+        S.cvx[pre + n + '_' + t] = a.map(function (x) { return x.f; }).sort();
+        return a.length ? '<details><summary style="color:' + col + '">' + t + ': ' + a.length + '</summary><div class="d-flex gap-1 my-1"><button type="button" class="crs-mini" onclick="Crs.expL(\'' + pre + n + '_' + t + '\',\'p\')">PDF</button><button type="button" class="crs-mini" onclick="Crs.expL(\'' + pre + n + '_' + t + '\',\'x\')">Excel</button></div><div class="lst">' + a.map(function (x) { return esc(x.l); }).sort().join('<br>') + '</div></details>' : '';
       };
       return '<div class="dash-card"><div class="dash-card-title">' + n[0].toUpperCase() + n.slice(1) + '</div><div class="dash-card-num" style="margin-bottom:6px">' + cp.length + '/' + A.length + '</div>' + li(pd, 'Pending', '#C0392B') + li(cp, 'Complete', '#1F4E99') + '</div>';
-    }).join(''), LOC.length - firstCard);
+    }).join(''); };
+    grid($c('cv'), mkCards(stx, ''), LOC.length - firstCard);
+    const rgs = stx.map(function (r) { return r.region; }).filter(function (v, i, a) { return v && a.indexOf(v) === i; }).sort();
+    S.rgHtml = rgs.map(function (g, gi) { return '<div class="sec-title mt-3" style="font-size:.95rem">Region: ' + esc(g) + '</div><div class="crs-eq mt-2" style="margin-bottom:0;--n:' + (LOC.length - Math.max(firstCard, 1)) + '">' + mkCards(stx.filter(function (r) { return r.region === g; }), 'rg' + gi + '_') + '</div>'; }).join('');
+    if (!$c('rv').classList.contains('d-none')) $c('rv').innerHTML = S.rgHtml || '<p class="m-2">Data nahi hai.</p>';
+
 
     const lv = S.level, ax = lv === 'division' ? ['district', 'courseName'] : lv === 'state' ? ['division', 'district'] : lv === 'region' ? ['state', 'division'] : ['region', 'state'];
     [['c1', ax[0]], ['c2', ax[1]]].forEach(function (p) {
@@ -2448,9 +2453,14 @@ window.Crs = (function () {
   const xls = function (h, rs, n) { dl(new Blob(['﻿<html><meta charset="utf-8">' + tbl(h, rs) + '</html>'], { type: 'application/vnd.ms-excel' }), n + '.xls'); };
   const pdf = function (h, rs, n, t, land) { const d = new window.jspdf.jsPDF(land ? 'l' : 'p', 'mm', land ? 'a3' : 'a4'); d.text(t, 10, 10); d.autoTable({ head: [h], body: rs, startY: 15, styles: { fontSize: land ? 6 : 9 }, headStyles: { fillColor: [10, 31, 68] } }); d.save(n + '.pdf'); };
   const TT = 'Madani Courses - Courses Data';
+  const capOpt = { scale: 2, backgroundColor: '#F4F6FA', onclone: function (d) {
+    d.querySelectorAll('#c_cap [data-nocap],#c_fl,#c_fb').forEach(function (e) { e.remove(); });
+    const h = d.querySelector('#c_cap h2'); if (h) h.classList.remove('mb-3');
+  } };
   function wireDash() {
+    $c('rb').onclick = function () { const v = $c('rv'), on = v.classList.contains('d-none'); v.classList.toggle('d-none', !on); $c('rb').textContent = on ? 'Hide Region Wise Report' : 'Region Wise Report'; if (on) v.innerHTML = S.rgHtml || '<p class="m-2">Data nahi hai.</p>'; };
     $c('fr').onclick = function () { FLT.forEach(function (f) { $c(f[1]).value = ''; }); renderDash(); };
-    $c('img').onclick = function () { html2canvas($c('cap'), { scale: 2, backgroundColor: '#F4F6FA' }).then(function (c) { const a = document.createElement('a'); a.href = c.toDataURL(); a.download = 'Courses_Dashboard_' + Date.now() + '.png'; a.click(); }); };
+    $c('img').onclick = function () { html2canvas($c('cap'), capOpt).then(function (c) { const a = document.createElement('a'); a.href = c.toDataURL(); a.download = 'Courses_Dashboard_' + Date.now() + '.png'; a.click(); }); };
     $c('xl').onclick = function () { xls(hd, tv(), 'Courses_Data_' + Date.now()); };
     $c('pf').onclick = function () { pdf(hd, tv(), 'Courses_Data_' + Date.now(), TT, 1); };
     $c('it').onclick = function () {
@@ -2460,7 +2470,7 @@ window.Crs = (function () {
       w.innerHTML = '<h3>' + TT + '</h3>' + tbl(hd, rs, ';white-space:nowrap'); document.body.appendChild(w);
       html2canvas(w, { scale: 2 }).then(function (c) { const a = document.createElement('a'); a.href = c.toDataURL(); a.download = 'Courses_Data_' + Date.now() + '.png'; a.click(); w.remove(); });
     };
-    $c('dpdf').onclick = function () { html2canvas($c('cap'), { scale: 2, backgroundColor: '#F4F6FA' }).then(function (c) { const h = c.height * 210 / c.width, d = new window.jspdf.jsPDF({ unit: 'mm', format: [210, h + 20] }); d.text('Madani Courses - Courses Dashboard Report', 10, 10); d.addImage(c.toDataURL('image/png'), 'PNG', 0, 15, 210, h); d.save('Courses_Dashboard_' + Date.now() + '.pdf'); }); };
+    $c('dpdf').onclick = function () { html2canvas($c('cap'), capOpt).then(function (c) { const h = c.height * 210 / c.width, d = new window.jspdf.jsPDF({ unit: 'mm', format: [210, h + 20] }); d.text('Madani Courses - Courses Dashboard Report', 10, 10); d.addImage(c.toDataURL('image/png'), 'PNG', 0, 15, 210, h); d.save('Courses_Dashboard_' + Date.now() + '.pdf'); }); };
     $c('ps').onchange = $c('sq').oninput = function () { S.pg = 1; drawTable(); };
     $c('pv').onclick = function () { if (S.pg > 1) { S.pg--; drawTable(); } };
     $c('nx').onclick = function () { S.pg++; drawTable(); };
