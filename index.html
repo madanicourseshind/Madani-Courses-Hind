@@ -204,16 +204,16 @@
   #editModeBanner,.crs-edit{ background:linear-gradient(90deg,#F59E0B,#FBBF24); color:#3B2A00; }
 
   /* Stat cards: har card ka apna accha rang */
-  .stat-grid .dash-card, .crs-eq .dash-card{ --ac:#2563EB;
-    background:linear-gradient(150deg,#fff 0%,color-mix(in srgb,var(--ac) 13%,#fff) 100%) !important;
-    border:1px solid color-mix(in srgb,var(--ac) 26%,#fff) !important; border-left:5px solid var(--ac) !important;
+  .stat-grid .dash-card, .crs-eq .dash-card{ --ac:#2563EB; --acr:37,99,235;
+    background-color:#fff !important; background-image:linear-gradient(150deg,rgba(255,255,255,0) 0%,rgba(var(--acr),.13) 100%) !important;
+    border:1px solid rgba(var(--acr),.26) !important; border-left:5px solid var(--ac) !important;
     border-radius:14px !important; box-shadow:0 5px 16px rgba(15,40,100,.07); transition:transform .15s ease, box-shadow .15s ease; }
   .stat-grid .dash-card:hover, .crs-eq .dash-card:hover{ transform:translateY(-3px); box-shadow:0 12px 26px rgba(15,40,100,.13); }
-  .stat-grid .dash-card:nth-child(6n+2), .crs-eq .dash-card:nth-child(6n+2){ --ac:#0891B2; }
-  .stat-grid .dash-card:nth-child(6n+3), .crs-eq .dash-card:nth-child(6n+3){ --ac:#059669; }
-  .stat-grid .dash-card:nth-child(6n+4), .crs-eq .dash-card:nth-child(6n+4){ --ac:#D97706; }
-  .stat-grid .dash-card:nth-child(6n+5), .crs-eq .dash-card:nth-child(6n+5){ --ac:#7C3AED; }
-  .stat-grid .dash-card:nth-child(6n+6), .crs-eq .dash-card:nth-child(6n+6){ --ac:#DB2777; }
+  .stat-grid .dash-card:nth-child(6n+2), .crs-eq .dash-card:nth-child(6n+2){ --ac:#0891B2; --acr:8,145,178; }
+  .stat-grid .dash-card:nth-child(6n+3), .crs-eq .dash-card:nth-child(6n+3){ --ac:#059669; --acr:5,150,105; }
+  .stat-grid .dash-card:nth-child(6n+4), .crs-eq .dash-card:nth-child(6n+4){ --ac:#D97706; --acr:217,119,6; }
+  .stat-grid .dash-card:nth-child(6n+5), .crs-eq .dash-card:nth-child(6n+5){ --ac:#7C3AED; --acr:124,58,237; }
+  .stat-grid .dash-card:nth-child(6n+6), .crs-eq .dash-card:nth-child(6n+6){ --ac:#DB2777; --acr:219,39,119; }
   .dash-card-title{ color:var(--ac,#1F4E99) !important; letter-spacing:.02em; }
   .dash-card-num{ color:#0B4A60 !important; }
   .text-success-custom{ color:#047857 !important; }
