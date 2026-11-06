@@ -178,6 +178,15 @@
   .rgp-t3s{ display:inline-block; font-weight:800; font-size:.72rem; padding:2px 12px; border-radius:12px; }
   @media(max-width:600px){ .rgp-grid{ grid-template-columns:1fr; } .rgp-t,.px-t{ font-size:1.3rem; padding:8px 22px; } .rgp-sum{ gap:8px; } .rgp-t3n{ font-size:1.5rem; } }
   .px-fp::before,.px-fp::after{ display:none !important; }
+
+  .rgp-r{ display:flex; align-items:center; gap:8px; padding:7px 0; border-top:1px solid #EEF1F6; }
+  .rgp-r:first-of-type{ border-top:0; }
+  .rgp-rn{ width:25%; font-weight:800; font-size:.8rem; color:#374151; text-transform:uppercase; }
+  .rgp-rv{ flex:1; display:flex; gap:6px; flex-wrap:wrap; }
+  .rgp-b{ border-radius:12px; padding:2px 10px; font-size:.8rem; font-weight:800; white-space:nowrap; }
+  .rgp-b.pd{ background:#FDECEA; color:#B03A2E; } .rgp-b.cp{ background:#E6EEFA; color:#1F4E99; }
+  .rgp-rp{ font-weight:800; font-size:.85rem; color:var(--ac); min-width:38px; text-align:right; }
+  .rgp-c .rgp-ch{ background:var(--ac); color:#fff !important; border-radius:12px; padding:5px 14px; margin-bottom:6px; font-size:1rem; }
   /* ===================== NEW LOOK: Sidebar + professional colours ===================== */
   :root{ --teal-900:#0B4A60; --teal-800:#0E5A74; --teal-700:#126F8A; --teal-500:#1687A8; --sb-w:268px; --nv9:#0B4A60; --nv8:#126F8A; --nv7:#1687A8; --blue:#1687A8; --cyan:#06B6D4; --amber:#F59E0B; }
   body{ background:linear-gradient(180deg,#EEF6F9 0%,#E2EFF4 100%) fixed; }
@@ -2120,7 +2129,7 @@ window.Crs = (function () {
       return { g: g, lv: lv };
     });
     S.period = periodTxt();
-    S.rgHtml = S.rgD.map(rgBlock).join('');
+    S.rgHtml = S.rgD.length ? rgBlock() : '';
     if (!$c('rv').classList.contains('d-none')) $c('rv').innerHTML = S.rgHtml || '<p class="m-2">Data nahi hai.</p>';
 
 
@@ -2235,26 +2244,29 @@ window.Crs = (function () {
   }
   const pdfFromCanvas = function (c, title, name) { const h = c.height * 210 / c.width, d = new window.jspdf.jsPDF({ unit: 'mm', format: [210, h + 20] }); d.text(title, 10, 10); d.addImage(c.toDataURL('image/png'), 'PNG', 0, 15, 210, h); d.save(name + '.pdf'); };
   const ACC = [[37, 99, 235], [8, 145, 178], [5, 150, 105], [217, 119, 6], [124, 58, 237], [219, 39, 119]];
-  function rgBlock(d, gi) {
-    const last = d.lv[d.lv.length - 1] || { A: [], cp: [], pd: [] }, pc = last.A.length ? Math.round(last.cp.length * 100 / last.A.length) : 0;
-    const nm = function (a, cls) { return a.map(function (x) { return '<span class="rgp-n ' + cls + '">' + esc(x.l) + '</span>'; }).join(''); };
-    const cards = d.lv.map(function (v, i) {
-      const a = ACC[(i + 1) % ACC.length], p = v.A.length ? Math.round(v.cp.length * 100 / v.A.length) : 0;
-      return '<div class="rgp-c" style="--ac:rgb(' + a + ');--acr:' + a + '"><div class="rgp-ch">' + v.n[0].toUpperCase() + v.n.slice(1) + '</div><div class="rgp-num">' + v.cp.length + '/' + v.A.length + '<small>' + p + '%</small></div><div class="rgp-bar"><i style="width:' + p + '%"></i></div>' +
-        (v.pd.length ? '<div class="rgp-l"><b style="color:#C0392B">Pending: ' + v.pd.length + '</b>' + nm(v.pd, 'pd') + '</div>' : '') +
-        (v.cp.length ? '<div class="rgp-l"><b style="color:#1F4E99">Complete: ' + v.cp.length + '</b>' + nm(v.cp, 'cp') + '</div>' : '') + '</div>';
+  function rgBlock() {
+    const D = S.rgD, tot = { p: 0, c: 0, a: 0 }, nm = function (n) { return n[0].toUpperCase() + n.slice(1); };
+    const cards = D.map(function (d, gi) {
+      const ac = ACC[gi % ACC.length];
+      const rows = d.lv.map(function (v) {
+        const p = v.A.length ? Math.round(v.cp.length * 100 / v.A.length) : 0;
+        return '<div class="rgp-r"><div class="rgp-rn">' + nm(v.n) + '</div><div class="rgp-rv"><span class="rgp-b pd">Pending ' + v.pd.length + '</span><span class="rgp-b cp">Complete ' + v.cp.length + '</span></div><div class="rgp-rp">' + p + '%</div></div>';
+      }).join('');
+      const l = d.lv[d.lv.length - 1]; if (l) { tot.p += l.pd.length; tot.c += l.cp.length; tot.a += l.A.length; }
+      return '<div class="rgp-c" style="--ac:rgb(' + ac + ');--acr:' + ac + '"><div class="rgp-ch">' + esc(d.g) + '</div>' + rows + '</div>';
     }).join('');
+    const pc = tot.a ? Math.round(tot.c * 100 / tot.a) : 0, ln = D[0] && D[0].lv.length ? D[0].lv[D[0].lv.length - 1].n.toUpperCase() : '';
     const tile = function (t, n, sb, col) { return '<div class="rgp-t3" style="border-color:' + col + '"><div class="rgp-t3t">' + t + '</div><div class="rgp-t3n" style="color:' + col + '">' + n + '</div><div class="rgp-t3s" style="background:' + col + '22;color:' + col + '">' + sb + '</div></div>'; };
-    return '<div class="rgp-wrap"><div class="rgp" id="c_rgp' + gi + '"><div class="rgp-t">' + esc(d.g) + ' Region</div><div class="rgp-s">Pending &amp; Complete Report</div><div class="rgp-p">' + esc(S.period) + '</div><div class="rgp-grid">' + cards + '</div>' +
-      '<div class="rgp-sum">' + tile('Completion', pc + '%', 'OVERALL', '#0F766E') + tile('Pending', last.pd.length, last.n ? last.n.toUpperCase() : '', '#C0392B') + tile('Complete', last.cp.length, last.n ? last.n.toUpperCase() : '', '#1F4E99') + '</div></div>' +
-      '<div class="rgp-btns d-flex flex-wrap gap-2 mt-2"><button type="button" class="btn-save" style="width:auto;padding:6px 14px" onclick="Crs.rgShare(' + gi + ',\'s\')">Share (WhatsApp)</button><button type="button" class="crs-mini" onclick="Crs.rgShare(' + gi + ',\'d\')">Image</button><button type="button" class="crs-mini" onclick="Crs.rgShare(' + gi + ',\'p\')">PDF</button><button type="button" class="crs-mini" onclick="Crs.rgShare(' + gi + ',\'x\')">Excel</button></div></div>';
+    return '<div class="rgp-wrap"><div class="rgp" id="c_rgpAll"><div class="rgp-t">Region Wise Report</div><div class="rgp-s">Pending &amp; Complete Status</div><div class="rgp-p">' + esc(S.period) + '</div><div class="rgp-grid">' + cards + '</div>' +
+      '<div class="rgp-sum">' + tile('Completion', pc + '%', 'OVERALL', '#0F766E') + tile('Pending', tot.p, ln, '#C0392B') + tile('Complete', tot.c, ln, '#1F4E99') + '</div></div>' +
+      '<div class="rgp-btns d-flex flex-wrap gap-2 mt-2"><button type="button" class="btn-save" style="width:auto;padding:6px 14px" onclick="Crs.rgShare(0,\'s\')">Share (WhatsApp)</button><button type="button" class="crs-mini" onclick="Crs.rgShare(0,\'d\')">Image</button><button type="button" class="crs-mini" onclick="Crs.rgShare(0,\'p\')">PDF</button><button type="button" class="crs-mini" onclick="Crs.rgShare(0,\'x\')">Excel</button></div></div>';
   }
-  function rgShare(gi, t) {
-    const d = S.rgD[gi]; if (!d) return;
-    if (t === 'x') { const rs = []; d.lv.forEach(function (v) { v.pd.forEach(function (x) { rs.push([v.n, x.f, 'Pending']); }); v.cp.forEach(function (x) { rs.push([v.n, x.f, 'Complete']); }); }); return xls(['Level', 'Name', 'Status'], rs, 'Region_' + d.g + '_Report'); }
-    html2canvas($c('rgp' + gi), { scale: 2, backgroundColor: null, windowWidth: 1250, onclone: function (c) { const e = c.getElementById('c_rgp' + gi); e.style.width = '920px'; e.style.maxWidth = 'none'; } }).then(function (c) {
-      const nm = 'Region_' + d.g.replace(/\W+/g, '_') + '_Report';
-      if (t === 'p') return pdfFromCanvas(c, 'Madani Courses - ' + d.g + ' Region Report', nm);
+  function rgShare(_, t) {
+    if (!S.rgD || !S.rgD.length) return;
+    if (t === 'x') { const rs = []; S.rgD.forEach(function (d) { d.lv.forEach(function (v) { v.pd.forEach(function (x) { rs.push([d.g, v.n, x.f, 'Pending']); }); v.cp.forEach(function (x) { rs.push([d.g, v.n, x.f, 'Complete']); }); }); }); return xls(['Region', 'Level', 'Name', 'Status'], rs, 'Region_Wise_Report'); }
+    html2canvas($c('rgpAll'), { scale: 2, backgroundColor: null, windowWidth: 1250, onclone: function (c) { const e = c.getElementById('c_rgpAll'); e.style.width = '920px'; e.style.maxWidth = 'none'; } }).then(function (c) {
+      const nm = 'Region_Wise_Report';
+      if (t === 'p') return pdfFromCanvas(c, 'Madani Courses - Region Wise Report', nm);
       c.toBlob(function (b) {
         const f = new File([b], nm + '.png', { type: 'image/png' });
         if (t === 's' && navigator.canShare && navigator.canShare({ files: [f] })) return navigator.share({ files: [f], title: nm }).catch(function () {});
