@@ -2388,7 +2388,7 @@ window.Crs = (function () {
     grid($c('st'), box('Total Courses', cr.length) + box('Total Shuraka', sS(ok)) + box('Full Time', ft.length, sS(fa)) + box('Part Time', cr.length - ft.length, sS(pa)) + box('Shobajat', shb.length, sS(shb)) + box('PT Muallim', pm.length, sS(pm)), 6);
     const FT = ['63 Day Madani Course', '12 Deeni Kaam Course', 'Islahe Amal Course', '7 Day Faizane Namaz Course', 'Muallim Madani Course', '1 Mah Madani Course (For Student)'];
     const z = function (s) { return N(s).replace(/[^a-z0-9]/g, ''); };
-    grid($c('ft'), FT.map(function (n) { const a = ft.filter(function (r) { return z(r.courseName) === z(n); }); return box(n, a.length, sS(a)); }).join(''), 6);
+    grid($c('ft'), FT.map(function (n) { const a = ft.filter(function (r) { return z(r.courseName) === z(n); }); return box(n, a.length, sS(fa.filter(function (r) { return z(r.courseName) === z(n); }))); }).join(''), 6);
     const EX = [['3 Din Qafila', 'qafila3'], ['Shuraka (3 Din)', 'shuraka2'], ['12 Din Qafila', 'qafila12'], ['Shuraka (12 Din)', 'shuraka3'], ['Nek Amal Taqseem', 'nekTaqseem'], ['Nek Amal Wasool', 'nekWasool'], ['Namaz ke Azkar', 'azkar'], ['12 Mah Qafila', 'mah12'], ['Jamiatul Madina', 'jamiatul'], ['Imamat Course', 'imamat'], ['Madrasatul Madina', 'madrasa'], ['Tanzeemi Zimmedari', 'zimmedari']];
     grid($c('ex'), EX.map(function (e) { return box(e[0], ok.reduce(function (a, r) { return a + (e[1] === 'zimmedari' ? (r[e[1]] ? (isNaN(+r[e[1]]) ? 1 : +r[e[1]]) : 0) : (+r[e[1]] || 0)); }, 0)); }).join(''), 6);
 
