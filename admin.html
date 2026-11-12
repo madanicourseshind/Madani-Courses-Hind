@@ -2931,7 +2931,7 @@ window.Dm = (function () {
     $a('dmAdd').style.display = t === 'taq' ? '' : 'none'; $a('dmBadW').style.display = t === 'data' ? '' : 'none';
     $a('dmHead').innerHTML = t === 'taq'
       ? '<tr><th>#</th>' + LV.map(function (x) { return '<th>' + x + '</th>'; }).join('') + '<th></th></tr>'
-      : '<tr><th>Date</th><th>Region</th><th>State</th><th>Division</th><th>District</th><th>Alaqa</th><th>Name</th><th>Mobile</th><th>Role</th><th>Status</th><th></th></tr>';
+      : '<tr><th>Level</th><th>Country</th><th>Region</th><th>State</th><th>Division</th><th>District</th><th>Alaqa</th><th>Name</th><th>Mobile</th><th>Email</th><th>Role</th><th>Submitted By</th><th>Status</th><th>Date</th><th></th></tr>';
     load();
   }
   async function load() {
@@ -2939,6 +2939,7 @@ window.Dm = (function () {
     try {
       const r = await call(T === 'taq' ? 'dmTaqList' : 'dmDataList'); if (!r.success) return msg('dmMsg', false, r.message);
       rows = r.rows;
+      if (T === 'data') rows.sort(function (a, b) { return a.lv - b.lv || a.loc.join('|').localeCompare(b.loc.join('|')); });
       if (T === 'data' || !TQ.length) { const t = await call('dmTaqList'); if (t.success) TQ = t.rows.map(function (x) { return x.v; }); }
       if (T === 'taq') TQ = rows.map(function (x) { return x.v; });
       search();
@@ -2948,7 +2949,7 @@ window.Dm = (function () {
     const q = ($a('dmQ').value || '').toLowerCase(), bad = $a('dmBad').checked;
     view = rows.filter(function (x) {
       if (T === 'data' && bad && x.ok) return false;
-      return !q || (T === 'taq' ? x.v : x.loc.concat([x.name, x.mobile, x.role, x.status, x.ts])).join(' ').toLowerCase().indexOf(q) >= 0;
+      return !q || (T === 'taq' ? x.v : x.loc.concat([LV[x.lv] || '', x.name, x.mobile, x.email, x.role, x.by, x.status, x.ts])).join(' ').toLowerCase().indexOf(q) >= 0;
     });
     page = 0; draw();
   }
@@ -2961,8 +2962,8 @@ window.Dm = (function () {
     $a('dmBody').innerHTML = part.map(function (x, j) {
       const i = s + j;
       if (T === 'taq') return '<tr><td>' + (i + 1) + '</td>' + x.v.map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + btn(i) + '</tr>';
-      return '<tr' + (x.ok ? '' : ' style="background:#FFF4E5"') + '><td>' + esc(x.ts) + '</td>' + x.loc.slice(1).map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '<td>' + esc(x.name) + '</td><td>' + esc(x.mobile) + '</td><td>' + esc(x.role) + '</td><td>' + esc(x.status) + (x.ok ? '' : ' <span title="Ye location Taqarrur me nahi mili: isliye user ke dashboard me nahi dikhegi. Edit karke sahi location chunein." style="color:#C0392B">&#9888;</span>') + '</td>' + btn(i) + '</tr>';
-    }).join('') || '<tr><td colspan="12">Koi data nahi.</td></tr>';
+      return '<tr' + (x.ok ? '' : ' style="background:#FFF4E5"') + '><td><b>' + esc(x.lv >= 0 ? LV[x.lv] : '-') + '</b></td>' + x.loc.map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '<td>' + esc(x.name) + '</td><td>' + esc(x.mobile) + '</td><td>' + esc(x.email) + '</td><td>' + esc(x.role) + '</td><td>' + esc(x.by) + '</td><td>' + esc(x.status) + (x.ok ? '' : ' <span title="Ye location Taqarrur me nahi mili: isliye user ke dashboard me nahi dikhegi. Edit karke sahi location chunein." style="color:#C0392B">&#9888;</span>') + '</td><td style="white-space:nowrap">' + esc(x.ts) + '</td>' + btn(i) + '</tr>';
+    }).join('') || '<tr><td colspan="16">' + (T === 'data' && !rows.length ? 'Appointment Data abhi khali hai. Settings > Data Import me "Purana APPOINTMENT Data" paste karke Data Import karein.' : 'Koi data nahi.') + '</td></tr>';
   }
   // ----- edit form -----
   const opts = function (vals, sel) { const a = vals.filter(function (v, i, z) { return v && z.indexOf(v) === i; }); if (sel && a.indexOf(sel) < 0) a.unshift(sel); return '<option value="">--</option>' + a.map(function (v) { return '<option' + (v === sel ? ' selected' : '') + '>' + esc(v) + '</option>'; }).join(''); };
@@ -4524,7 +4525,8 @@ function createServer(DB, env) {
     const docs = (await DB.listDocs('Data')).sort(function (a, b) { return (b.data.seq || 0) - (a.data.seq || 0); });
     return { success: true, rows: docs.map(function (d) {
       const o = d.data, a = TQK.map(function (k) { return (o[k] || '').toString(); }), ok = !!taq[a.map(tqN).join('|')];
-      return { id: d.id, ts: o.ts || '', loc: a, name: o.name || '', mobile: o.mobile || '', email: o.email || '', role: o.role || '', status: o.status || 'Approved', by: o.submittedBy || '', ok: ok };
+      let lv = -1; a.forEach(function (v, i) { if (v) lv = i; });
+      return { id: d.id, ts: o.ts || '', lv: lv, loc: a, name: o.name || '', mobile: o.mobile || '', email: o.email || '', role: o.role || '', status: o.status || 'Approved', by: o.submittedBy || '', ok: ok };
     }) };
   }
 
