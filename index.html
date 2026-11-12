@@ -3934,7 +3934,8 @@ function createServer(DB, env) {
     const docs = (await DB.listDocs('Data')).sort(function (a, b) { return (b.data.seq || 0) - (a.data.seq || 0); });
     return { success: true, rows: docs.map(function (d) {
       const o = d.data, a = TQK.map(function (k) { return (o[k] || '').toString(); }), ok = !!taq[a.map(tqN).join('|')];
-      return { id: d.id, ts: o.ts || '', loc: a, name: o.name || '', mobile: o.mobile || '', email: o.email || '', role: o.role || '', status: o.status || 'Approved', by: o.submittedBy || '', ok: ok };
+      let lv = -1; a.forEach(function (v, i) { if (v) lv = i; });
+      return { id: d.id, ts: o.ts || '', lv: lv, loc: a, name: o.name || '', mobile: o.mobile || '', email: o.email || '', role: o.role || '', status: o.status || 'Approved', by: o.submittedBy || '', ok: ok };
     }) };
   }
 
