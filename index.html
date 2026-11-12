@@ -365,7 +365,7 @@ body.view-as{ padding-top:40px; }
     <button type="button" class="sb-main" id="modeBtnCrs" onclick="showMode('crs')"><span class="sb-ico">&#127891;</span>Courses Data</button>
     <div class="sb-subs d-none" id="sbCrs"><button type="button" class="sb-sub active" id="sb_crs_form">Courses Data Form</button><button type="button" class="sb-sub" id="sb_crs_dash">Courses Dashboard</button></div>
     <button type="button" class="sb-main" id="modeBtnSet" onclick="showMode('set')" style="display:none"><span class="sb-ico">&#9881;</span>Settings &amp; Permissions</button>
-    <div class="sb-subs d-none" id="sbSet"><button type="button" class="sb-sub active" data-t="setApptCtl">Appointment Controls</button><button type="button" class="sb-sub" data-t="setCrsCtl">Courses Controls</button><button type="button" class="sb-sub" data-t="setUsers">Users</button><button type="button" class="sb-sub" data-t="setCrsOpt">Courses Dropdowns</button><button type="button" class="sb-sub" data-t="setImp">Data Import</button></div>
+    <div class="sb-subs d-none" id="sbSet"><button type="button" class="sb-sub active" data-t="setApptCtl">Appointment Controls</button><button type="button" class="sb-sub" data-t="setCrsCtl">Courses Controls</button><button type="button" class="sb-sub" data-t="setUsers">Users</button><button type="button" class="sb-sub" data-t="setCrsOpt">Courses Dropdowns</button><button type="button" class="sb-sub" data-t="setImp">Data Import</button><button type="button" class="sb-sub" data-t="setDM">Data Manager</button></div>
   </nav>
   <div class="sb-foot">Madani Courses &middot; Data Management</div>
 </aside>
@@ -1004,7 +1004,8 @@ body.view-as{ padding-top:40px; }
     showMode(acc.appointment ? 'appt' : 'crs');
   }
   function showSet(id) {
-    ['setApptCtl', 'setCrsCtl', 'setUsers', 'setCrsOpt', 'setImp'].forEach(function (x) { $('#' + x).toggleClass('d-none', x !== id); });
+    ['setApptCtl', 'setCrsCtl', 'setUsers', 'setCrsOpt', 'setImp', 'setDM'].forEach(function (x) { $('#' + x).toggleClass('d-none', x !== id); });
+    if (id === 'setDM' && window.Dm) Dm.init();
     $('#setTabs button').each(function () { $(this).toggleClass('active', $(this).data('t') === id); });
   }
 
@@ -2371,7 +2372,7 @@ window.Crs = (function () {
   var $ = window.jQuery;
   var T = { appt_form: ['Appointment Data', 'Data Entry Form'], appt_dash: ['Appointment Data', 'Data Dashboard'], crs_form: ['Courses Data', 'Courses Data Form'], crs_dash: ['Courses Data', 'Courses Dashboard'], set: ['Settings & Permissions', ''] };
   var cur = { appt: 'appt_form', crs: 'crs_form' };
-  var setNames = { setApptCtl: 'Appointment Controls', setCrsCtl: 'Courses Controls', setUsers: 'Users', setCrsOpt: 'Courses Dropdowns', setImp: 'Data Import' };
+  var setNames = { setApptCtl: 'Appointment Controls', setCrsCtl: 'Courses Controls', setUsers: 'Users', setCrsOpt: 'Courses Dropdowns', setImp: 'Data Import', setDM: 'Data Manager' };
   var mode = 'appt', setSub = 'setApptCtl';
 
   function title() {
@@ -3410,7 +3411,9 @@ function createServer(DB, env) {
     }
     if (!items.length) return { success: false, message: 'Koi valid Data row nahi mili (16 columns, Timestamp se shuru).' };
     await DB.batchSet('Data', items);
-    return { success: true, count: items.length, message: items.length + ' Data rows import ho gayi.' };
+    const tqs = {}; (await getTaqarrurRows()).forEach(function (r) { tqs[r.map(function (x) { return normalize(x).replace(/\s+/g, ' '); }).join('|')] = 1; });
+    const miss = items.filter(function (it) { return !tqs[['country', 'region', 'state', 'division', 'district', 'alaqa'].map(function (k) { return normalize(it.data[k]).replace(/\s+/g, ' '); }).join('|')]; }).length;
+    return { success: true, count: items.length, message: items.length + ' Data rows import ho gayi.' + (miss ? ' ' + miss + ' rows ki location Taqarrur se match nahi hui (ye user ke dashboard me nahi dikhengi): Settings > Data Manager > Appointment Data me \u201cSirf Taqarrur se na milne wali\u201d chun kar Edit karein.' : ' Sab rows ki location Taqarrur se match hui: user ke dashboard me dikhengi.') };
   }
 
   /* =====================================================================
@@ -3832,6 +3835,126 @@ function createServer(DB, env) {
     return { success: true, rows: (await getTaqarrurRows()).map(function (r) { return [r[0], r[1], r[2], r[3], r[4], r[5]]; }) };
   }
 
+
+  /* ---------- Admin Data Manager: Taqarrur / Appointment Data table (view, add, edit, delete) ---------- */
+  const TQK = ['country', 'region', 'state', 'division', 'district', 'alaqa'];
+  const tqN = function (v) { return normalize(v).replace(/\s+/g, ' '); };
+  const tqClean = function (a) { return TQK.map(function (_, i) { return ((a && a[i]) || '').toString().trim(); }); };
+  const tqDocs = async function () { return (await DB.listDocs('Taqarrur')).sort(function (a, b) { return a.id < b.id ? -1 : a.id > b.id ? 1 : 0; }); };
+  const tqRow = function (o) { return [o.c || '', o.r || '', o.s || '', o.d || '', o.t || '', o.a || '']; };
+  const tqObj = function (r) { return { c: r[0], r: r[1], s: r[2], d: r[3], t: r[4], a: r[5] }; };
+
+  async function dmTaqList(token) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin dekh sakta hai.');
+    const rows = [];
+    (await tqDocs()).forEach(function (d) { (d.data.rows || []).forEach(function (o, i) { rows.push({ k: d.id + ':' + i, v: tqRow(o) }); }); });
+    return { success: true, rows: rows };
+  }
+
+  // key khali = naya row. cascade = naam badalne par purane Data / Courses / Users me bhi badlo.
+  async function dmTaqSave(token, key, row, cascade) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin change kar sakta hai.');
+    row = tqClean(row); if (!row[0]) row[0] = 'India';
+    if (!row[1]) return crsFail('Region zaroori hai.');
+    for (let i = 2; i < 6; i++) if (row[i] && !row[i - 1]) return crsFail(TQK[i] + ' bharne se pehle ' + TQK[i - 1] + ' bharein.');
+    const docs = await tqDocs(), same = function (a, b) { return a.every(function (x, i) { return tqN(x) === tqN(b[i]); }); };
+    if (!key) {
+      for (const d of docs) if ((d.data.rows || []).some(function (o) { return same(tqRow(o), row); })) return crsFail('Ye row Taqarrur me pehle se maujood hai.');
+      const last = docs[docs.length - 1];
+      if (last && (last.data.rows || []).length < 800) { last.data.rows.push(tqObj(row)); await DB.setDoc('Taqarrur', last.id, { rows: last.data.rows }); }
+      else await DB.setDoc('Taqarrur', 'chunk_' + ('0000' + docs.length).slice(-4), { rows: [tqObj(row)] });
+      taqCache = null;
+      return { success: true, message: 'Naya Taqarrur row add ho gaya.' };
+    }
+    const p = key.split(':'), idx = parseInt(p[1], 10), doc = docs.find(function (d) { return d.id === p[0]; });
+    if (!doc || !(doc.data.rows || [])[idx]) return crsFail('Row nahi mila (list refresh karein).');
+    const old = tqRow(doc.data.rows[idx]);
+    const ch = []; for (let i = 0; i < 6; i++) if (tqN(old[i]) !== tqN(row[i]) || old[i] !== row[i]) ch.push(i);
+    if (!ch.length) return { success: true, message: 'Koi change nahi hua.' };
+    for (const d of docs) if (d.data.rows.some(function (o, i) { return !(d.id === doc.id && i === idx) && same(tqRow(o), row); })) return crsFail('Ye row Taqarrur me pehle se maujood hai.');
+    // single level ka naam badla ho to us naam ke tamam rows/data me badlo, warna sirf isi row ke path wala data
+    const single = !!cascade && ch.length === 1, L = ch[0];
+    let P = 0; for (let i = 0; i < 6; i++) if (old[i]) P = i + 1;
+    if (single) P = L + 1;
+    const match = function (get, skipAlaqa) { for (let i = 0; i < P; i++) { if (skipAlaqa && i === 5) continue; if (tqN(get(i)) !== tqN(old[i])) return false; } return true; };
+    const apply = function (get, set, skipAlaqa) {
+      if (single) set(L, row[L]);
+      else for (let i = 0; i < P; i++) { if (skipAlaqa && i === 5) continue; set(i, row[i]); }
+    };
+    let nT = 0;
+    const touched = [];
+    docs.forEach(function (d) {
+      let mod = false;
+      d.data.rows.forEach(function (o, i) {
+        const r = tqRow(o);
+        if (d.id === doc.id && i === idx) { d.data.rows[i] = tqObj(row); mod = true; return; }
+        if (single && match(function (k) { return r[k]; })) { r[L] = row[L]; d.data.rows[i] = tqObj(r); mod = true; nT++; }
+      });
+      if (mod) touched.push({ id: d.id, data: { rows: d.data.rows } });
+    });
+    await DB.batchSet('Taqarrur', touched);
+    taqCache = null;
+    const fix = async function (coll, keyOf, skipAlaqa) {
+      const out = [];
+      (await DB.listDocs(coll)).forEach(function (x) {
+        const o = x.data;
+        if (!match(function (k) { return o[keyOf[k]]; }, skipAlaqa)) return;
+        const n = Object.assign({}, o); apply(null, function (k, v) { n[keyOf[k]] = v; }, skipAlaqa); out.push({ id: x.id, data: n });
+      });
+      if (out.length) await DB.batchSet(coll, out);
+      return out.length;
+    };
+    const kk = TQK.slice();
+    const nD = await fix('Data', kk, false), nC = await fix('CourseData', kk, true);
+    // Users: scope
+    const us = [];
+    (await DB.listDocs('User')).forEach(function (x) {
+      const sc = x.data.scope; if (!sc) return;
+      if (!match(function (k) { return sc[TQK[k]]; }) || (single && !sc[TQK[L]])) return;
+      const n = Object.assign({}, x.data), ns = Object.assign({}, sc); apply(null, function (k, v) { ns[TQK[k]] = v; }); n.scope = ns; us.push({ id: x.id, data: n });
+    });
+    if (us.length) await DB.batchSet('User', us);
+    return { success: true, message: 'Taqarrur update ho gaya.' + (single ? ' (' + nT + ' aur Taqarrur rows, ' : ' (') + nD + ' Appointment Data, ' + nC + ' Courses Data, ' + us.length + ' User location bhi update hui)' };
+  }
+
+  async function dmTaqDelete(token, key) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin delete kar sakta hai.');
+    const p = (key || '').split(':'), idx = parseInt(p[1], 10), doc = (await tqDocs()).find(function (d) { return d.id === p[0]; });
+    if (!doc || !(doc.data.rows || [])[idx]) return crsFail('Row nahi mila (list refresh karein).');
+    const old = tqRow(doc.data.rows[idx]);
+    doc.data.rows.splice(idx, 1);
+    await DB.setDoc('Taqarrur', doc.id, { rows: doc.data.rows });
+    taqCache = null;
+    return { success: true, message: 'Taqarrur row delete ho gaya. (Is location ka purana Data/Courses delete nahi hua.)' };
+  }
+
+  async function dmDataList(token) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin dekh sakta hai.');
+    const taq = {}; (await getTaqarrurRows()).forEach(function (r) { taq[r.map(tqN).join('|')] = 1; });
+    const docs = (await DB.listDocs('Data')).sort(function (a, b) { return (b.data.seq || 0) - (a.data.seq || 0); });
+    return { success: true, rows: docs.map(function (d) {
+      const o = d.data, a = TQK.map(function (k) { return (o[k] || '').toString(); }), ok = !!taq[a.map(tqN).join('|')];
+      return { id: d.id, ts: o.ts || '', loc: a, name: o.name || '', mobile: o.mobile || '', email: o.email || '', role: o.role || '', status: o.status || 'Approved', by: o.submittedBy || '', ok: ok };
+    }) };
+  }
+
+  async function dmDataSave(token, id, f) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin change kar sakta hai.');
+    const cur = await DB.getDoc('Data', id); if (!cur) return crsFail('Entry nahi mili (list refresh karein).');
+    const o = Object.assign({}, cur), g = function (k) { return (f[k] === undefined || f[k] === null ? '' : f[k]).toString().trim(); };
+    if (!g('region') || !g('name')) return crsFail('Region aur Name zaroori hain.');
+    ['country', 'region', 'state', 'division', 'district', 'alaqa', 'name', 'mobile', 'email', 'role'].forEach(function (k) { o[k] = g(k); });
+    o.status = ['Approved', 'Pending', 'Rejected'].indexOf(g('status')) >= 0 ? g('status') : (o.status || 'Approved');
+    await DB.setDoc('Data', id, o);
+    return { success: true, message: 'Entry update ho gayi.' };
+  }
+
+  async function dmDataDelete(token, id) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin delete kar sakta hai.');
+    await DB.deleteDoc('Data', id);
+    return { success: true, message: 'Entry delete ho gayi.' };
+  }
+
   // scope = { country, region, state, division, district, alaqa }: Level ke hisab se location chunkar user banta hai (User ID koi bhi ho sakti hai)
   async function saveUser(token, login, password, status, level, scope, crsMuallim, crsTypes) {
     if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin change kar sakta hai.');
@@ -3882,7 +4005,7 @@ function createServer(DB, env) {
     getDropdownData, saveData, deleteRecord, reviewRecord,
     getDashboardData, generateEntryLink, resolveEntryLink,
     isFirstRun, importTaqarrur, importUsers, importData,
-    getTaqarrurTree, viewAsUser, getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, deleteCourses, generateCourseLink, importCourseData, clearAppointmentData, clearData,
+    getTaqarrurTree, viewAsUser, getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, deleteCourses, generateCourseLink, importCourseData, clearAppointmentData, clearData, dmTaqList, dmTaqSave, dmTaqDelete, dmDataList, dmDataSave, dmDataDelete,
     listUsers, saveUser, deleteUser,
     // testing / internal
     _internal: { getSetting, putSetting, normalize, parseDelimited, parseTaqarrurValues, fmtTs, sessions, getTaqarrurRows, resolveScope }
