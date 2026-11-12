@@ -365,7 +365,7 @@ body.view-as{ padding-top:40px; }
     <button type="button" class="sb-main" id="modeBtnCrs" onclick="showMode('crs')"><span class="sb-ico">&#127891;</span>Courses Data</button>
     <div class="sb-subs d-none" id="sbCrs"><button type="button" class="sb-sub active" id="sb_crs_form">Courses Data Form</button><button type="button" class="sb-sub" id="sb_crs_dash">Courses Dashboard</button></div>
     <button type="button" class="sb-main" id="modeBtnSet" onclick="showMode('set')" style="display:none"><span class="sb-ico">&#9881;</span>Settings &amp; Permissions</button>
-    <div class="sb-subs d-none" id="sbSet"><button type="button" class="sb-sub active" data-t="setApptCtl">Appointment Controls</button><button type="button" class="sb-sub" data-t="setCrsCtl">Courses Controls</button><button type="button" class="sb-sub" data-t="setUsers">Users</button><button type="button" class="sb-sub" data-t="setCrsOpt">Courses Dropdowns</button><button type="button" class="sb-sub" data-t="setImp">Data Import</button></div>
+    <div class="sb-subs d-none" id="sbSet"><button type="button" class="sb-sub active" data-t="setApptCtl">Appointment Controls</button><button type="button" class="sb-sub" data-t="setCrsCtl">Courses Controls</button><button type="button" class="sb-sub" data-t="setUsers">Users</button><button type="button" class="sb-sub" data-t="setCrsOpt">Courses Dropdowns</button><button type="button" class="sb-sub" data-t="setImp">Data Import</button><button type="button" class="sb-sub" data-t="setDM">Data Manager</button></div>
   </nav>
   <div class="sb-foot">Madani Courses &middot; Data Management</div>
 </aside>
@@ -577,6 +577,7 @@ body.view-as{ padding-top:40px; }
         <button type="button" data-t="setUsers" onclick="showSet('setUsers')">Users</button>
         <button type="button" data-t="setCrsOpt" onclick="showSet('setCrsOpt')">Courses Dropdowns</button>
         <button type="button" data-t="setImp" onclick="showSet('setImp')">Data Import</button>
+        <button type="button" data-t="setDM" onclick="showSet('setDM')">Data Manager</button>
       </div>
       <div class="panel" id="setApptCtl"><h2>&#9881; Appointment &mdash; System Admin Control</h2>
 
@@ -836,6 +837,32 @@ body.view-as{ padding-top:40px; }
     <textarea id="coImp" class="form-control form-control-sm" rows="5"></textarea>
     <button type="button" class="btn btn-sm btn-success mt-2" onclick="Adm.importMaster()">Import Options</button> <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="Adm.clearData('crsmaster')">&#128465; Saare Dropdown options delete</button>
     <div id="coMsg" class="mt-2" style="font-size:0.85rem"></div>
+  </div>
+</div>
+<div id="setDM" class="d-none">
+  <div class="panel">
+    <h2>&#128203; Data Manager &mdash; Import kiya hua data (table, Edit, Delete)</h2>
+    <p style="font-size:0.78rem" class="text-muted">Yahan jo bhi badlenge, usi ke hisab se Appointment / Courses ke dropdown aur Dashboard ka data badal jayega. Courses Data ki table Courses Dashboard me hai (Edit/Delete ke saath).</p>
+    <div class="set-tabs mb-2" id="dmTabs">
+      <button type="button" class="active" data-t="taq" onclick="Dm.tab('taq')">Taqarrur (Location)</button>
+      <button type="button" data-t="data" onclick="Dm.tab('data')">Appointment Data</button>
+    </div>
+    <div class="d-flex gap-2 mb-2 flex-wrap align-items-center">
+      <input id="dmQ" class="form-control form-control-sm" placeholder="Search" style="max-width:240px" oninput="Dm.search()">
+      <button type="button" class="btn btn-sm btn-secondary" onclick="Dm.load()">&#8635; Refresh</button>
+      <button type="button" class="btn btn-sm btn-success" id="dmAdd" onclick="Dm.edit('')">+ Naya Row</button>
+      <label class="mb-0" style="font-size:0.8rem" id="dmBadW"><input type="checkbox" id="dmBad" onchange="Dm.search()"> Sirf Taqarrur se na milne wali</label>
+      <span id="dmCnt" style="font-size:0.8rem"></span>
+    </div>
+    <div id="dmMsg" style="font-size:0.85rem"></div>
+    <div class="table-scroll" style="max-height:480px;overflow:auto"><table class="crs-table"><thead id="dmHead"></thead><tbody id="dmBody"></tbody></table></div>
+    <div class="d-flex gap-2 mt-2 align-items-center"><button type="button" class="btn btn-sm btn-outline-secondary" onclick="Dm.pg(-1)">&laquo; Prev</button><span id="dmPg" style="font-size:0.8rem"></span><button type="button" class="btn btn-sm btn-outline-secondary" onclick="Dm.pg(1)">Next &raquo;</button></div>
+  </div>
+  <div id="dmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:3000;align-items:center;justify-content:center;padding:14px">
+    <div style="background:#fff;border-radius:14px;padding:18px;max-width:760px;width:100%;max-height:92vh;overflow:auto">
+      <h2 id="dmMT" style="margin-bottom:10px"></h2><div id="dmMB"></div>
+      <div class="d-flex gap-2 mt-3"><button type="button" class="btn btn-sm btn-success" onclick="Dm.save()">Save</button><button type="button" class="btn btn-sm btn-secondary" onclick="Dm.close()">Cancel</button><span id="dmMM" class="align-self-center" style="font-size:0.82rem"></span></div>
+    </div>
   </div>
 </div>
 
@@ -1296,7 +1323,8 @@ body.view-as{ padding-top:40px; }
     showMode(acc.appointment ? 'appt' : 'crs');
   }
   function showSet(id) {
-    ['setApptCtl', 'setCrsCtl', 'setUsers', 'setCrsOpt', 'setImp'].forEach(function (x) { $('#' + x).toggleClass('d-none', x !== id); });
+    ['setApptCtl', 'setCrsCtl', 'setUsers', 'setCrsOpt', 'setImp', 'setDM'].forEach(function (x) { $('#' + x).toggleClass('d-none', x !== id); });
+    if (id === 'setDM' && window.Dm) Dm.init();
     $('#setTabs button').each(function () { $(this).toggleClass('active', $(this).data('t') === id); });
   }
 
@@ -2663,7 +2691,7 @@ window.Crs = (function () {
   var $ = window.jQuery;
   var T = { appt_form: ['Appointment Data', 'Data Entry Form'], appt_dash: ['Appointment Data', 'Data Dashboard'], crs_form: ['Courses Data', 'Courses Data Form'], crs_dash: ['Courses Data', 'Courses Dashboard'], set: ['Settings & Permissions', ''] };
   var cur = { appt: 'appt_form', crs: 'crs_form' };
-  var setNames = { setApptCtl: 'Appointment Controls', setCrsCtl: 'Courses Controls', setUsers: 'Users', setCrsOpt: 'Courses Dropdowns', setImp: 'Data Import' };
+  var setNames = { setApptCtl: 'Appointment Controls', setCrsCtl: 'Courses Controls', setUsers: 'Users', setCrsOpt: 'Courses Dropdowns', setImp: 'Data Import', setDM: 'Data Manager' };
   var mode = 'appt', setSub = 'setApptCtl';
 
   function title() {
@@ -2885,6 +2913,104 @@ window.Adm = (function () {
     setTimeout(function () { jQuery('#modeBtnSet').trigger('click'); }, 250);
   }
   return { viewUser: viewUser, backFromView: backFromView, clearData: clearData, load: load, loadUsers: loadUsers, editUser: editUser, delUser: delUser, saveUser: saveUser, drawOpt: drawOpt, addType: addType, delType: delType, addName: addName, delName: delName, addList: addList, delShoba: delShoba, delMu: delMu, saveYears: saveYears, importMaster: importMaster };
+})();
+
+/* ===== Admin: Data Manager (Taqarrur + Appointment Data table, edit/delete) ===== */
+window.Dm = (function () {
+  const $a = function (i) { return document.getElementById(i); };
+  const esc = function (v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); };
+  const call = function (fn) { const a = [].slice.call(arguments, 1); return new Promise(function (res, rej) { google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn].apply(null, [window.getSessionToken()].concat(a)); }); };
+  const LV = ['Country', 'Region', 'State', 'Division', 'District', 'Alaqa'];
+  let T = 'taq', rows = [], view = [], page = 0, cur = null, TQ = [];
+  const PER = 50;
+  const msg = function (id, ok, t) { const e = $a(id); e.style.color = ok ? '#146C43' : '#C0392B'; e.textContent = t; };
+
+  function tab(t) {
+    T = t; page = 0; $a('dmQ').value = ''; $a('dmBad').checked = false;
+    document.querySelectorAll('#dmTabs button').forEach(function (b) { b.classList.toggle('active', b.dataset.t === t); });
+    $a('dmAdd').style.display = t === 'taq' ? '' : 'none'; $a('dmBadW').style.display = t === 'data' ? '' : 'none';
+    $a('dmHead').innerHTML = t === 'taq'
+      ? '<tr><th>#</th>' + LV.map(function (x) { return '<th>' + x + '</th>'; }).join('') + '<th></th></tr>'
+      : '<tr><th>Date</th><th>Region</th><th>State</th><th>Division</th><th>District</th><th>Alaqa</th><th>Name</th><th>Mobile</th><th>Role</th><th>Status</th><th></th></tr>';
+    load();
+  }
+  async function load() {
+    $a('dmBody').innerHTML = '<tr><td colspan="12">Load ho raha hai...</td></tr>'; msg('dmMsg', true, '');
+    try {
+      const r = await call(T === 'taq' ? 'dmTaqList' : 'dmDataList'); if (!r.success) return msg('dmMsg', false, r.message);
+      rows = r.rows;
+      if (T === 'data' || !TQ.length) { const t = await call('dmTaqList'); if (t.success) TQ = t.rows.map(function (x) { return x.v; }); }
+      if (T === 'taq') TQ = rows.map(function (x) { return x.v; });
+      search();
+    } catch (e) { msg('dmMsg', false, 'Error: ' + e.message); }
+  }
+  function search() {
+    const q = ($a('dmQ').value || '').toLowerCase(), bad = $a('dmBad').checked;
+    view = rows.filter(function (x) {
+      if (T === 'data' && bad && x.ok) return false;
+      return !q || (T === 'taq' ? x.v : x.loc.concat([x.name, x.mobile, x.role, x.status, x.ts])).join(' ').toLowerCase().indexOf(q) >= 0;
+    });
+    page = 0; draw();
+  }
+  function pg(d) { const n = Math.max(1, Math.ceil(view.length / PER)); page = Math.min(n - 1, Math.max(0, page + d)); draw(); }
+  function draw() {
+    const s = page * PER, part = view.slice(s, s + PER);
+    $a('dmCnt').textContent = view.length + ' / ' + rows.length + ' rows' + (T === 'data' ? ' (Taqarrur se na milne wali: ' + rows.filter(function (x) { return !x.ok; }).length + ')' : '');
+    $a('dmPg').textContent = 'Page ' + (page + 1) + ' / ' + Math.max(1, Math.ceil(view.length / PER));
+    const btn = function (i) { return '<td style="white-space:nowrap"><button type="button" class="btn btn-sm btn-outline-primary" onclick="Dm.edit(' + i + ')">Edit</button> <button type="button" class="btn btn-sm btn-outline-danger" onclick="Dm.del(' + i + ')">Delete</button></td>'; };
+    $a('dmBody').innerHTML = part.map(function (x, j) {
+      const i = s + j;
+      if (T === 'taq') return '<tr><td>' + (i + 1) + '</td>' + x.v.map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + btn(i) + '</tr>';
+      return '<tr' + (x.ok ? '' : ' style="background:#FFF4E5"') + '><td>' + esc(x.ts) + '</td>' + x.loc.slice(1).map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '<td>' + esc(x.name) + '</td><td>' + esc(x.mobile) + '</td><td>' + esc(x.role) + '</td><td>' + esc(x.status) + (x.ok ? '' : ' <span title="Ye location Taqarrur me nahi mili: isliye user ke dashboard me nahi dikhegi. Edit karke sahi location chunein." style="color:#C0392B">&#9888;</span>') + '</td>' + btn(i) + '</tr>';
+    }).join('') || '<tr><td colspan="12">Koi data nahi.</td></tr>';
+  }
+  // ----- edit form -----
+  const opts = function (vals, sel) { const a = vals.filter(function (v, i, z) { return v && z.indexOf(v) === i; }); if (sel && a.indexOf(sel) < 0) a.unshift(sel); return '<option value="">--</option>' + a.map(function (v) { return '<option' + (v === sel ? ' selected' : '') + '>' + esc(v) + '</option>'; }).join(''); };
+  function chain(from) {
+    const v = []; for (let i = 0; i < 6; i++) v.push($a('dmL' + i).value);
+    for (let i = from + 1; i < 6; i++) {
+      const vals = TQ.filter(function (r) { for (let k = 0; k < i; k++) if (r[k] !== v[k]) return false; return true; }).map(function (r) { return r[i]; });
+      $a('dmL' + i).innerHTML = opts(vals, ''); v[i] = '';
+    }
+  }
+  function edit(i) {
+    const isNew = i === '', x = isNew ? null : view[i]; cur = x; $a('dmMM').textContent = '';
+    let h = '';
+    if (T === 'taq') {
+      const v = x ? x.v : ['India', '', '', '', '', ''];
+      $a('dmMT').textContent = isNew ? 'Naya Taqarrur Row' : 'Taqarrur Row Edit';
+      h = '<div class="crs-g" style="--c:3">' + LV.map(function (l, k) { return '<div><span class="field-label">' + l + '</span><input id="dmL' + k + '" class="form-control" list="dmDl' + k + '" value="' + esc(v[k]) + '"><datalist id="dmDl' + k + '">' + TQ.map(function (r) { return r[k]; }).filter(function (a, b, z) { return a && z.indexOf(a) === b; }).map(function (a) { return '<option value="' + esc(a) + '">'; }).join('') + '</datalist></div>'; }).join('') + '</div>' +
+        (isNew ? '' : '<label class="mt-2" style="font-size:0.82rem"><input type="checkbox" id="dmCas" checked> Sirf ek naam badalne par: purane Taqarrur rows, Appointment/Courses Data aur Users ki location me bhi wahi naam badlo (Rename everywhere)</label>');
+    } else {
+      const v = x.loc;
+      $a('dmMT').textContent = 'Appointment Entry Edit';
+      h = '<div class="crs-g" style="--c:3">' + LV.map(function (l, k) { return '<div><span class="field-label">' + l + '</span><select id="dmL' + k + '" class="form-select"></select></div>'; }).join('') + '</div>' +
+        '<div class="crs-g mt-2" style="--c:3"><div><span class="field-label">Name</span><input id="dmName" class="form-control" value="' + esc(x.name) + '"></div><div><span class="field-label">Mobile</span><input id="dmMob" class="form-control" value="' + esc(x.mobile) + '"></div><div><span class="field-label">Email</span><input id="dmEm" class="form-control" value="' + esc(x.email) + '"></div>' +
+        '<div><span class="field-label">Role</span><input id="dmRole" class="form-control" value="' + esc(x.role) + '"></div><div><span class="field-label">Status</span><select id="dmSt" class="form-select">' + ['Approved', 'Pending', 'Rejected'].map(function (s) { return '<option' + (s === x.status ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select></div></div>';
+    }
+    $a('dmMB').innerHTML = h;
+    if (T === 'data') { for (let k = 0; k < 6; k++) { const prev = []; for (let q = 0; q < k; q++) prev.push(x.loc[q]); $a('dmL' + k).innerHTML = opts(TQ.filter(function (r) { for (let q = 0; q < k; q++) if (r[q] !== prev[q]) return false; return true; }).map(function (r) { return r[k]; }), x.loc[k]); $a('dmL' + k).onchange = (function (kk) { return function () { chain(kk); }; })(k); } }
+    $a('dmModal').style.display = 'flex';
+  }
+  function close() { $a('dmModal').style.display = 'none'; }
+  async function save() {
+    const loc = []; for (let k = 0; k < 6; k++) loc.push($a('dmL' + k).value.trim());
+    try {
+      let r;
+      if (T === 'taq') r = await call('dmTaqSave', cur ? cur.k : '', loc, cur ? $a('dmCas').checked : false);
+      else r = await call('dmDataSave', cur.id, { country: loc[0], region: loc[1], state: loc[2], division: loc[3], district: loc[4], alaqa: loc[5], name: $a('dmName').value, mobile: $a('dmMob').value, email: $a('dmEm').value, role: $a('dmRole').value, status: $a('dmSt').value });
+      if (!r.success) return msg('dmMM', false, r.message);
+      close(); afterChange(); await load(); msg('dmMsg', true, r.message);
+    } catch (e) { msg('dmMM', false, 'Error: ' + e.message); }
+  }
+  async function del(i) {
+    const x = view[i];
+    if (!confirm(T === 'taq' ? 'Ye Taqarrur row delete karein?\n' + x.v.filter(Boolean).join(' > ') : 'Ye Appointment entry delete karein?\n' + x.name + ' (' + x.loc.filter(Boolean).join(' > ') + ')')) return;
+    try { const r = await call(T === 'taq' ? 'dmTaqDelete' : 'dmDataDelete', T === 'taq' ? x.k : x.id); if (r.success) { afterChange(); await load(); } msg('dmMsg', r.success, r.message); } catch (e) { msg('dmMsg', false, 'Error: ' + e.message); }
+  }
+  // Taqarrur / data badalne ke baad dusre tab ka dropdown + dashboard fresh karo
+  function afterChange() { try { if (window.Crs) Crs.refresh(); if (window.Adm && Adm.load) Adm.load(); if (window.loadDashboard) window.loadDashboard(); } catch (e) {} }
+  return { tab: tab, load: load, search: search, pg: pg, edit: edit, save: save, close: close, del: del, init: function () { if (!rows.length) tab('taq'); } };
 })();
 
 </script>
@@ -3875,7 +4001,9 @@ function createServer(DB, env) {
     }
     if (!items.length) return { success: false, message: 'Koi valid Data row nahi mili (16 columns, Timestamp se shuru).' };
     await DB.batchSet('Data', items);
-    return { success: true, count: items.length, message: items.length + ' Data rows import ho gayi.' };
+    const tqs = {}; (await getTaqarrurRows()).forEach(function (r) { tqs[r.map(function (x) { return normalize(x).replace(/\s+/g, ' '); }).join('|')] = 1; });
+    const miss = items.filter(function (it) { return !tqs[['country', 'region', 'state', 'division', 'district', 'alaqa'].map(function (k) { return normalize(it.data[k]).replace(/\s+/g, ' '); }).join('|')]; }).length;
+    return { success: true, count: items.length, message: items.length + ' Data rows import ho gayi.' + (miss ? ' ' + miss + ' rows ki location Taqarrur se match nahi hui (ye user ke dashboard me nahi dikhengi): Settings > Data Manager > Appointment Data me \u201cSirf Taqarrur se na milne wali\u201d chun kar Edit karein.' : ' Sab rows ki location Taqarrur se match hui: user ke dashboard me dikhengi.') };
   }
 
   /* =====================================================================
@@ -4297,6 +4425,126 @@ function createServer(DB, env) {
     return { success: true, rows: (await getTaqarrurRows()).map(function (r) { return [r[0], r[1], r[2], r[3], r[4], r[5]]; }) };
   }
 
+
+  /* ---------- Admin Data Manager: Taqarrur / Appointment Data table (view, add, edit, delete) ---------- */
+  const TQK = ['country', 'region', 'state', 'division', 'district', 'alaqa'];
+  const tqN = function (v) { return normalize(v).replace(/\s+/g, ' '); };
+  const tqClean = function (a) { return TQK.map(function (_, i) { return ((a && a[i]) || '').toString().trim(); }); };
+  const tqDocs = async function () { return (await DB.listDocs('Taqarrur')).sort(function (a, b) { return a.id < b.id ? -1 : a.id > b.id ? 1 : 0; }); };
+  const tqRow = function (o) { return [o.c || '', o.r || '', o.s || '', o.d || '', o.t || '', o.a || '']; };
+  const tqObj = function (r) { return { c: r[0], r: r[1], s: r[2], d: r[3], t: r[4], a: r[5] }; };
+
+  async function dmTaqList(token) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin dekh sakta hai.');
+    const rows = [];
+    (await tqDocs()).forEach(function (d) { (d.data.rows || []).forEach(function (o, i) { rows.push({ k: d.id + ':' + i, v: tqRow(o) }); }); });
+    return { success: true, rows: rows };
+  }
+
+  // key khali = naya row. cascade = naam badalne par purane Data / Courses / Users me bhi badlo.
+  async function dmTaqSave(token, key, row, cascade) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin change kar sakta hai.');
+    row = tqClean(row); if (!row[0]) row[0] = 'India';
+    if (!row[1]) return crsFail('Region zaroori hai.');
+    for (let i = 2; i < 6; i++) if (row[i] && !row[i - 1]) return crsFail(TQK[i] + ' bharne se pehle ' + TQK[i - 1] + ' bharein.');
+    const docs = await tqDocs(), same = function (a, b) { return a.every(function (x, i) { return tqN(x) === tqN(b[i]); }); };
+    if (!key) {
+      for (const d of docs) if ((d.data.rows || []).some(function (o) { return same(tqRow(o), row); })) return crsFail('Ye row Taqarrur me pehle se maujood hai.');
+      const last = docs[docs.length - 1];
+      if (last && (last.data.rows || []).length < 800) { last.data.rows.push(tqObj(row)); await DB.setDoc('Taqarrur', last.id, { rows: last.data.rows }); }
+      else await DB.setDoc('Taqarrur', 'chunk_' + ('0000' + docs.length).slice(-4), { rows: [tqObj(row)] });
+      taqCache = null;
+      return { success: true, message: 'Naya Taqarrur row add ho gaya.' };
+    }
+    const p = key.split(':'), idx = parseInt(p[1], 10), doc = docs.find(function (d) { return d.id === p[0]; });
+    if (!doc || !(doc.data.rows || [])[idx]) return crsFail('Row nahi mila (list refresh karein).');
+    const old = tqRow(doc.data.rows[idx]);
+    const ch = []; for (let i = 0; i < 6; i++) if (tqN(old[i]) !== tqN(row[i]) || old[i] !== row[i]) ch.push(i);
+    if (!ch.length) return { success: true, message: 'Koi change nahi hua.' };
+    for (const d of docs) if (d.data.rows.some(function (o, i) { return !(d.id === doc.id && i === idx) && same(tqRow(o), row); })) return crsFail('Ye row Taqarrur me pehle se maujood hai.');
+    // single level ka naam badla ho to us naam ke tamam rows/data me badlo, warna sirf isi row ke path wala data
+    const single = !!cascade && ch.length === 1, L = ch[0];
+    let P = 0; for (let i = 0; i < 6; i++) if (old[i]) P = i + 1;
+    if (single) P = L + 1;
+    const match = function (get, skipAlaqa) { for (let i = 0; i < P; i++) { if (skipAlaqa && i === 5) continue; if (tqN(get(i)) !== tqN(old[i])) return false; } return true; };
+    const apply = function (get, set, skipAlaqa) {
+      if (single) set(L, row[L]);
+      else for (let i = 0; i < P; i++) { if (skipAlaqa && i === 5) continue; set(i, row[i]); }
+    };
+    let nT = 0;
+    const touched = [];
+    docs.forEach(function (d) {
+      let mod = false;
+      d.data.rows.forEach(function (o, i) {
+        const r = tqRow(o);
+        if (d.id === doc.id && i === idx) { d.data.rows[i] = tqObj(row); mod = true; return; }
+        if (single && match(function (k) { return r[k]; })) { r[L] = row[L]; d.data.rows[i] = tqObj(r); mod = true; nT++; }
+      });
+      if (mod) touched.push({ id: d.id, data: { rows: d.data.rows } });
+    });
+    await DB.batchSet('Taqarrur', touched);
+    taqCache = null;
+    const fix = async function (coll, keyOf, skipAlaqa) {
+      const out = [];
+      (await DB.listDocs(coll)).forEach(function (x) {
+        const o = x.data;
+        if (!match(function (k) { return o[keyOf[k]]; }, skipAlaqa)) return;
+        const n = Object.assign({}, o); apply(null, function (k, v) { n[keyOf[k]] = v; }, skipAlaqa); out.push({ id: x.id, data: n });
+      });
+      if (out.length) await DB.batchSet(coll, out);
+      return out.length;
+    };
+    const kk = TQK.slice();
+    const nD = await fix('Data', kk, false), nC = await fix('CourseData', kk, true);
+    // Users: scope
+    const us = [];
+    (await DB.listDocs('User')).forEach(function (x) {
+      const sc = x.data.scope; if (!sc) return;
+      if (!match(function (k) { return sc[TQK[k]]; }) || (single && !sc[TQK[L]])) return;
+      const n = Object.assign({}, x.data), ns = Object.assign({}, sc); apply(null, function (k, v) { ns[TQK[k]] = v; }); n.scope = ns; us.push({ id: x.id, data: n });
+    });
+    if (us.length) await DB.batchSet('User', us);
+    return { success: true, message: 'Taqarrur update ho gaya.' + (single ? ' (' + nT + ' aur Taqarrur rows, ' : ' (') + nD + ' Appointment Data, ' + nC + ' Courses Data, ' + us.length + ' User location bhi update hui)' };
+  }
+
+  async function dmTaqDelete(token, key) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin delete kar sakta hai.');
+    const p = (key || '').split(':'), idx = parseInt(p[1], 10), doc = (await tqDocs()).find(function (d) { return d.id === p[0]; });
+    if (!doc || !(doc.data.rows || [])[idx]) return crsFail('Row nahi mila (list refresh karein).');
+    const old = tqRow(doc.data.rows[idx]);
+    doc.data.rows.splice(idx, 1);
+    await DB.setDoc('Taqarrur', doc.id, { rows: doc.data.rows });
+    taqCache = null;
+    return { success: true, message: 'Taqarrur row delete ho gaya. (Is location ka purana Data/Courses delete nahi hua.)' };
+  }
+
+  async function dmDataList(token) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin dekh sakta hai.');
+    const taq = {}; (await getTaqarrurRows()).forEach(function (r) { taq[r.map(tqN).join('|')] = 1; });
+    const docs = (await DB.listDocs('Data')).sort(function (a, b) { return (b.data.seq || 0) - (a.data.seq || 0); });
+    return { success: true, rows: docs.map(function (d) {
+      const o = d.data, a = TQK.map(function (k) { return (o[k] || '').toString(); }), ok = !!taq[a.map(tqN).join('|')];
+      return { id: d.id, ts: o.ts || '', loc: a, name: o.name || '', mobile: o.mobile || '', email: o.email || '', role: o.role || '', status: o.status || 'Approved', by: o.submittedBy || '', ok: ok };
+    }) };
+  }
+
+  async function dmDataSave(token, id, f) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin change kar sakta hai.');
+    const cur = await DB.getDoc('Data', id); if (!cur) return crsFail('Entry nahi mili (list refresh karein).');
+    const o = Object.assign({}, cur), g = function (k) { return (f[k] === undefined || f[k] === null ? '' : f[k]).toString().trim(); };
+    if (!g('region') || !g('name')) return crsFail('Region aur Name zaroori hain.');
+    ['country', 'region', 'state', 'division', 'district', 'alaqa', 'name', 'mobile', 'email', 'role'].forEach(function (k) { o[k] = g(k); });
+    o.status = ['Approved', 'Pending', 'Rejected'].indexOf(g('status')) >= 0 ? g('status') : (o.status || 'Approved');
+    await DB.setDoc('Data', id, o);
+    return { success: true, message: 'Entry update ho gayi.' };
+  }
+
+  async function dmDataDelete(token, id) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin delete kar sakta hai.');
+    await DB.deleteDoc('Data', id);
+    return { success: true, message: 'Entry delete ho gayi.' };
+  }
+
   // scope = { country, region, state, division, district, alaqa }: Level ke hisab se location chunkar user banta hai (User ID koi bhi ho sakti hai)
   async function saveUser(token, login, password, status, level, scope, crsMuallim, crsTypes) {
     if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin change kar sakta hai.');
@@ -4347,7 +4595,7 @@ function createServer(DB, env) {
     getDropdownData, saveData, deleteRecord, reviewRecord,
     getDashboardData, generateEntryLink, resolveEntryLink,
     isFirstRun, importTaqarrur, importUsers, importData,
-    getTaqarrurTree, viewAsUser, getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, deleteCourses, generateCourseLink, importCourseData, clearAppointmentData, clearData,
+    getTaqarrurTree, viewAsUser, getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, deleteCourses, generateCourseLink, importCourseData, clearAppointmentData, clearData, dmTaqList, dmTaqSave, dmTaqDelete, dmDataList, dmDataSave, dmDataDelete,
     listUsers, saveUser, deleteUser,
     // testing / internal
     _internal: { getSetting, putSetting, normalize, parseDelimited, parseTaqarrurValues, fmtTs, sessions, getTaqarrurRows, resolveScope }
