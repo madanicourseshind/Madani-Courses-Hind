@@ -365,7 +365,7 @@ body.view-as{ padding-top:40px; }
     <button type="button" class="sb-main" id="modeBtnCrs" onclick="showMode('crs')"><span class="sb-ico">&#127891;</span>Courses Data</button>
     <div class="sb-subs d-none" id="sbCrs"><button type="button" class="sb-sub active" id="sb_crs_form">Courses Data Form</button><button type="button" class="sb-sub" id="sb_crs_dash">Courses Dashboard</button></div>
     <button type="button" class="sb-main" id="modeBtnSet" onclick="showMode('set')" style="display:none"><span class="sb-ico">&#9881;</span>Settings &amp; Permissions</button>
-    <div class="sb-subs d-none" id="sbSet"><button type="button" class="sb-sub active" data-t="setApptCtl">Appointment Controls</button><button type="button" class="sb-sub" data-t="setCrsCtl">Courses Controls</button><button type="button" class="sb-sub" data-t="setUsers">Users</button><button type="button" class="sb-sub" data-t="setCrsOpt">Courses Dropdowns</button><button type="button" class="sb-sub" data-t="setImp">Data Import</button><button type="button" class="sb-sub" data-t="setDM">Data Manager</button></div>
+    <div class="sb-subs d-none" id="sbSet"><button type="button" class="sb-sub active" data-t="setApptCtl">Appointment Controls</button><button type="button" class="sb-sub" data-t="setCrsCtl">Courses Controls</button><button type="button" class="sb-sub" data-t="setUsers">Users</button><button type="button" class="sb-sub" data-t="setCrsOpt">Dropdowns</button><button type="button" class="sb-sub" data-t="setImp">Data Import</button><button type="button" class="sb-sub" data-t="setDM">Data Manager</button></div>
   </nav>
   <div class="sb-foot">Madani Courses &middot; Data Management</div>
 </aside>
@@ -577,6 +577,7 @@ body.view-as{ padding-top:40px; }
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -965,6 +966,10 @@ body.view-as{ padding-top:40px; }
     }).saveSpecificAccess(sessionToken, key, $box.find('.sp-input').val());
   });
 
+  function apptRoleOptsHtml() {
+    const v = (currentUser && currentUser.controls && currentUser.controls.apptRoles) || '';
+    return (v ? v.split('|') : ['Sirf Shobe Per Ajir', 'Deegar Shobe per Ajir', 'Volunteer']).map(function (r) { return '<option value="' + escHtml(r) + '">' + escHtml(r) + '</option>'; }).join('');
+  }
 
   // ===== Appointment dashboard: Pending / Complete naam ki list + PDF / Excel =====
   function apptLists(i, p, d) {
@@ -1006,6 +1011,7 @@ body.view-as{ padding-top:40px; }
   function showSet(id) {
     ['setApptCtl', 'setCrsCtl', 'setUsers', 'setCrsOpt', 'setImp', 'setDM'].forEach(function (x) { $('#' + x).toggleClass('d-none', x !== id); });
     if (id === 'setDM' && window.Dm) Dm.init();
+    if (id === 'setCrsOpt' && window.Adm) Adm.drawDdInfo();
     $('#setTabs button').each(function () { $(this).toggleClass('active', $(this).data('t') === id); });
   }
 
@@ -1231,9 +1237,7 @@ body.view-as{ padding-top:40px; }
           '<div class="col-12 col-md-3"><input type="email" class="form-control f-email" placeholder="Email ID"></div>' +
           '<div class="col-12 col-md-3"><select class="form-select f-ajir">' +
             '<option value="">Role *</option>' +
-            '<option value="Sirf Shobe Per Ajir">Sirf Shobe Per Ajir</option>' +
-            '<option value="Deegar Shobe per Ajir">Deegar Shobe per Ajir</option>' +
-            '<option value="Volunteer">Volunteer</option>' +
+            apptRoleOptsHtml() +
           '</select></div>' +
         '</div>' +
       '</div>'
@@ -2372,7 +2376,7 @@ window.Crs = (function () {
   var $ = window.jQuery;
   var T = { appt_form: ['Appointment Data', 'Data Entry Form'], appt_dash: ['Appointment Data', 'Data Dashboard'], crs_form: ['Courses Data', 'Courses Data Form'], crs_dash: ['Courses Data', 'Courses Dashboard'], set: ['Settings & Permissions', ''] };
   var cur = { appt: 'appt_form', crs: 'crs_form' };
-  var setNames = { setApptCtl: 'Appointment Controls', setCrsCtl: 'Courses Controls', setUsers: 'Users', setCrsOpt: 'Courses Dropdowns', setImp: 'Data Import', setDM: 'Data Manager' };
+  var setNames = { setApptCtl: 'Appointment Controls', setCrsCtl: 'Courses Controls', setUsers: 'Users', setCrsOpt: 'Dropdowns', setImp: 'Data Import', setDM: 'Data Manager' };
   var mode = 'appt', setSub = 'setApptCtl';
 
   function title() {
@@ -2527,7 +2531,8 @@ function createServer(DB, env) {
       stateLink: g('StateLinkAccess', 'OFF'),
       countryDist: g('CountryDistrictAccess', 'OFF'),
       regionDist: g('RegionDistrictAccess', 'OFF'),
-      stateDist: g('StateDistrictAccess', 'OFF')
+      stateDist: g('StateDistrictAccess', 'OFF'),
+      apptRoles: g('ApptRoles', '')
     };
     CRS_BASE.forEach(function (b) { out['crs' + b[1].charAt(0).toUpperCase() + b[1].slice(1)] = g('Crs' + b[0], b[2]); if (/^Export/.test(b[0])) out[b[1]] = g(b[0], b[2]); });
     return out;
@@ -3956,6 +3961,24 @@ function createServer(DB, env) {
     return { success: true, message: 'Entry delete ho gayi.' };
   }
 
+
+  /* ---------- Appointment Entry Form: Role dropdown options (Settings 'ApptRoles', default = purane 3 options) ---------- */
+  const APPT_ROLES_DEF = ['Sirf Shobe Per Ajir', 'Deegar Shobe per Ajir', 'Volunteer'];
+  async function getApptRoles(token) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin dekh sakta hai.');
+    const v = (await getSetting('ApptRoles', '')).toString();
+    return { success: true, roles: v ? v.split('|') : APPT_ROLES_DEF.slice(), isDefault: !v };
+  }
+  async function saveApptRoles(token, roles) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin change kar sakta hai.');
+    const out = [];
+    (roles || []).forEach(function (r) { r = (r || '').toString().replace(/\|/g, ' ').replace(/\s+/g, ' ').trim(); if (r && !out.some(function (x) { return normalize(x) === normalize(r); })) out.push(r); });
+    if (!out.some(function (x) { return normalize(x) === 'volunteer'; })) out.push('Volunteer');
+    const same = out.length === APPT_ROLES_DEF.length && out.every(function (x, i) { return x === APPT_ROLES_DEF[i]; });
+    await putSetting('ApptRoles', same ? '' : out.join('|'));
+    return { success: true, message: 'Appointment Role options save ho gaye.', roles: out };
+  }
+
   // scope = { country, region, state, division, district, alaqa }: Level ke hisab se location chunkar user banta hai (User ID koi bhi ho sakti hai)
   async function saveUser(token, login, password, status, level, scope, crsMuallim, crsTypes) {
     if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin change kar sakta hai.');
@@ -4006,7 +4029,7 @@ function createServer(DB, env) {
     getDropdownData, saveData, deleteRecord, reviewRecord,
     getDashboardData, generateEntryLink, resolveEntryLink,
     isFirstRun, importTaqarrur, importUsers, importData,
-    getTaqarrurTree, viewAsUser, getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, deleteCourses, generateCourseLink, importCourseData, clearAppointmentData, clearData, dmTaqList, dmTaqSave, dmTaqDelete, dmDataList, dmDataSave, dmDataDelete,
+    getTaqarrurTree, viewAsUser, getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, deleteCourses, generateCourseLink, importCourseData, clearAppointmentData, clearData, dmTaqList, dmTaqSave, dmTaqDelete, dmDataList, dmDataSave, dmDataDelete, getApptRoles, saveApptRoles,
     listUsers, saveUser, deleteUser,
     // testing / internal
     _internal: { getSetting, putSetting, normalize, parseDelimited, parseTaqarrurValues, fmtTs, sessions, getTaqarrurRows, resolveScope }
