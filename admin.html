@@ -365,7 +365,7 @@ body.view-as{ padding-top:40px; }
     <button type="button" class="sb-main" id="modeBtnCrs" onclick="showMode('crs')"><span class="sb-ico">&#127891;</span>Courses Data</button>
     <div class="sb-subs d-none" id="sbCrs"><button type="button" class="sb-sub active" id="sb_crs_form">Courses Data Form</button><button type="button" class="sb-sub" id="sb_crs_dash">Courses Dashboard</button></div>
     <button type="button" class="sb-main" id="modeBtnSet" onclick="showMode('set')" style="display:none"><span class="sb-ico">&#9881;</span>Settings &amp; Permissions</button>
-    <div class="sb-subs d-none" id="sbSet"><button type="button" class="sb-sub active" data-t="setApptCtl">Appointment Controls</button><button type="button" class="sb-sub" data-t="setCrsCtl">Courses Controls</button><button type="button" class="sb-sub" data-t="setUsers">Users</button><button type="button" class="sb-sub" data-t="setCrsOpt">Courses Dropdowns</button><button type="button" class="sb-sub" data-t="setImp">Data Import</button><button type="button" class="sb-sub" data-t="setDM">Data Manager</button></div>
+    <div class="sb-subs d-none" id="sbSet"><button type="button" class="sb-sub active" data-t="setApptCtl">Appointment Controls</button><button type="button" class="sb-sub" data-t="setCrsCtl">Courses Controls</button><button type="button" class="sb-sub" data-t="setUsers">Users</button><button type="button" class="sb-sub" data-t="setCrsOpt">Dropdowns</button><button type="button" class="sb-sub" data-t="setImp">Data Import</button><button type="button" class="sb-sub" data-t="setDM">Data Manager</button></div>
   </nav>
   <div class="sb-foot">Madani Courses &middot; Data Management</div>
 </aside>
@@ -575,7 +575,7 @@ body.view-as{ padding-top:40px; }
         <button type="button" class="active" data-t="setApptCtl" onclick="showSet('setApptCtl')">Appointment Controls</button>
         <button type="button" data-t="setCrsCtl" onclick="showSet('setCrsCtl')">Courses Controls</button>
         <button type="button" data-t="setUsers" onclick="showSet('setUsers')">Users</button>
-        <button type="button" data-t="setCrsOpt" onclick="showSet('setCrsOpt')">Courses Dropdowns</button>
+        <button type="button" data-t="setCrsOpt" onclick="showSet('setCrsOpt')">Dropdowns</button>
         <button type="button" data-t="setImp" onclick="showSet('setImp')">Data Import</button>
         <button type="button" data-t="setDM" onclick="showSet('setDM')">Data Manager</button>
       </div>
@@ -809,7 +809,9 @@ body.view-as{ padding-top:40px; }
 
 <div id="setCrsOpt" class="d-none">
   <div class="panel">
-    <h2>Courses Dropdown Options</h2>
+    <h2>Dropdown Options</h2>
+    <div class="set-tabs mb-3" id="ddTabs"><button type="button" class="active" data-t="ddCrs" onclick="Adm.ddTab('ddCrs')">Courses Entry Form</button><button type="button" data-t="ddAppt" onclick="Adm.ddTab('ddAppt')">Appointment Entry Form</button></div>
+    <div id="ddCrs">
     <div class="row g-3">
       <div class="col-md-6">
         <span class="field-label">Course Type</span>
@@ -837,6 +839,32 @@ body.view-as{ padding-top:40px; }
     <textarea id="coImp" class="form-control form-control-sm" rows="5"></textarea>
     <button type="button" class="btn btn-sm btn-success mt-2" onclick="Adm.importMaster()">Import Options</button> <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="Adm.clearData('crsmaster')">&#128465; Saare Dropdown options delete</button>
     <div id="coMsg" class="mt-2" style="font-size:0.85rem"></div>
+    <h2 class="mt-4">Baaki Dropdown (Courses Entry Form)</h2>
+    <div id="ddCrsInfo" style="font-size:0.85rem"></div>
+    <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="Adm.openStructure()">Location badalne ke liye: Data Manager &rarr; Courses Structure</button>
+    </div>
+    <div id="ddAppt" class="d-none">
+      <h2>Role Dropdown (Appointment Entry Form)</h2>
+      <p style="font-size:0.78rem" class="text-muted">"Volunteer" hamesha rahega (District / Alaqa level par apne aap lagta hai). Naye options sirf aage ki nayi entries ke form me dikhenge; purani entries me koi tabdili nahi hoti.</p>
+      <div class="d-flex gap-2 mb-2" style="max-width:520px"><input id="apNewRole" class="form-control form-control-sm" placeholder="Naya Role option"><button type="button" class="btn btn-sm btn-secondary" onclick="Adm.addRole()">+ Add</button></div>
+      <div class="opt-list" id="apRoles" style="max-width:520px"></div>
+      <div class="d-flex gap-2 mt-2 flex-wrap"><button type="button" class="btn btn-sm btn-success" onclick="Adm.saveRoles()">Save Roles</button><button type="button" class="btn btn-sm btn-outline-secondary" onclick="Adm.resetRoles()">Purane 3 options par wapas</button></div>
+      <div id="apMsg" class="mt-2" style="font-size:0.85rem"></div>
+      <h2 class="mt-4">Role Import (sirf Appointment)</h2>
+      <p style="font-size:0.78rem" class="text-muted">Har line me ek Role. Maujooda options me judd jayenge.</p>
+      <textarea id="apImp" class="form-control form-control-sm" rows="3"></textarea>
+      <div class="mt-1"><input type="file" accept=".csv,.tsv,.txt,.xlsx,.xls" class="form-control form-control-sm" style="max-width:340px" onchange="Adm.fileTo('apImp',this)"></div>
+      <button type="button" class="btn btn-sm btn-success mt-2" onclick="Adm.importRoles()">Role Import</button>
+      <h2 class="mt-4">Baaki Dropdown (Appointment Entry Form)</h2>
+      <div id="ddApptInfo" style="font-size:0.85rem"></div>
+      <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="Adm.openStructure()">Location badalne ke liye: Data Manager &rarr; Courses Structure</button>
+    </div>
+    <h2 class="mt-4">Dono Form ke Dropdown Ek Sath Import</h2>
+    <p style="font-size:0.78rem" class="text-muted">Columns: <b>Form | Dropdown | Parent | Value</b>. Form = Courses ya Appointment. Dropdown = Course Type / Course Name / Shobajat Courses / Muallim Zimmedari (Courses) ya Role (Appointment). Course Name ke liye Parent me uska Course Type likhein. Sirf bhari hui rows import hoti hain, maujooda options me judd jate hain.</p>
+    <textarea id="ddImp" class="form-control form-control-sm" rows="4"></textarea>
+    <div class="mt-1"><input type="file" accept=".csv,.tsv,.txt,.xlsx,.xls" class="form-control form-control-sm" style="max-width:340px" onchange="Adm.fileTo('ddImp',this)"></div>
+    <button type="button" class="btn btn-sm btn-success mt-2" onclick="Adm.importBoth()">Dono Ek Sath Import</button> <a href="#" onclick="Adm.ddSample();return false" class="btn btn-sm btn-link">Sample format</a>
+    <div id="ddMsg" class="mt-2" style="font-size:0.85rem"></div>
   </div>
 </div>
 <div id="setDM" class="d-none">
@@ -868,20 +896,20 @@ body.view-as{ padding-top:40px; }
 
       <div class="panel d-none" id="setImp"><h2>Firebase Data Setup (Import)</h2><div class="mb-2 mt-4 p-3 bg-light rounded" style="border:1px solid var(--line-200);">
             <label class="field-label text-dark text-uppercase fs-6 mb-2 border-bottom pb-1">7. Firebase Data Setup (Import)</label>
-            <p style="font-size:0.75rem;" class="text-muted mb-2">Google Sheet ka data select karke copy karein aur yahan paste karein (Tab ya comma se alag, pehli row header). Taqarrur import karne par purana Taqarrur replace hota hai; Users aur Data me jud jata hai.</p>
+            <p style="font-size:0.75rem;" class="text-muted mb-2">Apni Excel / Sheet / CSV file me jo data bhara hua hai wahi copy karke yahan paste karein, ya “File chunein” se CSV / Excel file select karein (pehli row header). Khali rows apne aap chhod di jati hain; ye kisi Google Drive se data nahi leta. Taqarrur import karne par purana Taqarrur replace hota hai; Users aur Data me jud jata hai.</p>
 
             <span class="field-label">Taqarrur &mdash; Country | Region | State | Division | District | Alaqa</span>
-            <textarea id="impTaq" class="form-control form-control-sm mb-1" rows="3" placeholder="Country&#9;Region&#9;State&#9;Division&#9;District&#9;Alaqa"></textarea>
+            <textarea id="impTaq" class="form-control form-control-sm mb-1" rows="3"></textarea><div class="mb-1"><input type="file" accept=".csv,.tsv,.txt,.xlsx,.xls" class="form-control form-control-sm" style="max-width:340px" onchange="Adm.fileTo(\'impTaq\',this)"></div>
             <button type="button" class="btn btn-sm btn-success mb-3" onclick="runImport('taq')">Taqarrur Import</button> <button type="button" class="btn btn-sm btn-outline-danger" onclick="Adm.clearData('taq')">&#128465; Saara Taqarrur delete</button>
 
             <span class="field-label d-block">Users &mdash; Login | Password | Status | Level</span>
-            <textarea id="impUsers" class="form-control form-control-sm mb-1" rows="3" placeholder="Bihar State&#9;pass123&#9;Active&#9;State"></textarea>
+            <textarea id="impUsers" class="form-control form-control-sm mb-1" rows="3"></textarea><div class="mb-1"><input type="file" accept=".csv,.tsv,.txt,.xlsx,.xls" class="form-control form-control-sm" style="max-width:340px" onchange="Adm.fileTo(\'impUsers\',this)"></div>
             <button type="button" class="btn btn-sm btn-success mb-3" onclick="runImport('users')">Users Import</button> <button type="button" class="btn btn-sm btn-outline-danger" onclick="Adm.clearData('users')">&#128465; Saare Users delete (admin rahega)</button>
 
             <span class="field-label d-block">Purana <u>APPOINTMENT</u> Data (optional) &mdash; Data sheet ke 16 columns (A&ndash;P). Courses ka data yahan na daalein!</span>
-            <textarea id="impData" class="form-control form-control-sm mb-1" rows="3"></textarea>
+            <textarea id="impData" class="form-control form-control-sm mb-1" rows="3"></textarea><div class="mb-1"><input type="file" accept=".csv,.tsv,.txt,.xlsx,.xls" class="form-control form-control-sm" style="max-width:340px" onchange="Adm.fileTo(\'impData\',this)"></div>
             <button type="button" class="btn btn-sm btn-success" onclick="runImport('data')">Data Import</button> <button type="button" class="btn btn-sm btn-outline-danger" onclick="Adm.clearData('appt')">&#128465; Saara Appointment Data delete</button>
-            <div class="mt-3 p-2" style="background:#DCE6F7;border-radius:8px;"><span class="field-label d-block">Purana <u>COURSES</u> Data &mdash; Courses dashboard ke Excel/CSV ka header + rows paste karein (Timestamp, Year, Month, Region, State, Division, District, Course Type, ...)</span><textarea id="impCrs" class="form-control form-control-sm mb-1" rows="4"></textarea><button type="button" class="btn btn-sm btn-success" onclick="runImport('crsdata')">Courses Data Import</button> <button type="button" class="btn btn-sm btn-outline-danger" onclick="Adm.clearData('crs')">&#128465; Saara Courses Data delete</button></div>
+            <div class="mt-3 p-2" style="background:#DCE6F7;border-radius:8px;"><span class="field-label d-block">Purana <u>COURSES</u> Data &mdash; Courses dashboard ke Excel/CSV ka header + rows paste karein (Timestamp, Year, Month, Region, State, Division, District, Course Type, ...)</span><textarea id="impCrs" class="form-control form-control-sm mb-1" rows="4"></textarea><div class="mb-1"><input type="file" accept=".csv,.tsv,.txt,.xlsx,.xls" class="form-control form-control-sm" style="max-width:340px" onchange="Adm.fileTo(\'impCrs\',this)"></div><button type="button" class="btn btn-sm btn-success" onclick="runImport('crsdata')">Courses Data Import</button> <button type="button" class="btn btn-sm btn-outline-danger" onclick="Adm.clearData('crs')">&#128465; Saara Courses Data delete</button></div>
 <div id="impMsg" class="mt-2" style="font-size:0.8rem;"></div>
           </div>
 
@@ -896,6 +924,7 @@ body.view-as{ padding-top:40px; }
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -1284,6 +1313,10 @@ body.view-as{ padding-top:40px; }
     }).saveSpecificAccess(sessionToken, key, $box.find('.sp-input').val());
   });
 
+  function apptRoleOptsHtml() {
+    const v = (currentUser && currentUser.controls && currentUser.controls.apptRoles) || '';
+    return (v ? v.split('|') : ['Sirf Shobe Per Ajir', 'Deegar Shobe per Ajir', 'Volunteer']).map(function (r) { return '<option value="' + escHtml(r) + '">' + escHtml(r) + '</option>'; }).join('');
+  }
 
   // ===== Appointment dashboard: Pending / Complete naam ki list + PDF / Excel =====
   function apptLists(i, p, d) {
@@ -1325,6 +1358,7 @@ body.view-as{ padding-top:40px; }
   function showSet(id) {
     ['setApptCtl', 'setCrsCtl', 'setUsers', 'setCrsOpt', 'setImp', 'setDM'].forEach(function (x) { $('#' + x).toggleClass('d-none', x !== id); });
     if (id === 'setDM' && window.Dm) Dm.init();
+    if (id === 'setCrsOpt' && window.Adm) Adm.drawDdInfo();
     $('#setTabs button').each(function () { $(this).toggleClass('active', $(this).data('t') === id); });
   }
 
@@ -1550,9 +1584,7 @@ body.view-as{ padding-top:40px; }
           '<div class="col-12 col-md-3"><input type="email" class="form-control f-email" placeholder="Email ID"></div>' +
           '<div class="col-12 col-md-3"><select class="form-select f-ajir">' +
             '<option value="">Role *</option>' +
-            '<option value="Sirf Shobe Per Ajir">Sirf Shobe Per Ajir</option>' +
-            '<option value="Deegar Shobe per Ajir">Deegar Shobe per Ajir</option>' +
-            '<option value="Volunteer">Volunteer</option>' +
+            apptRoleOptsHtml() +
           '</select></div>' +
         '</div>' +
       '</div>'
@@ -2691,7 +2723,7 @@ window.Crs = (function () {
   var $ = window.jQuery;
   var T = { appt_form: ['Appointment Data', 'Data Entry Form'], appt_dash: ['Appointment Data', 'Data Dashboard'], crs_form: ['Courses Data', 'Courses Data Form'], crs_dash: ['Courses Data', 'Courses Dashboard'], set: ['Settings & Permissions', ''] };
   var cur = { appt: 'appt_form', crs: 'crs_form' };
-  var setNames = { setApptCtl: 'Appointment Controls', setCrsCtl: 'Courses Controls', setUsers: 'Users', setCrsOpt: 'Courses Dropdowns', setImp: 'Data Import', setDM: 'Data Manager' };
+  var setNames = { setApptCtl: 'Appointment Controls', setCrsCtl: 'Courses Controls', setUsers: 'Users', setCrsOpt: 'Dropdowns', setImp: 'Data Import', setDM: 'Data Manager' };
   var mode = 'appt', setSub = 'setApptCtl';
 
   function title() {
@@ -2912,7 +2944,80 @@ window.Adm = (function () {
     window.handleLoginResult(st.user);
     setTimeout(function () { jQuery('#modeBtnSet').trigger('click'); }, 250);
   }
-  return { viewUser: viewUser, backFromView: backFromView, clearData: clearData, load: load, loadUsers: loadUsers, editUser: editUser, delUser: delUser, saveUser: saveUser, drawOpt: drawOpt, addType: addType, delType: delType, addName: addName, delName: delName, addList: addList, delShoba: delShoba, delMu: delMu, saveYears: saveYears, importMaster: importMaster };
+
+  // ----- Dropdown tabs (Courses / Appointment Entry Form) -----
+  let ROLES = [];
+  function ddTab(t) {
+    ['ddCrs', 'ddAppt'].forEach(function (x) { $a(x).classList.toggle('d-none', x !== t); });
+    document.querySelectorAll('#ddTabs button').forEach(function (b) { b.classList.toggle('active', b.dataset.t === t); });
+    if (t === 'ddAppt') loadRoles(); drawDdInfo();
+  }
+  async function drawDdInfo() {
+    await initLocData();
+    const u = function (k) { return TQ.map(function (r) { return r[k]; }).filter(function (v, i, a) { return v && a.indexOf(v) === i; }); };
+    const row = function (n, a) { return '<div style="margin-bottom:4px"><b>' + n + '</b> (' + a.length + '): <span class="text-muted">' + esc(a.slice(0, 12).join(', ')) + (a.length > 12 ? ' ...' : '') + '</span></div>'; };
+    const loc = row('Region', u(1)) + row('State', u(2)) + row('Division', u(3)) + row('District', u(4));
+    $a('ddCrsInfo').innerHTML = loc + '<div><b>Year</b>: upar "Year Dropdown Range" se &nbsp; <b>Month</b>: January&ndash;December (fixed) &nbsp; <b>Remark</b>: apne aap</div>';
+    $a('ddApptInfo').innerHTML = '<div style="margin-bottom:4px"><b>Level</b>: User ke level ke hisab se apne aap (Country &rarr; Alaqa)</div>' + row('Country', u(0)) + row('Region', u(1)) + row('State', u(2)) + row('Division', u(3)) + row('District', u(4)) + row('Alaqa', u(5));
+  }
+  function openStructure() { if (window.showSet) { showSet('setDM'); } }
+  async function loadRoles() { try { const r = await call('getApptRoles'); if (r.success) { ROLES = r.roles; drawRoles(); } } catch (e) { msg('apMsg', false, 'Error: ' + e.message); } }
+  function drawRoles() {
+    $a('apRoles').innerHTML = ROLES.map(function (x, i) {
+      const lock = x.toLowerCase() === 'volunteer';
+      return '<div class="opt-row d-flex justify-content-between align-items-center" style="padding:4px 8px;border-bottom:1px solid #eef1f6"><span>' + esc(x) + (lock ? ' <small class="text-muted">(zaroori)</small>' : '') + '</span>' + (lock ? '' : '<button type="button" class="btn btn-sm btn-outline-danger py-0" onclick="Adm.delRole(' + i + ')">&times;</button>') + '</div>';
+    }).join('');
+  }
+  function addRole() { const v = ($a('apNewRole').value || '').trim(); if (!v) return; if (ROLES.some(function (x) { return x.toLowerCase() === v.toLowerCase(); })) return msg('apMsg', false, 'Ye option pehle se hai.'); ROLES.push(v); $a('apNewRole').value = ''; drawRoles(); msg('apMsg', true, 'Save Roles dabayein.'); }
+  function delRole(i) { ROLES.splice(i, 1); drawRoles(); msg('apMsg', true, 'Save Roles dabayein.'); }
+  async function saveRoles() { try { const r = await call('saveApptRoles', ROLES); msg('apMsg', r.success, r.message); if (r.success) { ROLES = r.roles; drawRoles(); } } catch (e) { msg('apMsg', false, 'Error: ' + e.message); } }
+  function resetRoles() { ROLES = ['Sirf Shobe Per Ajir', 'Deegar Shobe per Ajir', 'Volunteer']; drawRoles(); msg('apMsg', true, 'Save Roles dabayein.'); }
+  async function importRoles() {
+    const t = ($a('apImp').value || '').split(/\r?\n/).map(function (x) { return x.split(/\t|,/)[0].trim(); }).filter(Boolean);
+    if (!t.length) return msg('apMsg', false, 'Pehle roles paste karein.');
+    await loadRoles(); t.forEach(function (v) { if (!/^role$/i.test(v) && !ROLES.some(function (x) { return x.toLowerCase() === v.toLowerCase(); })) ROLES.push(v); });
+    await saveRoles(); $a('apImp').value = '';
+  }
+  function ddSample() {
+    $a('ddImp').value = 'Form\tDropdown\tParent\tValue\nCourses\tCourse Type\t\tFull Time\nCourses\tCourse Name\tFull Time\t7 Day Faizane Namaz Course\nCourses\tShobajat Courses\t\tImamat Course\nCourses\tMuallim Zimmedari\t\tRegion Nigran\nAppointment\tRole\t\tVolunteer';
+  }
+  async function importBoth() {
+    const rows = ($a('ddImp').value || '').split(/\r?\n/).map(function (l) { return l.split(l.indexOf('\t') >= 0 ? '\t' : ',').map(function (x) { return x.trim(); }); }).filter(function (r) { return r.some(Boolean) && !/^form$/i.test(r[0]); });
+    if (!rows.length) return msg('ddMsg', false, 'Pehle data paste karein ya file chunein.');
+    const cr = ['Courses Type\tCourse Name\tShobajat Courses\tMuallim Zimmedari'], ro = []; let bad = 0;
+    rows.forEach(function (r) {
+      const f = (r[0] || '').toLowerCase(), d = (r[1] || '').toLowerCase().replace(/[^a-z]/g, ''), p = r[2] || '', v = r[3] || '';
+      if (!v) { bad++; return; }
+      if (f.indexOf('course') === 0) {
+        if (d === 'coursetype' || d === 'type') cr.push(v + '\t\t\t');
+        else if (d === 'coursename' || d === 'name') { if (!p) bad++; else cr.push(p + '\t' + v + '\t\t'); }
+        else if (d.indexOf('shoba') === 0) cr.push('\t\t' + v + '\t');
+        else if (d.indexOf('muallim') === 0) cr.push('\t\t\t' + v);
+        else bad++;
+      } else if (f.indexOf('appoint') === 0 && d === 'role') ro.push(v);
+      else bad++;
+    });
+    let out = [];
+    try {
+      if (cr.length > 1) { const r = await call('importCourseMaster', cr.join('\n')); out.push('Courses: ' + r.message); if (r.success) { loadMaster(); if (window.Crs) Crs.refresh(); } }
+      if (ro.length) { await loadRoles(); ro.forEach(function (v) { if (!ROLES.some(function (x) { return x.toLowerCase() === v.toLowerCase(); })) ROLES.push(v); }); const r = await call('saveApptRoles', ROLES); out.push('Appointment: ' + r.message); }
+      msg('ddMsg', true, out.join(' | ') + (bad ? ' (' + bad + ' rows samajh nahi aayi, chhod di)' : ''));
+      if (out.length) $a('ddImp').value = '';
+    } catch (e) { msg('ddMsg', false, 'Error: ' + e.message); }
+  }
+  // ----- file (CSV / Excel) -> textarea; khali rows chhod di jati hain -----
+  function fileTo(id, inp) {
+    const f = inp.files && inp.files[0]; if (!f) return;
+    const put = function (t) { $a(id).value = t.replace(/\r/g, '').split('\n').filter(function (l) { return l.replace(/[\t,;\s]/g, '') !== ''; }).join('\n'); inp.value = ''; };
+    if (/\.(xlsx|xls)$/i.test(f.name)) {
+      if (!window.XLSX) { inp.value = ''; return alert('Excel reader load nahi hua (internet check karein) ya file ko CSV save karke chunein.'); }
+      const rd = new FileReader();
+      rd.onload = function (e) { try { const wb = XLSX.read(e.target.result, { type: 'array' }); put(XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]], { FS: '\t', blankrows: false })); } catch (x) { alert('File padh nahi payi: ' + x.message); } };
+      rd.readAsArrayBuffer(f);
+    } else { const rd = new FileReader(); rd.onload = function (e) { put(e.target.result); }; rd.readAsText(f); }
+  }
+
+  return { ddTab: ddTab, openStructure: openStructure, addRole: addRole, delRole: delRole, saveRoles: saveRoles, resetRoles: resetRoles, importRoles: importRoles, importBoth: importBoth, ddSample: ddSample, fileTo: fileTo, drawDdInfo: drawDdInfo, viewUser: viewUser, backFromView: backFromView, clearData: clearData, load: load, loadUsers: loadUsers, editUser: editUser, delUser: delUser, saveUser: saveUser, drawOpt: drawOpt, addType: addType, delType: delType, addName: addName, delName: delName, addList: addList, delShoba: delShoba, delMu: delMu, saveYears: saveYears, importMaster: importMaster };
 })();
 
 /* ===== Admin: Data Manager (Taqarrur + Appointment Data table, edit/delete) ===== */
@@ -3118,7 +3223,8 @@ function createServer(DB, env) {
       stateLink: g('StateLinkAccess', 'OFF'),
       countryDist: g('CountryDistrictAccess', 'OFF'),
       regionDist: g('RegionDistrictAccess', 'OFF'),
-      stateDist: g('StateDistrictAccess', 'OFF')
+      stateDist: g('StateDistrictAccess', 'OFF'),
+      apptRoles: g('ApptRoles', '')
     };
     CRS_BASE.forEach(function (b) { out['crs' + b[1].charAt(0).toUpperCase() + b[1].slice(1)] = g('Crs' + b[0], b[2]); if (/^Export/.test(b[0])) out[b[1]] = g(b[0], b[2]); });
     return out;
@@ -4547,6 +4653,24 @@ function createServer(DB, env) {
     return { success: true, message: 'Entry delete ho gayi.' };
   }
 
+
+  /* ---------- Appointment Entry Form: Role dropdown options (Settings 'ApptRoles', default = purane 3 options) ---------- */
+  const APPT_ROLES_DEF = ['Sirf Shobe Per Ajir', 'Deegar Shobe per Ajir', 'Volunteer'];
+  async function getApptRoles(token) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin dekh sakta hai.');
+    const v = (await getSetting('ApptRoles', '')).toString();
+    return { success: true, roles: v ? v.split('|') : APPT_ROLES_DEF.slice(), isDefault: !v };
+  }
+  async function saveApptRoles(token, roles) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin change kar sakta hai.');
+    const out = [];
+    (roles || []).forEach(function (r) { r = (r || '').toString().replace(/\|/g, ' ').replace(/\s+/g, ' ').trim(); if (r && !out.some(function (x) { return normalize(x) === normalize(r); })) out.push(r); });
+    if (!out.some(function (x) { return normalize(x) === 'volunteer'; })) out.push('Volunteer');
+    const same = out.length === APPT_ROLES_DEF.length && out.every(function (x, i) { return x === APPT_ROLES_DEF[i]; });
+    await putSetting('ApptRoles', same ? '' : out.join('|'));
+    return { success: true, message: 'Appointment Role options save ho gaye.', roles: out };
+  }
+
   // scope = { country, region, state, division, district, alaqa }: Level ke hisab se location chunkar user banta hai (User ID koi bhi ho sakti hai)
   async function saveUser(token, login, password, status, level, scope, crsMuallim, crsTypes) {
     if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin change kar sakta hai.');
@@ -4597,7 +4721,7 @@ function createServer(DB, env) {
     getDropdownData, saveData, deleteRecord, reviewRecord,
     getDashboardData, generateEntryLink, resolveEntryLink,
     isFirstRun, importTaqarrur, importUsers, importData,
-    getTaqarrurTree, viewAsUser, getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, deleteCourses, generateCourseLink, importCourseData, clearAppointmentData, clearData, dmTaqList, dmTaqSave, dmTaqDelete, dmDataList, dmDataSave, dmDataDelete,
+    getTaqarrurTree, viewAsUser, getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, deleteCourses, generateCourseLink, importCourseData, clearAppointmentData, clearData, dmTaqList, dmTaqSave, dmTaqDelete, dmDataList, dmDataSave, dmDataDelete, getApptRoles, saveApptRoles,
     listUsers, saveUser, deleteUser,
     // testing / internal
     _internal: { getSetting, putSetting, normalize, parseDelimited, parseTaqarrurValues, fmtTs, sessions, getTaqarrurRows, resolveScope }
