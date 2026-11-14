@@ -635,6 +635,7 @@ body.view-as{ padding-top:40px; }
   let currentUser = null;
   let table;
   let ENTRY_FORM = 'appointment';
+  let ENTRY_ACCESS = { form: true, dash: true };
   const IS_ADMIN_PAGE = false;
   window.getSessionToken = function () { return sessionToken; };
   window.getCurrentUser = function () { return currentUser; };
@@ -647,6 +648,7 @@ body.view-as{ padding-top:40px; }
         ENTRY_TOKEN = r.token || '';
         LINK_ERROR = r.error || '';
         ENTRY_FORM = r.form || 'appointment';
+        ENTRY_ACCESS = r.access || { form: true, dash: true };
         startQuickEntryMode();
       }).withFailureHandler(function (err) {
         LINK_ERROR = 'Connection error: ' + (err && err.message ? err.message : err);
@@ -721,7 +723,13 @@ body.view-as{ padding-top:40px; }
     applyRoleRestrictions();
     initDropdowns();
     $('#modeBtnSet').hide(); (ENTRY_FORM === 'courses' ? $('#modeBtnAppt') : $('#modeBtnCrs')).hide();
-    if (ENTRY_FORM === 'courses') { showMode('crs'); Crs.init(); } else { showMode('appt'); }
+    if (ENTRY_FORM === 'courses') { showMode('crs'); Crs.init({ role: 'User', access: { crsForm: ENTRY_ACCESS.form, crsDash: ENTRY_ACCESS.dash } }); } else {
+      showMode('appt');
+      window.__acc = { apptForm: ENTRY_ACCESS.form, apptDash: ENTRY_ACCESS.dash };
+      $('#formTabBtn').closest('li').toggle(ENTRY_ACCESS.form); $('#sb_appt_form').toggle(ENTRY_ACCESS.form);
+      $('#myTab [data-bs-target="#dashboardSection"]').closest('li').toggle(ENTRY_ACCESS.dash); $('#sb_appt_dash').toggle(ENTRY_ACCESS.dash);
+      if (!ENTRY_ACCESS.form && ENTRY_ACCESS.dash) { $('#myTab [data-bs-target="#dashboardSection"]').first().tab('show'); loadData(); }
+    }
   }
 
   function doLogin() {
@@ -3324,17 +3332,21 @@ function createServer(DB, env) {
     if (!d || !d.country || !d.region || !d.state || !d.division) return invalid;
     const form = d.form === 'courses' ? 'courses' : 'appointment';
     const qeKey = form === 'courses' ? 'CrsFormAccessQuickEntry' : 'FormAccessQuickEntry';
-    if ((await getSetting(qeKey, 'ON')) === 'OFF') {
-      return { error: 'Quick Entry Form abhi Admin dwara band (OFF) kiya gaya hai.' };
+    // Entry Form aur Dashboard alag: dono OFF ho tabhi link band; sirf Dashboard ON ho to link sirf Dashboard kholta hai
+    const formOn = (await getSetting(qeKey, 'ON')) !== 'OFF';
+    const dRaw = await getSetting(form === 'courses' ? 'CrsDashAccessQuick' : 'DashAccessQuick', '');
+    const dashOn = dRaw ? dRaw !== 'OFF' : formOn;
+    if (!formOn && !dashOn) {
+      return { error: 'Quick Entry Link abhi Admin dwara band (OFF) kiya gaya hai.' };
     }
     const loc = { country: d.country, region: d.region, state: d.state, division: d.division, district: d.district || '', alaqa: d.alaqa || '' };
-    if (!(await quickLinkAllowed(qeKey, loc))) {
+    if (formOn && !(await quickLinkAllowed(qeKey, loc))) {
       return { error: 'Is Quick Link ko Form ka access nahi hai (Admin ne sirf specific links ko access diya hai).' };
     }
     const token = env.uuid();
     const sessionData = Object.assign({ userId: QUICK_ENTRY_USER, role: 'User', level: 'quick' }, loc);
     sessions.set(token, { data: sessionData, exp: Date.now() + SESSION_DURATION_MS });
-    return { location: loc, token: token, form: form };
+    return { location: loc, token: token, form: form, access: { form: formOn, dash: dashOn } };
   }
 
   /* ---------- Admin: Firebase Data Setup (Google Sheet se data lana) ---------- */
