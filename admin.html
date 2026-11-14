@@ -365,7 +365,7 @@ body.view-as{ padding-top:40px; }
     <button type="button" class="sb-main" id="modeBtnCrs" onclick="showMode('crs')"><span class="sb-ico">&#127891;</span>Courses Data</button>
     <div class="sb-subs d-none" id="sbCrs"><button type="button" class="sb-sub active" id="sb_crs_form">Courses Data Form</button><button type="button" class="sb-sub" id="sb_crs_dash">Courses Dashboard</button></div>
     <button type="button" class="sb-main" id="modeBtnSet" onclick="showMode('set')" style="display:none"><span class="sb-ico">&#9881;</span>Settings &amp; Permissions</button>
-    <div class="sb-subs d-none" id="sbSet"><button type="button" class="sb-sub active" data-t="setApptCtl">Appointment Controls</button><button type="button" class="sb-sub" data-t="setCrsCtl">Courses Controls</button><button type="button" class="sb-sub" data-t="setUsers">Users</button><button type="button" class="sb-sub" data-t="setCrsOpt">Dropdowns</button><button type="button" class="sb-sub" data-t="setImp">Data Import</button><button type="button" class="sb-sub" data-t="setDM">Data Manager</button></div>
+    <div class="sb-subs d-none" id="sbSet"><button type="button" class="sb-sub active" data-t="setApptCtl">Appointment Controls</button><button type="button" class="sb-sub" data-t="setCrsCtl">Courses Controls</button><button type="button" class="sb-sub" data-t="setUsers">Users</button><button type="button" class="sb-sub" data-t="setCrsOpt">Dropdowns</button><button type="button" class="sb-sub" data-t="setImp">Data Import</button><button type="button" class="sb-sub" data-t="setDM">Data Manager</button><button type="button" class="sb-sub" data-t="setAcc">Access Control</button></div>
   </nav>
   <div class="sb-foot">Madani Courses &middot; Data Management</div>
 </aside>
@@ -578,6 +578,7 @@ body.view-as{ padding-top:40px; }
         <button type="button" data-t="setCrsOpt" onclick="showSet('setCrsOpt')">Dropdowns</button>
         <button type="button" data-t="setImp" onclick="showSet('setImp')">Data Import</button>
         <button type="button" data-t="setDM" onclick="showSet('setDM')">Data Manager</button>
+        <button type="button" data-t="setAcc" onclick="showSet('setAcc')">Access Control</button>
       </div>
       <div class="panel" id="setApptCtl"><h2>&#9881; Appointment &mdash; System Admin Control</h2>
 
@@ -893,6 +894,23 @@ body.view-as{ padding-top:40px; }
     </div>
   </div>
 </div>
+<div id="setAcc" class="d-none">
+  <div class="panel">
+    <h2>&#128274; Access Control &mdash; Entry Form &amp; Dashboard (Appointment + Courses)</h2>
+    <p style="font-size:0.8rem" class="text-muted">Har level (Country se Quick Entry Link tak) ke liye <b>Entry Form</b> aur <b>Dashboard</b> ki permission alag alag ya <b>Dono ek sath</b> set karein. Sirf Dashboard ON ho to user ko sirf Dashboard dikhega, Entry Form nahi. Dono OFF ho to us form ka tab hi nahi dikhta.</p>
+    <div class="d-flex gap-2 flex-wrap mb-3">
+      <button type="button" class="btn btn-danger" onclick="Acc.bulk('all','OFF')">&#9940; Sab Band (1 click)</button>
+      <button type="button" class="btn btn-success" onclick="Acc.bulk('all','ON')">&#9989; Sab Chalu (1 click)</button>
+      <button type="button" class="btn btn-outline-danger btn-sm" onclick="Acc.bulk('appt','OFF')">Appointment Sab Band</button>
+      <button type="button" class="btn btn-outline-success btn-sm" onclick="Acc.bulk('appt','ON')">Appointment Sab Chalu</button>
+      <button type="button" class="btn btn-outline-danger btn-sm" onclick="Acc.bulk('crs','OFF')">Courses Sab Band</button>
+      <button type="button" class="btn btn-outline-success btn-sm" onclick="Acc.bulk('crs','ON')">Courses Sab Chalu</button>
+    </div>
+    <div id="accMsg" style="font-size:0.85rem" class="mb-2"></div>
+    <div id="accBody"></div>
+    <p style="font-size:0.75rem" class="text-muted mt-2">Admin par koi pabandi nahi lagti. Quick Entry Link ke "Sirf in ko" jaisi purani settings Appointment / Courses Controls me pehle jaisi hi hain.</p>
+  </div>
+</div>
 
       <div class="panel d-none" id="setImp"><h2>Firebase Data Setup (Import)</h2><div class="mb-2 mt-4 p-3 bg-light rounded" style="border:1px solid var(--line-200);">
             <label class="field-label text-dark text-uppercase fs-6 mb-2 border-bottom pb-1">7. Firebase Data Setup (Import)</label>
@@ -1015,8 +1033,8 @@ body.view-as{ padding-top:40px; }
   function checkLinkStatusForLoginPage() {
     google.script.run.withSuccessHandler(function (ctrls) {
       // Banner tabhi jab Appointment AUR Courses dono forms band hon (ek bhi chalu ho to login allowed)
-      const apptOff = ctrls.formCountry === 'OFF' && ctrls.formRegion === 'OFF' && ctrls.formState === 'OFF' && ctrls.formDiv === 'OFF';
-      const crsOff = ctrls.crsFormCountry === 'OFF' && ctrls.crsFormRegion === 'OFF' && ctrls.crsFormState === 'OFF' && ctrls.crsFormDiv === 'OFF';
+      const apptOff = ctrls.formCountry === 'OFF' && ctrls.formRegion === 'OFF' && ctrls.formState === 'OFF' && ctrls.formDiv === 'OFF' && ctrls.dashCountry === 'OFF' && ctrls.dashRegion === 'OFF' && ctrls.dashState === 'OFF' && ctrls.dashDiv === 'OFF';
+      const crsOff = ctrls.crsFormCountry === 'OFF' && ctrls.crsFormRegion === 'OFF' && ctrls.crsFormState === 'OFF' && ctrls.crsFormDiv === 'OFF' && ctrls.crsDashCountry === 'OFF' && ctrls.crsDashRegion === 'OFF' && ctrls.crsDashState === 'OFF' && ctrls.crsDashDiv === 'OFF';
       if (apptOff && crsOff) {
         $('#linkStatusBanner').removeClass('d-none').text('Forms are currently CLOSED (Admin Only).');
       } else {
@@ -1347,6 +1365,11 @@ body.view-as{ padding-top:40px; }
   }
   function setupModes(res) {
     const acc = res.access || { appointment: true, courses: true };
+    const adm0 = res.role === 'Admin';
+    window.__acc = { apptForm: adm0 || acc.apptForm !== false, apptDash: adm0 || acc.apptDash !== false };
+    $('#formTabBtn').closest('li').toggle(window.__acc.apptForm);
+    $('#myTab [data-bs-target="#dashboardSection"]').closest('li').toggle(window.__acc.apptDash);
+    $('#sb_appt_form').toggle(window.__acc.apptForm); $('#sb_appt_dash').toggle(window.__acc.apptDash);
     const admin = res.role === 'Admin';
     $('#modeBtnAppt').toggle(!!acc.appointment);
     $('#modeBtnCrs').toggle(!!acc.courses);
@@ -1354,10 +1377,12 @@ body.view-as{ padding-top:40px; }
     Crs.init(res);
     if (IS_ADMIN_PAGE && admin && window.Adm) Adm.load();
     showMode(acc.appointment ? 'appt' : 'crs');
+    if (acc.appointment && !window.__acc.apptForm && window.__acc.apptDash) { $('#myTab [data-bs-target="#dashboardSection"]').first().tab('show'); loadData(); }
   }
   function showSet(id) {
-    ['setApptCtl', 'setCrsCtl', 'setUsers', 'setCrsOpt', 'setImp', 'setDM'].forEach(function (x) { $('#' + x).toggleClass('d-none', x !== id); });
+    ['setApptCtl', 'setCrsCtl', 'setUsers', 'setCrsOpt', 'setImp', 'setDM', 'setAcc'].forEach(function (x) { $('#' + x).toggleClass('d-none', x !== id); });
     if (id === 'setDM' && window.Dm) Dm.init();
+    if (id === 'setAcc' && window.Acc) Acc.load();
     if (id === 'setCrsOpt' && window.Adm) Adm.drawDdInfo();
     $('#setTabs button').each(function () { $(this).toggleClass('active', $(this).data('t') === id); });
   }
@@ -2689,7 +2714,10 @@ window.Crs = (function () {
   // login / quick-link ke baad ek baar chalta hai
   async function init(res) {
     if (!S.built) { buildForm(); wireDash(); wireLink(); $c('t1').onclick = function () { tab(1); }; $c('t2').onclick = function () { tab(2); }; $c('canB').onclick = resetForm; $c('sv').onclick = save; }
-    tab(1); S.edit = null; $c('edb').classList.add('d-none'); $c('sv').textContent = 'Save Data';
+    const ac = (res && res.access) || {}, adm = res && res.role === 'Admin', cf = adm || ac.crsForm !== false, cd = adm || ac.crsDash !== false;
+    $c('t1').parentNode.style.display = cf ? '' : 'none'; $c('t2').parentNode.style.display = cd ? '' : 'none';
+    const sf = document.getElementById('sb_crs_form'), sd = document.getElementById('sb_crs_dash'); if (sf) sf.style.display = cf ? '' : 'none'; if (sd) sd.style.display = cd ? '' : 'none';
+    tab(cf ? 1 : 2); S.edit = null; $c('edb').classList.add('d-none'); $c('sv').textContent = 'Save Data';
     S.level = U().level || '';
     $c('fload').style.color = ''; $c('fload').textContent = 'Loading...';
     try {
@@ -2723,7 +2751,7 @@ window.Crs = (function () {
   var $ = window.jQuery;
   var T = { appt_form: ['Appointment Data', 'Data Entry Form'], appt_dash: ['Appointment Data', 'Data Dashboard'], crs_form: ['Courses Data', 'Courses Data Form'], crs_dash: ['Courses Data', 'Courses Dashboard'], set: ['Settings & Permissions', ''] };
   var cur = { appt: 'appt_form', crs: 'crs_form' };
-  var setNames = { setApptCtl: 'Appointment Controls', setCrsCtl: 'Courses Controls', setUsers: 'Users', setCrsOpt: 'Dropdowns', setImp: 'Data Import', setDM: 'Data Manager' };
+  var setNames = { setApptCtl: 'Appointment Controls', setCrsCtl: 'Courses Controls', setUsers: 'Users', setCrsOpt: 'Dropdowns', setImp: 'Data Import', setDM: 'Data Manager', setAcc: 'Access Control' };
   var mode = 'appt', setSub = 'setApptCtl';
 
   function title() {
@@ -3119,6 +3147,49 @@ window.Dm = (function () {
   return { tab: tab, load: load, search: search, pg: pg, edit: edit, save: save, close: close, del: del, init: function () { if (!rows.length) tab('taq'); } };
 })();
 
+/* ===== Admin: Entry Form / Dashboard access matrix + ek click Sab Band / Chalu ===== */
+window.Acc = (function () {
+  const $a = function (i) { return document.getElementById(i); };
+  const call = function (fn) { const a = [].slice.call(arguments, 1); return new Promise(function (res, rej) { google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn].apply(null, [window.getSessionToken()].concat(a)); }); };
+  const LV = [['Country', 'Country', 'Country'], ['Region', 'Region', 'Region'], ['State', 'State', 'State'], ['Division', 'Division', 'Division'], ['Quick', 'Quick Entry Link', 'QuickEntry']];
+  // setting keys: Entry = FormAccess<Country|Region|State|Division|QuickEntry>, Dashboard = DashAccess<Country|Region|State|Division|Quick>
+  const keyE = function (f, i) { return (f === 'crs' ? 'Crs' : '') + 'FormAccess' + LV[i][2]; };
+  const keyD = function (f, i) { return (f === 'crs' ? 'Crs' : '') + 'DashAccess' + LV[i][0]; };
+  let M = null;
+  const msg = function (ok, t) { const e = $a('accMsg'); e.style.color = ok ? '#146C43' : '#C0392B'; e.textContent = t; };
+
+  async function load() {
+    try { const r = await call('getAccessMatrix'); if (!r.success) return msg(false, r.message); M = r.m; draw(); } catch (e) { msg(false, 'Error: ' + e.message); }
+  }
+  const pill = function (on, f, i, w) { return '<button type="button" class="btn btn-sm ' + (on ? 'btn-success' : 'btn-danger') + '" style="min-width:64px" onclick="Acc.tog(\'' + f + '\',' + i + ',\'' + w + '\')">' + (on ? 'ON' : 'OFF') + '</button>'; };
+  function draw() {
+    const tbl = function (f, title) {
+      return '<h3 style="font-size:1.05rem;margin:14px 0 6px">' + title + '</h3><div class="table-scroll"><table class="crs-table"><thead><tr><th>Level</th><th>Entry Form</th><th>Dashboard</th><th>Dono ek sath</th></tr></thead><tbody>' +
+        LV.map(function (l, i) { const c = M[f][l[0]]; return '<tr><td><b>' + l[1] + '</b></td><td>' + pill(c.entry, f, i, 'e') + '</td><td>' + pill(c.dash, f, i, 'd') + '</td><td>' + pill(c.entry && c.dash, f, i, 'b') + '</td></tr>'; }).join('') + '</tbody></table></div>';
+    };
+    $a('accBody').innerHTML = tbl('appt', 'Appointment Data') + tbl('crs', 'Courses Data');
+  }
+  async function put(pairs, okMsg) {
+    try { const r = await call('setAccessKeys', pairs); msg(r.success, r.success ? okMsg : r.message); await load(); if (window.Adm && Adm.load) Adm.load(); try { refreshAdminControls(); } catch (e) {} } catch (e) { msg(false, 'Error: ' + e.message); }
+  }
+  function tog(f, i, w) {
+    const c = M[f][LV[i][0]], pairs = [];
+    // dono keys likhte hain: jo nahi badla uski maujooda value pakki ho jati hai (Dashboard pehle Entry ke sath chalta tha)
+    if (w === 'e') pairs.push([keyE(f, i), c.entry ? 'OFF' : 'ON'], [keyD(f, i), c.dash ? 'ON' : 'OFF']);
+    else if (w === 'd') pairs.push([keyD(f, i), c.dash ? 'OFF' : 'ON'], [keyE(f, i), c.entry ? 'ON' : 'OFF']);
+    else { const v = (c.entry && c.dash) ? 'OFF' : 'ON'; pairs.push([keyE(f, i), v], [keyD(f, i), v]); }
+    put(pairs, 'Access update ho gaya.');
+  }
+  // which: all | appt | crs ; val: ON | OFF  (Country se Quick Entry Link tak, Entry + Dashboard dono)
+  function bulk(which, val) {
+    const forms = which === 'all' ? ['appt', 'crs'] : [which], name = which === 'all' ? 'Appointment aur Courses dono' : (which === 'appt' ? 'Appointment' : 'Courses');
+    if (!confirm(name + ' ke liye Country, Region, State, Division aur Quick Entry Link, sab ka Entry Form + Dashboard ' + (val === 'OFF' ? 'BAND (OFF)' : 'CHALU (ON)') + ' karein?')) return;
+    const pairs = []; forms.forEach(function (f) { LV.forEach(function (l, i) { pairs.push([keyE(f, i), val], [keyD(f, i), val]); }); });
+    put(pairs, name + ': sab ' + (val === 'OFF' ? 'band' : 'chalu') + ' kar diya.');
+  }
+  return { load: load, tog: tog, bulk: bulk };
+})();
+
 </script>
 
 <script>
@@ -3227,6 +3298,9 @@ function createServer(DB, env) {
       apptRoles: g('ApptRoles', '')
     };
     CRS_BASE.forEach(function (b) { out['crs' + b[1].charAt(0).toUpperCase() + b[1].slice(1)] = g('Crs' + b[0], b[2]); if (/^Export/.test(b[0])) out[b[1]] = g(b[0], b[2]); });
+    [['Country', 'Country', 'Country'], ['Region', 'Region', 'Region'], ['State', 'State', 'State'], ['Div', 'Division', 'Div'], ['Quick', 'Quick', 'QuickEntry']].forEach(function (l) {
+      out['dash' + l[0]] = g('DashAccess' + l[1], '') || out['form' + l[2]]; out['crsDash' + l[0]] = g('CrsDashAccess' + l[1], '') || out['crsForm' + l[2]];
+    });
     return out;
   }
 
@@ -3624,11 +3698,8 @@ function createServer(DB, env) {
 
       await applySpecificAccess(controls, { role: role, level: userLevel, country: scope.country, region: scope.region, state: scope.state, division: scope.division, district: scope.district, alaqa: scope.alaqa });
 
-      const access0 = {
-        appointment: scope.isAdmin || formAllowed(controls, userLevel, false),
-        courses: scope.isAdmin || formAllowed(controls, userLevel, true)
-      };
-      const access = (viaAdmin && !access0.appointment && !access0.courses) ? { appointment: true, courses: true } : access0;
+      const access0 = accessFor(scope.isAdmin, controls, userLevel);
+      const access = (viaAdmin && !access0.appointment && !access0.courses) ? { appointment: true, courses: true, apptForm: true, apptDash: true, crsForm: true, crsDash: true } : access0;
       if (!access.appointment && !access.courses) {
         return { success: false, message: capFirst(userLevel) + ' Users ke liye Appointment aur Courses dono Form abhi band hain.' };
       }
@@ -3637,7 +3708,7 @@ function createServer(DB, env) {
       const sessionData = {
         userId: rLogin, role: role, country: scope.country,
         region: scope.region, state: scope.state, division: scope.division,
-        district: scope.district, alaqa: scope.alaqa, level: userLevel, crsMuallim: (Array.isArray(u.crsMuallim) ? u.crsMuallim : (u.crsMuallim ? [u.crsMuallim.toString()] : [])), crsTypes: (Array.isArray(u.crsTypes) ? u.crsTypes : [])
+        district: scope.district, alaqa: scope.alaqa, level: userLevel, crsMuallim: (Array.isArray(u.crsMuallim) ? u.crsMuallim : (u.crsMuallim ? [u.crsMuallim.toString()] : [])), crsTypes: (Array.isArray(u.crsTypes) ? u.crsTypes : []), viaAdmin: !!viaAdmin
       };
       sessions.set(token, { data: sessionData, exp: Date.now() + SESSION_DURATION_MS });
 
@@ -3900,6 +3971,7 @@ function createServer(DB, env) {
     try {
       const session = validateSession(token);
       if (!session) return { success: false, message: 'Session expire ho gaya.' };
+      if (!isAdmin(session) && !session.viaAdmin && !dashAllowed(await getControlsFor(session), session.level, false)) return { success: false, message: 'Appointment Dashboard abhi aapke level ke liye band hai.' };
 
       const all = await readAllRows();
       if (all.length === 0) return { success: true, data: [], structure: await getScopedTaqarrur(session), role: session.role, controls: await getControlsFor(session), level: session.level };
@@ -4149,6 +4221,19 @@ function createServer(DB, env) {
     return c[(crs ? 'crsForm' : 'form') + base] !== 'OFF';
   }
 
+  const DASH_PROP = { country: 'Country', region: 'Region', state: 'State', division: 'Div', quick: 'Quick' };
+  function dashAllowed(c, level, crs) {
+    const base = DASH_PROP[level];
+    if (!base) return true;
+    return c[(crs ? 'crsDash' : 'dash') + base] !== 'OFF';
+  }
+  // Entry Form aur Dashboard ka access alag alag; dono band ho to tab hi nahi dikhta
+  function accessFor(isAdm, c, level) {
+    const a = { apptForm: isAdm || formAllowed(c, level, false), apptDash: isAdm || dashAllowed(c, level, false), crsForm: isAdm || formAllowed(c, level, true), crsDash: isAdm || dashAllowed(c, level, true) };
+    a.appointment = a.apptForm || a.apptDash; a.courses = a.crsForm || a.crsDash;
+    return a;
+  }
+
   function crsCanModify(session, c) {
     if (isAdmin(session)) return true;
     return { region: c.crsEditReg, state: c.crsEditState, division: c.crsEditDiv, quick: c.crsEditQuick }[session.level] === 'ON';
@@ -4345,6 +4430,7 @@ function createServer(DB, env) {
     try {
       const session = validateSession(token);
       if (!session) return crsFail('Session expire ho gaya.');
+      if (!isAdmin(session) && !session.viaAdmin && !dashAllowed(await getControlsFor(session), session.level, true)) return crsFail('Courses Dashboard abhi aapke level ke liye band hai.');
       const rows = (await DB.listDocs('CourseData')).map(function (x) {
         const o = Object.assign({ id: x.id, ts: x.data.ts || '', seq: x.data.seq || 0 }, crsToDoc(x.data));
         o.status = o.status || 'Approved';
@@ -4671,6 +4757,30 @@ function createServer(DB, env) {
     return { success: true, message: 'Appointment Role options save ho gaye.', roles: out };
   }
 
+
+  /* ---------- Admin: Entry Form / Dashboard access (Appointment + Courses), ek click me sab ON/OFF ---------- */
+  const ACC_LV = ['Country', 'Region', 'State', 'Division', 'Quick'];
+  async function getAccessMatrix(token) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin dekh sakta hai.');
+    const c = await getAdminControls(), P = ['Country', 'Region', 'State', 'Div', 'Quick'], F = ['Country', 'Region', 'State', 'Div', 'QuickEntry'], out = { appt: {}, crs: {} };
+    ACC_LV.forEach(function (l, i) {
+      out.appt[l] = { entry: c['form' + F[i]] !== 'OFF', dash: c['dash' + P[i]] !== 'OFF' };
+      out.crs[l] = { entry: c['crsForm' + F[i]] !== 'OFF', dash: c['crsDash' + P[i]] !== 'OFF' };
+    });
+    return { success: true, m: out };
+  }
+  // pairs: [[settingKey, 'ON'|'OFF'], ...] (sirf Entry / Dashboard access keys)
+  async function setAccessKeys(token, pairs) {
+    if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin change kar sakta hai.');
+    const ok = /^(Crs)?(FormAccess(Country|Region|State|Division|QuickEntry)|DashAccess(Country|Region|State|Division|Quick))$/;
+    let n = 0;
+    for (const p of (pairs || [])) {
+      if (!p || !ok.test(p[0]) || (p[1] !== 'ON' && p[1] !== 'OFF')) continue;
+      await putSetting(p[0], p[1]); n++;
+    }
+    return { success: true, count: n, message: n + ' access settings update hui.' };
+  }
+
   // scope = { country, region, state, division, district, alaqa }: Level ke hisab se location chunkar user banta hai (User ID koi bhi ho sakti hai)
   async function saveUser(token, login, password, status, level, scope, crsMuallim, crsTypes) {
     if (!adminOnly(token)) return crsFail('Unauthorized: Sirf Admin change kar sakta hai.');
@@ -4721,7 +4831,7 @@ function createServer(DB, env) {
     getDropdownData, saveData, deleteRecord, reviewRecord,
     getDashboardData, generateEntryLink, resolveEntryLink,
     isFirstRun, importTaqarrur, importUsers, importData,
-    getTaqarrurTree, viewAsUser, getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, deleteCourses, generateCourseLink, importCourseData, clearAppointmentData, clearData, dmTaqList, dmTaqSave, dmTaqDelete, dmDataList, dmDataSave, dmDataDelete, getApptRoles, saveApptRoles,
+    getTaqarrurTree, viewAsUser, getCourseMaster, saveCourseMaster, importCourseMaster, setCourseYears, saveCourse, getCourseDashboard, reviewCourse, deleteCourse, deleteCourses, generateCourseLink, importCourseData, clearAppointmentData, clearData, dmTaqList, dmTaqSave, dmTaqDelete, dmDataList, dmDataSave, dmDataDelete, getApptRoles, saveApptRoles, getAccessMatrix, setAccessKeys,
     listUsers, saveUser, deleteUser,
     // testing / internal
     _internal: { getSetting, putSetting, normalize, parseDelimited, parseTaqarrurValues, fmtTs, sessions, getTaqarrurRows, resolveScope }
